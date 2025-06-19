@@ -3,6 +3,7 @@ import { StoryCreator } from "@/components/admin/StoryCreator";
 import { ContentImporter } from "@/components/admin/ContentImporter";
 import { StoryLibrary } from "@/components/admin/StoryLibrary";
 import { Settings } from "@/components/admin/Settings";
+import { NotificationCenter } from "@/components/ui/notification-center";
 // import { useAuth } from "@clerk/clerk-react"; // Commented out until ClerkProvider is set up
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import {
@@ -255,8 +256,13 @@ const Admin = () => {
       {/* Sidebar */}
       <aside className="w-72 bg-gray-900 border-r border-gray-800 flex flex-col py-8 px-4 min-h-screen">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-purple-400">ChatLure Admin</h1>
-          <p className="text-sm text-gray-400 mt-1">Story Management Hub</p>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-bold text-purple-400">
+              ChatLure Admin
+            </h1>
+            <NotificationCenter />
+          </div>
+          <p className="text-sm text-gray-400">Story Management Hub</p>
         </div>
         <nav className="flex flex-col space-y-1">
           {sections.map((s) => {
