@@ -211,46 +211,50 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
 
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 pt-16">
-      {/* Home Screen Apps - Compact Layout */}
-      <div className="px-5 pt-6 pb-28 overflow-y-auto flex-1 space-y-4">
-        {/* Original Apps - Row 1 */}
-        <div className="grid grid-cols-4 gap-4">
-          {homeRow1.map((app, index) => (
-            <AppIcon
-              key={app.id}
-              icon={app.icon}
-              name={app.name}
-              color={app.color}
-              onClick={() => onAppSelect(app.id)}
-              delay={index * 0.1}
-            />
-          ))}
-        </div>
-
-        {/* Original Apps - Row 2 */}
-        <div className="grid grid-cols-4 gap-4">
-          {homeRow2.map((app, index) => (
-            <AppIcon
-              key={app.id}
-              icon={app.icon}
-              name={app.name}
-              color={app.color}
-              onClick={() => onAppSelect(app.id)}
-              delay={0.4 + index * 0.1}
-            />
-          ))}
-        </div>
-
-        {/* Sponsored Section - More Compact */}
-        <div className="space-y-3 pt-2">
-          <div className="text-center">
-            <h3 className="text-white/60 text-[10px] font-medium tracking-widest uppercase">
-              Sponsored
-            </h3>
+      {/* Home Screen Apps - Full Height Distribution */}
+      <div className="px-4 pt-8 pb-36 flex-1 flex flex-col justify-between">
+        {/* Top Section - Original Apps */}
+        <div className="space-y-8">
+          {/* Original Apps - Row 1 */}
+          <div className="grid grid-cols-4 gap-6">
+            {homeRow1.map((app, index) => (
+              <AppIcon
+                key={app.id}
+                icon={app.icon}
+                name={app.name}
+                color={app.color}
+                onClick={() => onAppSelect(app.id)}
+                delay={index * 0.1}
+              />
+            ))}
           </div>
 
+          {/* Original Apps - Row 2 */}
+          <div className="grid grid-cols-4 gap-6">
+            {homeRow2.map((app, index) => (
+              <AppIcon
+                key={app.id}
+                icon={app.icon}
+                name={app.name}
+                color={app.color}
+                onClick={() => onAppSelect(app.id)}
+                delay={0.4 + index * 0.1}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Middle Section - Sponsored Header */}
+        <div className="text-center py-4">
+          <h3 className="text-white/70 text-sm font-medium tracking-wider uppercase">
+            Sponsored
+          </h3>
+        </div>
+
+        {/* Bottom Section - Sponsored Apps */}
+        <div className="space-y-8">
           {/* Sponsored Apps - Row 1 */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-6">
             {sponsoredRow1.map((app, index) => (
               <AppIcon
                 key={app.id}
@@ -264,7 +268,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
           </div>
 
           {/* Sponsored Apps - Row 2 */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-6">
             {sponsoredRow2.map((app, index) => (
               <AppIcon
                 key={app.id}
