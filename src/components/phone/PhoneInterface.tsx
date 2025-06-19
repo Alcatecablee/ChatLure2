@@ -259,12 +259,16 @@ export function PhoneInterface() {
       case "schedule":
         return (
           <div className="w-full h-full bg-gradient-to-b from-red-900 to-orange-700 flex flex-col">
-            <div className="flex items-center justify-between p-4 text-white">
-              <button onClick={goHome} className="text-red-400">
-                ‹ Back
+            <div className="flex items-center justify-between p-4 pt-16 text-white">
+              <button
+                onClick={goHome}
+                className="flex items-center gap-1 text-red-400 hover:text-red-300 active:scale-95 transition-all"
+              >
+                <span className="text-xl">‹</span>
+                <span>Back</span>
               </button>
               <h1 className="text-lg font-semibold">Schedule</h1>
-              <div></div>
+              <div className="w-12"></div>
             </div>
             <div className="flex-1 px-4">
               <div className="space-y-3">
