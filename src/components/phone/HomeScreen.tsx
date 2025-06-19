@@ -231,16 +231,33 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       {/* Home Screen Apps Grid */}
       <div className="px-6 pt-12 pb-32 overflow-y-auto flex-1">
         <div className="grid grid-cols-4 gap-6 auto-rows-max">
-          {homeApps.map((app, index) => (
-            <AppIcon
-              key={app.id}
-              icon={app.icon}
-              name={app.name}
-              color={app.color}
-              onClick={app.onClick || (() => onAppSelect(app.id))}
-              delay={index * 0.1}
-            />
-          ))}
+          {homeApps.map((app, index) => {
+            // Check if this is a sponsored app (has packageName property)
+            const isSponsored = "packageName" in app;
+
+            return (
+              <AppIcon
+                key={isSponsored ? app.name : app.id}
+                icon={isSponsored ? app.icon : app.icon}
+                name={app.name}
+                color={app.color}
+                onClick={
+                  isSponsored
+                    ? () =>
+                        handleSponsoredApp(
+                          app.name,
+                          app.packageName,
+                          /iPhone|iPad|iPod/.test(navigator.userAgent)
+                            ? app.appStoreUrl
+                            : app.playStoreUrl,
+                        )
+                    : app.onClick || (() => onAppSelect(app.id))
+                }
+                delay={index * 0.1}
+                isSponsored={isSponsored}
+              />
+            );
+          })}
         </div>
       </div>
 
