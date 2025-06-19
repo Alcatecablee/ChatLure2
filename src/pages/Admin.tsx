@@ -34,52 +34,36 @@ const sections = [
   { key: "danger", label: "⚠️ Danger Zone", icon: AlertTriangle },
 ];
 
-// Clerk User List Component
+// Mock User List Component (replace with real Clerk integration when ClerkProvider is set up)
 function ClerkUserList() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Check if Clerk is available
-  let getToken: (() => Promise<string | null>) | null = null;
-  try {
-    const auth = useAuth();
-    getToken = auth.getToken;
-  } catch (clerkError) {
-    // Clerk provider not available
-  }
-
-  useEffect(() => {
-    if (!getToken) {
-      setError("Clerk authentication not configured");
-      return;
-    }
-
-    async function fetchUsers() {
-      setLoading(true);
-      setError(null);
-      try {
-        const token = await getToken!();
-        const response = await fetch("/api/clerk-users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch users");
-        }
-
-        const data = await response.json();
-        setUsers(data);
-      } catch (e: any) {
-        setError(e.message || "Failed to load users");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUsers();
-  }, [getToken]);
+  const [users] = useState([
+    {
+      id: "1",
+      firstName: "Sarah",
+      lastName: "Johnson",
+      email: "sarah.j@example.com",
+      imageUrl: "/avatars/user1.jpg",
+      createdAt: "2024-01-10T10:30:00Z",
+    },
+    {
+      id: "2",
+      firstName: "Mike",
+      lastName: "Chen",
+      email: "mike.chen@example.com",
+      imageUrl: "/avatars/user2.jpg",
+      createdAt: "2024-01-08T15:45:00Z",
+    },
+    {
+      id: "3",
+      firstName: "Emma",
+      lastName: "Davis",
+      email: "emma.davis@example.com",
+      imageUrl: "/avatars/user3.jpg",
+      createdAt: "2024-01-05T09:20:00Z",
+    },
+  ]);
+  const [loading] = useState(false);
+  const [error] = useState<string | null>(null);
 
   return (
     <div className="space-y-4">
