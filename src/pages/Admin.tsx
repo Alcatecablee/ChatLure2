@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { StoryCreator } from "@/components/admin/StoryCreator";
 import { ContentImporter } from "@/components/admin/ContentImporter";
 import { StoryLibrary } from "@/components/admin/StoryLibrary";
-import { useAuth } from "@clerk/clerk-react";
+// import { useAuth } from "@clerk/clerk-react"; // Commented out until ClerkProvider is set up
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import {
   BarChart3,
