@@ -132,11 +132,14 @@ const DRAMA_SCENARIOS = [
   { title: "Best Friend's Betrayal", genre: "drama", viral: 90 },
 ];
 
+import { useApp } from "@/contexts/AppContext";
+
 export function StoryCreator({
   onSave,
 }: {
-  onSave: (story: StoryTemplate) => void;
+  onSave?: (story: StoryTemplate) => void;
 }) {
+  const { addStory, addNotification } = useApp();
   const [currentStory, setCurrentStory] = useState<Partial<StoryTemplate>>({
     genre: "scandal",
     characters: [],
@@ -437,7 +440,39 @@ export function StoryCreator({
             <span>{isPreviewMode ? "Edit" : "Preview"}</span>
           </Button>
           <Button
-            onClick={() => onSave(currentStory as StoryTemplate)}
+            onClick={() => {
+              if (currentStory.name && currentStory.genre) {
+                addStory({
+                  title: currentStory.name,
+                  genre: currentStory.genre,
+                  description: currentStory.description || "",
+                  characters: currentStory.characters || [],
+                  plotPoints: currentStory.plotPoints || [],
+                  tags: currentStory.tags || [],
+                  isActive: currentStory.isActive !== false,
+                  viralScore: calculateViralScore(),
+                  source: "original",
+                });
+                // Reset form
+                setCurrentStory({
+                  genre: "scandal",
+                  characters: [],
+                  plotPoints: [],
+                  viralPotential: 50,
+                  tags: [],
+                  isActive: true,
+                  createdAt: new Date().toISOString(),
+                });
+                if (onSave) onSave(currentStory as StoryTemplate);
+              } else {
+                addNotification({
+                  type: "error",
+                  title: "Missing Information",
+                  message:
+                    "Please add a story name and select a genre before saving.",
+                });
+              }
+            }}
             className="bg-gradient-to-r from-purple-600 to-pink-600 flex items-center space-x-2"
           >
             <Save size={16} />

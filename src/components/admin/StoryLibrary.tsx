@@ -197,8 +197,21 @@ const GENRE_COLORS = {
   drama: "bg-orange-500/20 text-orange-400",
 };
 
+import { useApp, useStories } from "@/contexts/AppContext";
+
 export function StoryLibrary() {
-  const [stories, setStories] = useState<Story[]>(SAMPLE_STORIES);
+  const { updateStory, deleteStory, addNotification } = useApp();
+  const storiesFromContext = useStories();
+  const [stories, setStories] = useState<Story[]>(
+    storiesFromContext.length > 0 ? storiesFromContext : SAMPLE_STORIES,
+  );
+
+  // Update local state when global state changes
+  useEffect(() => {
+    if (storiesFromContext.length > 0) {
+      setStories(storiesFromContext);
+    }
+  }, [storiesFromContext]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [sortBy, setSortBy] = useState("viral");
@@ -250,11 +263,14 @@ export function StoryLibrary() {
   };
 
   const toggleStoryActive = (storyId: string) => {
-    setStories((prev) =>
-      prev.map((story) =>
-        story.id === storyId ? { ...story, isActive: !story.isActive } : story,
-      ),
-    );
+    const story = stories.find((s) => s.id === storyId);
+    if (story) {
+      const updatedStory = { ...story, isActive: !story.isActive };
+      updateStory(updatedStory);
+      setStories((prev) =>
+        prev.map((s) => (s.id === storyId ? updatedStory : s)),
+      );
+    }
   };
 
   const StoryCard = ({ story }: { story: Story }) => (

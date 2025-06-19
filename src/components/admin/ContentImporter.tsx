@@ -151,11 +151,15 @@ Mom Saw Texts,family,Lena,She saw EVERYTHING,5,terrified,true,true`,
 }`,
 };
 
+import { useApp, useCredentials } from "@/contexts/AppContext";
+
 export function ContentImporter({
   onImport,
 }: {
-  onImport: (stories: ImportedStory[]) => void;
+  onImport?: (stories: ImportedStory[]) => void;
 }) {
+  const { importStories, addNotification } = useApp();
+  const credentials = useCredentials();
   const [activeTab, setActiveTab] = useState("reddit");
   const [importMethod, setImportMethod] = useState<"csv" | "text" | "json">(
     "text",
@@ -536,7 +540,19 @@ export function ContentImporter({
             Export All
           </Button>
           <Button
-            onClick={() => onImport(parsedStories.filter((s) => !s.isImported))}
+            onClick={() => {
+              const storiesToImport = parsedStories.filter(
+                (s) => !s.isImported,
+              );
+              if (storiesToImport.length > 0) {
+                importStories(storiesToImport);
+                // Mark as imported
+                setParsedStories((prev) =>
+                  prev.map((story) => ({ ...story, isImported: true })),
+                );
+                if (onImport) onImport(storiesToImport);
+              }
+            }}
             className="bg-green-600 hover:bg-green-700"
             disabled={parsedStories.filter((s) => !s.isImported).length === 0}
           >
