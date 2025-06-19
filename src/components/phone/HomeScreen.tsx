@@ -255,7 +255,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
         </div>
 
         {/* Bottom Section - Sponsored Apps (pushed all the way down) */}
-        <div className="space-y-8 mb-44">
+        <div className="space-y-8 mb-52">
           {/* Sponsored Apps - Row 1 */}
           <div className="grid grid-cols-4 gap-6">
             {sponsoredRow1.map((app, index) => (
