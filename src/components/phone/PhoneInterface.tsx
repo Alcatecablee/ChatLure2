@@ -106,12 +106,16 @@ export function PhoneInterface() {
       case "timer":
         return (
           <div className="w-full h-full bg-gradient-to-b from-orange-900 to-red-700 flex flex-col">
-            <div className="flex items-center justify-between p-4 text-white">
-              <button onClick={goHome} className="text-orange-400">
-                ‹ Back
+            <div className="flex items-center justify-between p-4 pt-16 text-white">
+              <button
+                onClick={goHome}
+                className="flex items-center gap-1 text-orange-400 hover:text-orange-300 active:scale-95 transition-all"
+              >
+                <span className="text-xl">‹</span>
+                <span>Back</span>
               </button>
               <h1 className="text-lg font-semibold">Story Timer</h1>
-              <div></div>
+              <div className="w-12"></div>
             </div>
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
