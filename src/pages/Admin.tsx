@@ -253,6 +253,24 @@ function PayPalBilling() {
 
 const Admin = () => {
   const [section, setSection] = useState("dashboard");
+  const [error, setError] = useState<string | null>(null);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-md">
+          <h2 className="text-xl font-bold text-red-400 mb-4">Admin Error</h2>
+          <p className="text-gray-300 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
+          >
+            Reload
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-black text-white flex">
