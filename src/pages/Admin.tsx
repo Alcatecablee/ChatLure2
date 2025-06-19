@@ -116,18 +116,20 @@ function ClerkUserList() {
   );
 }
 
+import { useCredentials } from "@/contexts/AppContext";
+
 // PayPal Billing Component
 function PayPalBilling() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("inactive");
+  const credentials = useCredentials();
 
   // Check if PayPal credentials are configured
-  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
-  const paypalPlanId = import.meta.env.VITE_PAYPAL_PLAN_ID;
-  const isPayPalConfigured = paypalClientId && paypalClientId !== "";
+  const isPayPalConfigured =
+    credentials.paypal.enabled && credentials.paypal.clientId !== "";
 
   const createSubscription = (data: any, actions: any) => {
     return actions.subscription.create({
-      plan_id: paypalPlanId || "demo-plan-id",
+      plan_id: credentials.paypal.planId || "demo-plan-id",
     });
   };
 
@@ -201,7 +203,7 @@ function PayPalBilling() {
   return (
     <PayPalScriptProvider
       options={{
-        "client-id": paypalClientId,
+        "client-id": credentials.paypal.clientId,
         vault: true,
         intent: "subscription",
       }}

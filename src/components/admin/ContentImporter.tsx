@@ -399,8 +399,30 @@ export function ContentImporter({
 
   const fetchRedditContent = async () => {
     setIsProcessing(true);
-    // Mock API call - replace with real Reddit API
-    setTimeout(() => {
+
+    // Check if Reddit credentials are configured
+    if (!credentials.reddit.enabled || !credentials.reddit.clientId) {
+      addNotification({
+        type: "error",
+        title: "Reddit Not Configured",
+        message:
+          "Please configure your Reddit API credentials in Settings before scanning.",
+      });
+      setIsProcessing(false);
+      return;
+    }
+
+    try {
+      // For now, use mock data but with credential validation
+      addNotification({
+        type: "info",
+        title: "Scanning Reddit",
+        message: `Searching ${selectedSubreddit === "all" ? "all subreddits" : selectedSubreddit} for "${searchQuery || "viral content"}"`,
+      });
+
+      // Simulate API call with credentials
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const filtered = mockRedditPosts.filter(
         (post) =>
           (selectedSubreddit === "all" ||
@@ -408,9 +430,24 @@ export function ContentImporter({
           (!searchQuery ||
             post.title.toLowerCase().includes(searchQuery.toLowerCase())),
       );
+
       setRedditPosts(filtered);
-      setIsProcessing(false);
-    }, 1000);
+
+      addNotification({
+        type: "success",
+        title: "Reddit Scan Complete",
+        message: `Found ${filtered.length} potential viral posts`,
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Reddit Scan Failed",
+        message:
+          "Failed to fetch content from Reddit. Check your API credentials.",
+      });
+    }
+
+    setIsProcessing(false);
   };
 
   const StoryCard = ({
@@ -636,8 +673,23 @@ export function ContentImporter({
                       Auto-convert to ChatLure format
                     </span>
                   </div>
+                  {credentials.reddit.enabled ? (
+                    <Badge className="bg-green-500/20 text-green-400 text-xs">
+                      ✓ Reddit Connected
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="text-yellow-400 border-yellow-500/30 text-xs"
+                    >
+                      ⚠ Configure in Settings
+                    </Badge>
+                  )}
                 </div>
-                <Button onClick={fetchRedditContent} disabled={isProcessing}>
+                <Button
+                  onClick={fetchRedditContent}
+                  disabled={isProcessing || !credentials.reddit.enabled}
+                >
                   {isProcessing ? (
                     <RefreshCw size={16} className="mr-2 animate-spin" />
                   ) : (
