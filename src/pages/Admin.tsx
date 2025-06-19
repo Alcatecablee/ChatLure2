@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { StoryCreator } from "@/components/admin/StoryCreator";
 import { ContentImporter } from "@/components/admin/ContentImporter";
 import { StoryLibrary } from "@/components/admin/StoryLibrary";
+import { Settings } from "@/components/admin/Settings";
 // import { useAuth } from "@clerk/clerk-react"; // Commented out until ClerkProvider is set up
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import {
@@ -24,11 +25,11 @@ const sections = [
   { key: "library", label: "📚 Story Library", icon: Archive },
   { key: "story", label: "✨ Story Creator", icon: BookOpen },
   { key: "import", label: "📥 Content Import", icon: Upload },
+  { key: "settings", label: "⚙️ API Settings", icon: Settings },
   { key: "users", label: "👥 User Management", icon: Users },
   { key: "billing", label: "💳 Subscription & Billing", icon: CreditCard },
   { key: "notifications", label: "🔔 Notifications", icon: Bell },
-  { key: "content", label: "⚙️ Content Preferences", icon: Settings },
-  { key: "data", label: "📈 Data Usage", icon: Database },
+  { key: "content", label: "🎯 Content Preferences", icon: Database },
   { key: "privacy", label: "🛡️ Privacy & Safety", icon: Shield },
   { key: "analytics", label: "📊 Analytics", icon: TrendingUp },
   { key: "danger", label: "⚠️ Danger Zone", icon: AlertTriangle },
@@ -529,6 +530,11 @@ const Admin = () => {
                 console.log("Stories imported:", stories);
               }}
             />
+          </div>
+        )}
+        {section === "settings" && (
+          <div>
+            <Settings />
           </div>
         )}
         {section === "analytics" && (
