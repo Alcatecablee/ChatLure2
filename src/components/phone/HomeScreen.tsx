@@ -61,7 +61,7 @@ function AppIcon({
       className="flex flex-col items-center space-y-1 group"
     >
       <div
-        className={`w-12 h-12 rounded-app flex items-center justify-center text-white shadow-lg transform group-active:scale-95 transition-transform overflow-hidden`}
+        className={`w-16 h-16 rounded-app flex items-center justify-center text-white shadow-lg transform group-active:scale-95 transition-transform overflow-hidden`}
         style={{ backgroundColor: name === "ChatLure" ? "transparent" : color }}
       >
         {name === "ChatLure" ? (
