@@ -165,7 +165,7 @@ export function ContentImporter({
   const [redditPosts, setRedditPosts] = useState<RedditPost[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSubreddit, setSelectedSubreddit] = useState("");
+  const [selectedSubreddit, setSelectedSubreddit] = useState("all");
   const [minViralScore, setMinViralScore] = useState(70);
   const [autoConvert, setAutoConvert] = useState(true);
 
@@ -400,7 +400,8 @@ export function ContentImporter({
     setTimeout(() => {
       const filtered = mockRedditPosts.filter(
         (post) =>
-          (!selectedSubreddit || post.subreddit === selectedSubreddit) &&
+          (selectedSubreddit === "all" ||
+            post.subreddit === selectedSubreddit) &&
           (!searchQuery ||
             post.title.toLowerCase().includes(searchQuery.toLowerCase())),
       );
@@ -587,7 +588,7 @@ export function ContentImporter({
                       <SelectValue placeholder="All subreddits" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All subreddits</SelectItem>
+                      <SelectItem value="all">All subreddits</SelectItem>
                       {REDDIT_SOURCES.map((source) => (
                         <SelectItem key={source.name} value={source.name}>
                           {source.name} ({source.members})
