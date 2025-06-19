@@ -65,38 +65,6 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     window.location.reload();
   };
 
-  // Function to handle sponsored app clicks
-  const handleSponsoredApp = (
-    appName: string,
-    packageName: string,
-    appStoreUrl: string,
-  ) => {
-    // Try to open the app directly (deep link)
-    const deepLink = `intent://${packageName}#Intent;scheme=android-app;package=${packageName};end`;
-    const iOSScheme = appName.toLowerCase() + "://";
-
-    // Create a temporary link to try opening the app
-    const tryOpenApp = () => {
-      // For iOS
-      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-        window.location.href = iOSScheme;
-        // If app doesn't open, redirect to App Store after a delay
-        setTimeout(() => {
-          window.open(appStoreUrl, "_blank");
-        }, 2000);
-      } else {
-        // For Android
-        window.location.href = deepLink;
-        // If app doesn't open, redirect to Play Store after a delay
-        setTimeout(() => {
-          window.open(appStoreUrl, "_blank");
-        }, 2000);
-      }
-    };
-
-    tryOpenApp();
-  };
-
   const apps = [
     { id: "phone", icon: <Phone size={24} />, name: "Phone", color: "#34C759" },
     {
