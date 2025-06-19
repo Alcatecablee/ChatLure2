@@ -272,173 +272,180 @@ const Admin = () => {
     );
   }
 
-  return (
-    <div className="w-full min-h-screen bg-black text-white flex">
-      {/* Sidebar */}
-      <aside className="w-72 bg-gray-900 border-r border-gray-800 flex flex-col py-8 px-4 min-h-screen">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-purple-400">
-              ChatLure Admin
-            </h1>
-            <NotificationCenter />
+  try {
+    return (
+      <div className="w-full min-h-screen bg-black text-white flex">
+        {/* Sidebar */}
+        <aside className="w-72 bg-gray-900 border-r border-gray-800 flex flex-col py-8 px-4 min-h-screen">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-2xl font-bold text-purple-400">
+                ChatLure Admin
+              </h1>
+              <NotificationCenter />
+            </div>
+            <p className="text-sm text-gray-400">Story Management Hub</p>
           </div>
-          <p className="text-sm text-gray-400">Story Management Hub</p>
-        </div>
-        <nav className="flex flex-col space-y-1">
-          {sections.map((s) => {
-            const IconComponent = s.icon;
-            return (
-              <button
-                key={s.key}
-                className={`text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center space-x-3 ${
-                  section === s.key
-                    ? "bg-purple-700 text-white shadow-lg"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
-                }`}
-                onClick={() => setSection(s.key)}
-              >
-                <IconComponent size={18} />
-                <span>{s.label.replace(/^[^\s]* /, "")}</span>
-              </button>
-            );
-          })}
-        </nav>
+          <nav className="flex flex-col space-y-1">
+            {sections.map((s) => {
+              const IconComponent = s.icon;
+              return (
+                <button
+                  key={s.key}
+                  className={`text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center space-x-3 ${
+                    section === s.key
+                      ? "bg-purple-700 text-white shadow-lg"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
+                  }`}
+                  onClick={() => setSection(s.key)}
+                >
+                  <IconComponent size={18} />
+                  <span>{s.label.replace(/^[^\s]* /, "")}</span>
+                </button>
+              );
+            })}
+          </nav>
 
-        <div className="mt-auto pt-8 border-t border-gray-800">
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-purple-400 mb-2">
-              🔥 Quick Stats
-            </h3>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Active Stories:</span>
-                <span className="text-green-400 font-bold">23</span>
+          <div className="mt-auto pt-8 border-t border-gray-800">
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-purple-400 mb-2">
+                🔥 Quick Stats
+              </h3>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Active Stories:</span>
+                  <span className="text-green-400 font-bold">23</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Total Views:</span>
+                  <span className="text-blue-400 font-bold">1.2M</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Avg Viral Score:</span>
+                  <span className="text-orange-400 font-bold">87%</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Total Views:</span>
-                <span className="text-blue-400 font-bold">1.2M</span>
+            </div>
+          </div>
+        </aside>
+        {/* Main Content */}
+        <main className="flex-1 p-10 overflow-y-auto">
+          {section === "dashboard" && <Dashboard onNavigate={setSection} />}
+          {section === "users" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">User Management</h2>
+              <ClerkUserList />
+            </div>
+          )}
+          {section === "billing" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">
+                Subscription & Billing
+              </h2>
+              <PayPalBilling />
+            </div>
+          )}
+          {section === "notifications" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Notifications</h2>
+              <p className="text-gray-300 mb-2">
+                Send announcements or manage notification settings.
+              </p>
+              <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
+                Notification controls placeholder.
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Avg Viral Score:</span>
-                <span className="text-orange-400 font-bold">87%</span>
+            </div>
+          )}
+          {section === "content" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Content Preferences</h2>
+              <p className="text-gray-300 mb-2">
+                Set global content filters and manage categories.
+              </p>
+              <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
+                Content preferences controls placeholder.
               </div>
             </div>
-          </div>
-        </div>
-      </aside>
-      {/* Main Content */}
-      <main className="flex-1 p-10 overflow-y-auto">
-        {section === "dashboard" && <Dashboard onNavigate={setSection} />}
-        {section === "users" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">User Management</h2>
-            <ClerkUserList />
-          </div>
-        )}
-        {section === "billing" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Subscription & Billing</h2>
-            <PayPalBilling />
-          </div>
-        )}
-        {section === "notifications" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Notifications</h2>
-            <p className="text-gray-300 mb-2">
-              Send announcements or manage notification settings.
-            </p>
-            <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
-              Notification controls placeholder.
+          )}
+          {section === "data" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Data Usage</h2>
+              <p className="text-gray-300 mb-2">
+                Set or restrict data usage modes for users.
+              </p>
+              <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
+                Data usage controls placeholder.
+              </div>
             </div>
-          </div>
-        )}
-        {section === "content" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Content Preferences</h2>
-            <p className="text-gray-300 mb-2">
-              Set global content filters and manage categories.
-            </p>
-            <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
-              Content preferences controls placeholder.
+          )}
+          {section === "privacy" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Privacy & Safety</h2>
+              <p className="text-gray-300 mb-2">
+                Manage privacy settings and moderate flagged content.
+              </p>
+              <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
+                Privacy and safety controls placeholder.
+              </div>
             </div>
-          </div>
-        )}
-        {section === "data" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Data Usage</h2>
-            <p className="text-gray-300 mb-2">
-              Set or restrict data usage modes for users.
-            </p>
-            <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
-              Data usage controls placeholder.
+          )}
+          {section === "danger" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Danger Zone</h2>
+              <p className="text-gray-300 mb-2">
+                Perform global resets, clear histories, or mass delete actions.
+              </p>
+              <div className="bg-red-900/30 border border-red-500/30 p-6 rounded-xl text-red-300">
+                Danger zone controls placeholder.
+              </div>
             </div>
-          </div>
-        )}
-        {section === "privacy" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Privacy & Safety</h2>
-            <p className="text-gray-300 mb-2">
-              Manage privacy settings and moderate flagged content.
-            </p>
-            <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
-              Privacy and safety controls placeholder.
+          )}
+          {section === "library" && (
+            <div>
+              <StoryLibrary />
             </div>
-          </div>
-        )}
-        {section === "danger" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Danger Zone</h2>
-            <p className="text-gray-300 mb-2">
-              Perform global resets, clear histories, or mass delete actions.
-            </p>
-            <div className="bg-red-900/30 border border-red-500/30 p-6 rounded-xl text-red-300">
-              Danger zone controls placeholder.
+          )}
+          {section === "story" && (
+            <div>
+              <StoryCreator
+                onSave={(story) => {
+                  console.log("Story saved:", story);
+                }}
+              />
             </div>
-          </div>
-        )}
-        {section === "library" && (
-          <div>
-            <StoryLibrary />
-          </div>
-        )}
-        {section === "story" && (
-          <div>
-            <StoryCreator
-              onSave={(story) => {
-                console.log("Story saved:", story);
-              }}
-            />
-          </div>
-        )}
-        {section === "import" && (
-          <div>
-            <ContentImporter
-              onImport={(stories) => {
-                console.log("Stories imported:", stories);
-              }}
-            />
-          </div>
-        )}
-        {section === "settings" && (
-          <div>
-            <Settings />
-          </div>
-        )}
-        {section === "analytics" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">App Info & Analytics</h2>
-            <p className="text-gray-300 mb-2">
-              View app version, usage stats, and analytics.
-            </p>
-            <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
-              Analytics and info placeholder.
+          )}
+          {section === "import" && (
+            <div>
+              <ContentImporter
+                onImport={(stories) => {
+                  console.log("Stories imported:", stories);
+                }}
+              />
             </div>
-          </div>
-        )}
-      </main>
-    </div>
-  );
+          )}
+          {section === "settings" && (
+            <div>
+              <Settings />
+            </div>
+          )}
+          {section === "analytics" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">App Info & Analytics</h2>
+              <p className="text-gray-300 mb-2">
+                View app version, usage stats, and analytics.
+              </p>
+              <div className="bg-gray-800 p-6 rounded-xl text-gray-400">
+                Analytics and info placeholder.
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  } catch (err) {
+    setError(`Admin page error: ${err}`);
+    return null;
+  }
 };
 
 export default Admin;
