@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export type OnboardingStep =
   | "phone-off"
@@ -62,7 +62,7 @@ export function useOnboarding() {
       "phone-off",
       "booting",
       "voyeur-intro",
-      "complete"
+      "complete",
     ];
 
     const currentIndex = stepOrder.indexOf(onboardingState.currentStep);
