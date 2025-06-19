@@ -212,7 +212,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 pt-16">
       {/* Home Screen Apps - Full Height Distribution */}
-      <div className="px-4 pt-8 pb-32 flex-1 flex flex-col">
+      <div className="px-4 pt-8 pb-24 flex-1 flex flex-col">
         {/* Top Section - Original Apps */}
         <div className="space-y-8 mb-8">
           {/* Original Apps - Row 1 */}
