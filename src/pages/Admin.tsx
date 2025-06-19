@@ -118,8 +118,6 @@ function ClerkUserList() {
   );
 }
 
-import { useCredentials } from "@/contexts/AppContext";
-
 // PayPal Billing Component
 function PayPalBilling() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("inactive");
