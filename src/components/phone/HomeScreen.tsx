@@ -65,7 +65,8 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     window.location.reload();
   };
 
-  const apps = [
+  // Core system apps (2 rows)
+  const coreApps = [
     { id: "phone", icon: <Phone size={24} />, name: "Phone", color: "#34C759" },
     {
       id: "messages",
@@ -98,32 +99,73 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       color: "#2C2C2E",
     },
     { id: "mail", icon: <Mail size={24} />, name: "Mail", color: "#007AFF" },
-    {
-      id: "power",
-      icon: <Power size={24} />,
-      name: "Power",
-      color: "#FF3B30",
-      onClick: handlePowerOff,
-    },
     { id: "clock", icon: <Clock size={24} />, name: "Clock", color: "#2C2C2E" },
-    { id: "maps", icon: <Map size={24} />, name: "Maps", color: "#007AFF" },
-    { id: "music", icon: <Music size={24} />, name: "Music", color: "#FF2D92" },
+  ];
+
+  // Sponsored apps (2 rows) - Real looking apps
+  const sponsoredApps = [
     {
-      id: "safari",
-      icon: <Globe size={24} />,
-      name: "Safari",
-      color: "#007AFF",
+      id: "spotify",
+      icon: <Music size={24} />,
+      name: "Spotify",
+      color: "#1DB954",
+      isSponsored: true,
     },
     {
-      id: "calendar",
-      icon: <Calendar size={24} />,
-      name: "Calendar",
-      color: "#FF3B30",
+      id: "netflix",
+      icon: <div className="text-lg font-bold">N</div>,
+      name: "Netflix",
+      color: "#E50914",
+      isSponsored: true,
+    },
+    {
+      id: "uber",
+      icon: <div className="text-lg font-bold">U</div>,
+      name: "Uber",
+      color: "#000000",
+      isSponsored: true,
+    },
+    {
+      id: "airbnb",
+      icon: <div className="text-lg font-bold">A</div>,
+      name: "Airbnb",
+      color: "#FF5A5F",
+      isSponsored: true,
+    },
+    {
+      id: "instagram",
+      icon: <Camera size={24} />,
+      name: "Instagram",
+      color: "#E4405F",
+      isSponsored: true,
+    },
+    {
+      id: "tiktok",
+      icon: <div className="text-lg font-bold">T</div>,
+      name: "TikTok",
+      color: "#000000",
+      isSponsored: true,
+    },
+    {
+      id: "doordash",
+      icon: <div className="text-lg font-bold">D</div>,
+      name: "DoorDash",
+      color: "#FF3008",
+      isSponsored: true,
+    },
+    {
+      id: "maps",
+      icon: <Map size={24} />,
+      name: "Maps",
+      color: "#007AFF",
+      isSponsored: true,
     },
   ];
 
-  const dockApps = apps.slice(0, 4);
-  const homeApps = apps.slice(4);
+  const dockApps = coreApps.slice(0, 4);
+  const homeApps = coreApps.slice(4);
+  const sponsoredRow1 = sponsoredApps.slice(0, 4);
+  const sponsoredRow2 = sponsoredApps.slice(4);
 
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 pt-16">
