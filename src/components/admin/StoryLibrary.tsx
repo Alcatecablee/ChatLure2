@@ -200,7 +200,7 @@ const GENRE_COLORS = {
 export function StoryLibrary() {
   const [stories, setStories] = useState<Story[]>(SAMPLE_STORIES);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState("all");
   const [sortBy, setSortBy] = useState("viral");
   const [showInactive, setShowInactive] = useState(false);
   const [selectedStories, setSelectedStories] = useState<string[]>([]);
@@ -215,7 +215,8 @@ export function StoryLibrary() {
         tag.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 
-    const matchesGenre = !selectedGenre || story.genre === selectedGenre;
+    const matchesGenre =
+      selectedGenre === "all" || story.genre === selectedGenre;
     const matchesActive = showInactive || story.isActive;
 
     return matchesSearch && matchesGenre && matchesActive;
@@ -546,7 +547,7 @@ export function StoryLibrary() {
             <SelectValue placeholder="All Genres" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Genres</SelectItem>
+            <SelectItem value="all">All Genres</SelectItem>
             <SelectItem value="family">Family</SelectItem>
             <SelectItem value="scandal">Scandal</SelectItem>
             <SelectItem value="romance">Romance</SelectItem>
