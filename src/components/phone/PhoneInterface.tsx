@@ -218,12 +218,16 @@ export function PhoneInterface() {
       case "browse":
         return (
           <div className="w-full h-full bg-gradient-to-b from-blue-900 to-indigo-700 flex flex-col">
-            <div className="flex items-center justify-between p-4 text-white">
-              <button onClick={goHome} className="text-blue-400">
-                ‹ Back
+            <div className="flex items-center justify-between p-4 pt-16 text-white">
+              <button
+                onClick={goHome}
+                className="flex items-center gap-1 text-blue-400 hover:text-blue-300 active:scale-95 transition-all"
+              >
+                <span className="text-xl">‹</span>
+                <span>Back</span>
               </button>
               <h1 className="text-lg font-semibold">Browse</h1>
-              <div></div>
+              <div className="w-12"></div>
             </div>
             <div className="flex-1 px-4">
               <div className="bg-blue-800/50 rounded-lg p-3 mb-4">
