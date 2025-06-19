@@ -123,7 +123,7 @@ function PayPalBilling() {
 
   const createSubscription = (data: any, actions: any) => {
     return actions.subscription.create({
-      plan_id: process.env.VITE_PAYPAL_PLAN_ID, // your subscription plan ID
+      plan_id: import.meta.env.VITE_PAYPAL_PLAN_ID, // your subscription plan ID
     });
   };
 
@@ -136,7 +136,7 @@ function PayPalBilling() {
   return (
     <PayPalScriptProvider
       options={{
-        "client-id": process.env.VITE_PAYPAL_CLIENT_ID || "",
+        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "",
         vault: true,
         intent: "subscription",
       }}
