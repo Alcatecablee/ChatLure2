@@ -118,8 +118,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     tryOpenApp();
   };
 
-  // Core ChatLure apps (functional within the simulator)
-  const coreApps = [
+  const apps = [
     { id: "phone", icon: <Phone size={24} />, name: "Phone", color: "#34C759" },
     {
       id: "messages",
@@ -134,6 +133,12 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       color: "#636366",
     },
     {
+      id: "photos",
+      icon: <Image size={24} />,
+      name: "Photos",
+      color: "#FF9500",
+    },
+    {
       id: "settings",
       icon: <Settings size={24} />,
       name: "Settings",
@@ -145,6 +150,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       name: "Calculator",
       color: "#2C2C2E",
     },
+    { id: "mail", icon: <Mail size={24} />, name: "Mail", color: "#007AFF" },
     {
       id: "power",
       icon: <Power size={24} />,
@@ -152,71 +158,20 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       color: "#FF3B30",
       onClick: handlePowerOff,
     },
-  ];
-
-  // Sponsored apps (external links to real apps) - Revenue generating placements!
-  const sponsoredApps = [
+    { id: "clock", icon: <Clock size={24} />, name: "Clock", color: "#2C2C2E" },
+    { id: "maps", icon: <Map size={24} />, name: "Maps", color: "#007AFF" },
+    { id: "music", icon: <Music size={24} />, name: "Music", color: "#FF2D92" },
     {
-      name: "Airbnb",
-      icon: "https://cdn.builder.io/api/v1/image/assets%2F4fad96d56bab4dd5bf3f69370c695246%2F90c0c4a0e1c84b8ab4a4e0dd5da1a4a4",
-      color: "#FF5A5F",
-      packageName: "com.airbnb.android",
-      appStoreUrl: "https://apps.apple.com/app/airbnb/id401626263",
-      playStoreUrl:
-        "https://play.google.com/store/apps/details?id=com.airbnb.android",
+      id: "safari",
+      icon: <Globe size={24} />,
+      name: "Safari",
+      color: "#007AFF",
     },
     {
-      name: "Spotify",
-      icon: "🎵",
-      color: "#1DB954",
-      packageName: "com.spotify.music",
-      appStoreUrl: "https://apps.apple.com/app/spotify/id324684580",
-      playStoreUrl:
-        "https://play.google.com/store/apps/details?id=com.spotify.music",
-    },
-    {
-      name: "Uber",
-      icon: "🚗",
-      color: "#000000",
-      packageName: "com.ubercab",
-      appStoreUrl: "https://apps.apple.com/app/uber/id368677368",
-      playStoreUrl: "https://play.google.com/store/apps/details?id=com.ubercab",
-    },
-    {
-      name: "DoorDash",
-      icon: "🍔",
-      color: "#FF3008",
-      packageName: "com.dd.doordash",
-      appStoreUrl: "https://apps.apple.com/app/doordash/id719972451",
-      playStoreUrl:
-        "https://play.google.com/store/apps/details?id=com.dd.doordash",
-    },
-    {
-      name: "Netflix",
-      icon: "📺",
-      color: "#E50914",
-      packageName: "com.netflix.mediaclient",
-      appStoreUrl: "https://apps.apple.com/app/netflix/id363590051",
-      playStoreUrl:
-        "https://play.google.com/store/apps/details?id=com.netflix.mediaclient",
-    },
-    {
-      name: "Instagram",
-      icon: "📷",
-      color: "#E4405F",
-      packageName: "com.instagram.android",
-      appStoreUrl: "https://apps.apple.com/app/instagram/id389801252",
-      playStoreUrl:
-        "https://play.google.com/store/apps/details?id=com.instagram.android",
-    },
-    {
-      name: "TikTok",
-      icon: "🎬",
-      color: "#000000",
-      packageName: "com.zhiliaoapp.musically",
-      appStoreUrl: "https://apps.apple.com/app/tiktok/id835599320",
-      playStoreUrl:
-        "https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically",
+      id: "calendar",
+      icon: <Calendar size={24} />,
+      name: "Calendar",
+      color: "#FF3B30",
     },
   ];
 
