@@ -287,7 +287,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       </div>
 
       {/* Dock */}
-      <div className="absolute bottom-6 left-4 right-4">
+      <div className="absolute bottom-2 left-4 right-4">
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
