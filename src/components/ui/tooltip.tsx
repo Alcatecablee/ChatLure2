@@ -1,28 +1,55 @@
 import * as React from "react";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
 import { cn } from "@/lib/utils";
 
-const TooltipProvider = TooltipPrimitive.Provider;
+// Safe fallback tooltip components that don't depend on Radix UI
+const TooltipProvider: React.FC<{
+  children: React.ReactNode;
+  delayDuration?: number;
+}> = ({ children }) => {
+  return <>{children}</>;
+};
 
-const Tooltip = TooltipPrimitive.Root;
+const Tooltip: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};
 
-const TooltipTrigger = TooltipPrimitive.Trigger;
+const TooltipTrigger: React.FC<{
+  children: React.ReactNode;
+  asChild?: boolean;
+}> = ({ children }) => {
+  return <>{children}</>;
+};
 
 const TooltipContent = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <TooltipPrimitive.Content
-    ref={ref}
-    sideOffset={sideOffset}
-    className={cn(
-      "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className,
-    )}
-    {...props}
-  />
-));
-TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    side?: "top" | "right" | "bottom" | "left";
+    sideOffset?: number;
+    hidden?: boolean;
+  }
+>(
+  (
+    { className, side = "top", sideOffset = 4, hidden, children, ...props },
+    ref,
+  ) => {
+    if (hidden) return null;
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md",
+          "absolute pointer-events-none opacity-0", // Hide for now since we don't have positioning logic
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+TooltipContent.displayName = "TooltipContent";
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
