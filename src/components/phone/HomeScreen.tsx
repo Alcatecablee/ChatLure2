@@ -211,11 +211,11 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
 
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 pt-16">
-      {/* Home Screen Apps - Layered Layout */}
-      <div className="px-6 pt-12 pb-32 overflow-y-auto flex-1 space-y-8">
-        {/* Core Apps - Row 1 */}
+      {/* Home Screen Apps - ALL ORIGINAL APPS + Sponsored */}
+      <div className="px-6 pt-8 pb-32 overflow-y-auto flex-1 space-y-6">
+        {/* Original Apps - Row 1 */}
         <div className="grid grid-cols-4 gap-6">
-          {homeApps.map((app, index) => (
+          {homeRow1.map((app, index) => (
             <AppIcon
               key={app.id}
               icon={app.icon}
@@ -227,8 +227,22 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
           ))}
         </div>
 
+        {/* Original Apps - Row 2 */}
+        <div className="grid grid-cols-4 gap-6">
+          {homeRow2.map((app, index) => (
+            <AppIcon
+              key={app.id}
+              icon={app.icon}
+              name={app.name}
+              color={app.color}
+              onClick={() => onAppSelect(app.id)}
+              delay={0.4 + index * 0.1}
+            />
+          ))}
+        </div>
+
         {/* Sponsored Section */}
-        <div className="space-y-4">
+        <div className="space-y-4 pt-4">
           <div className="text-center">
             <h3 className="text-white/70 text-xs font-medium tracking-wider uppercase">
               Sponsored
@@ -243,7 +257,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
                 icon={app.icon}
                 name={app.name}
                 color={app.color}
-                delay={0.5 + index * 0.1}
+                delay={1.0 + index * 0.1}
                 isSponsored={true}
               />
             ))}
@@ -257,7 +271,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
                 icon={app.icon}
                 name={app.name}
                 color={app.color}
-                delay={0.9 + index * 0.1}
+                delay={1.4 + index * 0.1}
                 isSponsored={true}
               />
             ))}
