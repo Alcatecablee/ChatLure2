@@ -134,12 +134,16 @@ export function PhoneInterface() {
       case "discover":
         return (
           <div className="w-full h-full bg-gradient-to-b from-purple-900 to-pink-700 flex flex-col">
-            <div className="flex items-center justify-between p-4 text-white">
-              <button onClick={goHome} className="text-purple-400">
-                ‹ Back
+            <div className="flex items-center justify-between p-4 pt-16 text-white">
+              <button
+                onClick={goHome}
+                className="flex items-center gap-1 text-purple-400 hover:text-purple-300 active:scale-95 transition-all"
+              >
+                <span className="text-xl">‹</span>
+                <span>Back</span>
               </button>
               <h1 className="text-lg font-semibold">Discover</h1>
-              <div></div>
+              <div className="w-12"></div>
             </div>
             <div className="flex-1 px-4">
               <div className="grid grid-cols-2 gap-3">
