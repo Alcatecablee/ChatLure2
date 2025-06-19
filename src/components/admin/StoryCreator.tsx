@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useApp } from "@/contexts/AppContext";
 import {
   Plus,
   Save,
@@ -131,8 +132,6 @@ const DRAMA_SCENARIOS = [
   { title: "Stalker Revealed", genre: "mystery", viral: 92 },
   { title: "Best Friend's Betrayal", genre: "drama", viral: 90 },
 ];
-
-import { useApp } from "@/contexts/AppContext";
 
 export function StoryCreator({
   onSave,

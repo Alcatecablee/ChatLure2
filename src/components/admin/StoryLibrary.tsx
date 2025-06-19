@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useApp, useStories } from "@/contexts/AppContext";
 import {
   Search,
   Filter,
@@ -196,8 +197,6 @@ const GENRE_COLORS = {
   mystery: "bg-purple-500/20 text-purple-400",
   drama: "bg-orange-500/20 text-orange-400",
 };
-
-import { useApp, useStories } from "@/contexts/AppContext";
 
 export function StoryLibrary() {
   const { updateStory, deleteStory, addNotification } = useApp();

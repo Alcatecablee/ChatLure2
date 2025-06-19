@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useApp, useCredentials } from "@/contexts/AppContext";
 import {
   Upload,
   FileText,
@@ -150,8 +151,6 @@ Mom Saw Texts,family,Lena,She saw EVERYTHING,5,terrified,true,true`,
   ]
 }`,
 };
-
-import { useApp, useCredentials } from "@/contexts/AppContext";
 
 export function ContentImporter({
   onImport,
