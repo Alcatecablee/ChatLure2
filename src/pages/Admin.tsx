@@ -3,6 +3,7 @@ import { StoryCreator } from "@/components/admin/StoryCreator";
 import { ContentImporter } from "@/components/admin/ContentImporter";
 import { StoryLibrary } from "@/components/admin/StoryLibrary";
 import { Settings } from "@/components/admin/Settings";
+import { Dashboard } from "@/components/admin/Dashboard";
 import { NotificationCenter } from "@/components/ui/notification-center";
 // import { useAuth } from "@clerk/clerk-react"; // Commented out until ClerkProvider is set up
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
@@ -310,146 +311,7 @@ const Admin = () => {
       </aside>
       {/* Main Content */}
       <main className="flex-1 p-10 overflow-y-auto">
-        {section === "dashboard" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">📊 ChatLure Dashboard</h2>
-              <p className="text-gray-300">
-                Overview of your viral story empire
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-blue-500/20 p-3 rounded-lg">
-                    <BookOpen className="text-blue-400" size={24} />
-                  </div>
-                  <span className="text-2xl font-bold text-blue-400">23</span>
-                </div>
-                <h3 className="font-semibold text-white">Active Stories</h3>
-                <p className="text-sm text-gray-400">+3 this week</p>
-              </div>
-
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-green-500/20 p-3 rounded-lg">
-                    <Users className="text-green-400" size={24} />
-                  </div>
-                  <span className="text-2xl font-bold text-green-400">
-                    1.2M
-                  </span>
-                </div>
-                <h3 className="font-semibold text-white">Total Views</h3>
-                <p className="text-sm text-gray-400">+15% this month</p>
-              </div>
-
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-orange-500/20 p-3 rounded-lg">
-                    <TrendingUp className="text-orange-400" size={24} />
-                  </div>
-                  <span className="text-2xl font-bold text-orange-400">
-                    87%
-                  </span>
-                </div>
-                <h3 className="font-semibold text-white">Avg Viral Score</h3>
-                <p className="text-sm text-gray-400">Above industry avg</p>
-              </div>
-
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-purple-500/20 p-3 rounded-lg">
-                    <BarChart3 className="text-purple-400" size={24} />
-                  </div>
-                  <span className="text-2xl font-bold text-purple-400">
-                    73%
-                  </span>
-                </div>
-                <h3 className="font-semibold text-white">Completion Rate</h3>
-                <p className="text-sm text-gray-400">+8% improvement</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <h3 className="text-xl font-semibold text-white mb-4">
-                  🔥 Top Performing Stories
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-                    <div>
-                      <div className="font-semibold text-white">
-                        Mom Saw the Texts
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        125K views • 95% viral
-                      </div>
-                    </div>
-                    <div className="text-green-400 font-bold">🔥</div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-                    <div>
-                      <div className="font-semibold text-white">
-                        The Affair Exposed
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        287K views • 98% viral
-                      </div>
-                    </div>
-                    <div className="text-green-400 font-bold">🔥</div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-                    <div>
-                      <div className="font-semibold text-white">
-                        Inheritance War
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        45K views • 88% viral
-                      </div>
-                    </div>
-                    <div className="text-orange-400 font-bold">📈</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <h3 className="text-xl font-semibold text-white mb-4">
-                  ⚡ Quick Actions
-                </h3>
-                <div className="space-y-3">
-                  <button
-                    onClick={() => setSection("story")}
-                    className="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-lg text-left transition-colors"
-                  >
-                    <div className="font-semibold">✨ Create New Story</div>
-                    <div className="text-sm text-purple-200">
-                      Start building your next viral hit
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setSection("import")}
-                    className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg text-left transition-colors"
-                  >
-                    <div className="font-semibold">📥 Import from Reddit</div>
-                    <div className="text-sm text-blue-200">
-                      Source viral content automatically
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setSection("library")}
-                    className="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg text-left transition-colors"
-                  >
-                    <div className="font-semibold">📚 Manage Library</div>
-                    <div className="text-sm text-green-200">
-                      Organize and analyze your stories
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {section === "dashboard" && <Dashboard onNavigate={setSection} />}
         {section === "users" && (
           <div>
             <h2 className="text-2xl font-bold mb-4">User Management</h2>
