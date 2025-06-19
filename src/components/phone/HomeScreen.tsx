@@ -280,12 +280,12 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       </div>
 
       {/* Dock */}
-      <div className="absolute bottom-8 left-4 right-4">
+      <div className="absolute bottom-6 left-4 right-4">
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.4 }}
-          className="bg-white/10 backdrop-blur-ios rounded-2xl p-4"
+          className="bg-white/10 backdrop-blur-ios rounded-2xl p-3"
         >
           <div className="flex justify-around items-center">
             {dockApps.map((app, index) => (
