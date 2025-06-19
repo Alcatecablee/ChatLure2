@@ -212,7 +212,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 pt-16">
       {/* Home Screen Apps - Full Height Distribution */}
-      <div className="px-4 pt-8 pb-2 flex-1 flex flex-col">
+      <div className="px-4 pt-8 flex-1 flex flex-col">
         {/* Top Section - Original Apps */}
         <div className="space-y-8 mb-8">
           {/* Original Apps - Row 1 */}
@@ -245,7 +245,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
         </div>
 
         {/* Flexible Spacer to push sponsored content down */}
-        <div className="flex-1 min-h-16"></div>
+        <div className="flex-1 min-h-8"></div>
 
         {/* Middle Section - Sponsored Header */}
         <div className="text-center py-4">
@@ -254,8 +254,8 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
           </h3>
         </div>
 
-        {/* Bottom Section - Sponsored Apps (fill remaining space) */}
-        <div className="space-y-8">
+        {/* Bottom Section - Sponsored Apps (pushed all the way down) */}
+        <div className="space-y-8 mb-20">
           {/* Sponsored Apps - Row 1 */}
           <div className="grid grid-cols-4 gap-6">
             {sponsoredRow1.map((app, index) => (
