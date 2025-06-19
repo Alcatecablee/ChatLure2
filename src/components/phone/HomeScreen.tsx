@@ -175,11 +175,8 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     },
   ];
 
-  // Combine core apps with sponsored apps for display
-  const allApps = [...coreApps, ...sponsoredApps];
-
-  const dockApps = coreApps.slice(0, 4); // Keep dock as core ChatLure apps
-  const homeApps = [...coreApps.slice(4), ...sponsoredApps]; // Mix core + sponsored in main area
+  const dockApps = apps.slice(0, 4);
+  const homeApps = apps.slice(4);
 
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 pt-16">
