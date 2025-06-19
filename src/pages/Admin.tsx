@@ -118,22 +118,88 @@ function ClerkUserList() {
 function PayPalBilling() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("inactive");
 
+  // Check if PayPal credentials are configured
+  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  const paypalPlanId = import.meta.env.VITE_PAYPAL_PLAN_ID;
+  const isPayPalConfigured = paypalClientId && paypalClientId !== "";
+
   const createSubscription = (data: any, actions: any) => {
     return actions.subscription.create({
-      plan_id: import.meta.env.VITE_PAYPAL_PLAN_ID, // your subscription plan ID
+      plan_id: paypalPlanId || "demo-plan-id",
     });
   };
 
   const onApprove = (data: any) => {
-    // Handle successful subscription
     setSubscriptionStatus("active");
     console.log("Subscription approved:", data);
   };
 
+  // Show configuration placeholder if PayPal is not set up
+  if (!isPayPalConfigured) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+          <h3 className="text-xl font-semibold mb-4">
+            💳 Subscription Management
+          </h3>
+
+          <div className="mb-6">
+            <div className="text-sm text-gray-400 mb-2">Current Status</div>
+            <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-900/30 text-yellow-400">
+              Configuration Required
+            </div>
+          </div>
+
+          <div className="bg-yellow-900/20 border border-yellow-500/30 p-4 rounded-lg mb-4">
+            <h4 className="font-medium text-yellow-400 mb-2">
+              ⚠️ PayPal Configuration Required
+            </h4>
+            <p className="text-sm text-gray-300 mb-3">
+              To enable subscription management, please configure your PayPal
+              credentials:
+            </p>
+            <ul className="text-sm text-gray-400 space-y-1">
+              <li>
+                • Set{" "}
+                <code className="bg-gray-700 px-1 rounded">
+                  VITE_PAYPAL_CLIENT_ID
+                </code>{" "}
+                environment variable
+              </li>
+              <li>
+                • Set{" "}
+                <code className="bg-gray-700 px-1 rounded">
+                  VITE_PAYPAL_PLAN_ID
+                </code>{" "}
+                environment variable
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <div className="p-4 border border-gray-700 rounded-lg opacity-50">
+              <h4 className="font-medium mb-2">Premium Plan</h4>
+              <p className="text-sm text-gray-400 mb-4">
+                Access to all premium features
+              </p>
+              <div className="bg-gray-700 p-3 rounded text-center text-gray-400">
+                PayPal Integration Disabled
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-xs text-gray-500">
+          Configure PayPal credentials to enable subscription management
+        </div>
+      </div>
+    );
+  }
+
   return (
     <PayPalScriptProvider
       options={{
-        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "",
+        "client-id": paypalClientId,
         vault: true,
         intent: "subscription",
       }}
