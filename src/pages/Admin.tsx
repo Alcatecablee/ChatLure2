@@ -37,16 +37,29 @@ const sections = [
 // Clerk User List Component
 function ClerkUserList() {
   const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { getToken } = useAuth();
+
+  // Check if Clerk is available
+  let getToken: (() => Promise<string | null>) | null = null;
+  try {
+    const auth = useAuth();
+    getToken = auth.getToken;
+  } catch (clerkError) {
+    // Clerk provider not available
+  }
 
   useEffect(() => {
+    if (!getToken) {
+      setError("Clerk authentication not configured");
+      return;
+    }
+
     async function fetchUsers() {
       setLoading(true);
       setError(null);
       try {
-        const token = await getToken();
+        const token = await getToken!();
         const response = await fetch("/api/clerk-users", {
           headers: {
             Authorization: `Bearer ${token}`,
