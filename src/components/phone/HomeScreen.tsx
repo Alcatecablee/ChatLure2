@@ -21,9 +21,17 @@ interface AppIconProps {
   color: string;
   onClick?: () => void;
   delay?: number;
+  isSponsored?: boolean;
 }
 
-function AppIcon({ icon, name, color, onClick, delay = 0 }: AppIconProps) {
+function AppIcon({
+  icon,
+  name,
+  color,
+  onClick,
+  delay = 0,
+  isSponsored = false,
+}: AppIconProps) {
   return (
     <motion.button
       initial={{ scale: 0, opacity: 0 }}
@@ -31,10 +39,12 @@ function AppIcon({ icon, name, color, onClick, delay = 0 }: AppIconProps) {
       transition={{ delay, duration: 0.3, ease: "backOut" }}
       whileTap={{ scale: 0.9 }}
       onClick={onClick}
-      className="flex flex-col items-center space-y-1 group"
+      className="flex flex-col items-center space-y-1 group relative"
     >
       <div
-        className={`w-14 h-14 rounded-app flex items-center justify-center text-white shadow-lg transform group-active:scale-95 transition-transform overflow-hidden`}
+        className={`w-14 h-14 rounded-app flex items-center justify-center text-white shadow-lg transform group-active:scale-95 transition-transform overflow-hidden ${
+          isSponsored ? "ring-1 ring-white/20" : ""
+        }`}
         style={{ backgroundColor: name === "ChatLure" ? "transparent" : color }}
       >
         {name === "ChatLure" ? (
@@ -43,10 +53,21 @@ function AppIcon({ icon, name, color, onClick, delay = 0 }: AppIconProps) {
             alt="ChatLure"
             className="w-full h-full object-cover rounded-app"
           />
+        ) : typeof icon === "string" && icon.startsWith("http") ? (
+          <img
+            src={icon}
+            alt={name}
+            className="w-full h-full object-cover rounded-app"
+          />
         ) : (
-          icon
+          <span className="text-xl">{icon}</span>
         )}
       </div>
+      {isSponsored && (
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+          <span className="text-white text-xs">✨</span>
+        </div>
+      )}
       <span className="text-white text-xs text-center leading-none font-medium">
         {name}
       </span>
