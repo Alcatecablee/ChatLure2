@@ -2,19 +2,57 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#9333ea" />
+    <meta name="background-color" content="#000000" />
+    <meta name="display" content="standalone" />
+    <meta name="orientation" content="portrait-primary" />
+
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="ChatLure" />
+    <link
+      rel="apple-touch-icon"
+      href="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=180"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=512"
+    />
+
+    <!-- Standard Icons -->
     <link
       rel="icon"
       href="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=32"
     />
+    <link
+      rel="icon"
+      sizes="192x192"
+      href="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=192"
+    />
+
+    <!-- SEO & Social -->
     <meta
       name="description"
-      content="ChatLure - The Ultimate Voyeur Experience. Watch real conversations unfold in real-time."
+      content="ChatLure - The Ultimate Voyeur Experience. Watch real conversations unfold in real-time. Native app experience without app store fees."
     />
     <meta
       name="keywords"
-      content="voyeur, chat, conversations, drama, scandal, real-time"
+      content="voyeur, chat, conversations, drama, scandal, real-time, PWA, mobile app, stories"
     />
+    <meta name="author" content="ChatLure" />
+
+    <!-- Open Graph -->
     <meta property="og:title" content="ChatLure - Secret Voyeur Experience" />
     <meta
       property="og:description"
@@ -24,11 +62,139 @@
       property="og:image"
       content="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
     />
+    <meta property="og:url" content="https://chatlure.app" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ChatLure" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="ChatLure - Ultimate Voyeur Experience"
+    />
+    <meta
+      name="twitter:description"
+      content="Watch dramatic conversations unfold in real-time. Native app experience."
+    />
+    <meta
+      name="twitter:image"
+      content="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
+    />
+
+    <!-- Performance & Security -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+
+    <!-- Mobile Optimizations -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="ChatLure" />
+    <meta name="msapplication-TileColor" content="#9333ea" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
     <title>ChatLure - Ultimate Voyeur Experience</title>
   </head>
 
   <body>
     <div id="root"></div>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then(function (registration) {
+              console.log("SW registered: ", registration);
+
+              // Check for updates
+              registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    // New version available
+                    if (confirm("New version available! Reload to update?")) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+            })
+            .catch(function (registrationError) {
+              console.log("SW registration failed: ", registrationError);
+            });
+        });
+      }
+
+      // PWA Install Prompt
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Show install button or banner
+        const installBanner = document.createElement("div");
+        installBanner.innerHTML = `
+          <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: linear-gradient(135deg, #9333ea, #ec4899); padding: 16px; border-radius: 12px; color: white; font-family: system-ui; box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 10000; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 600; margin-bottom: 4px;">Install ChatLure</div>
+              <div style="font-size: 14px; opacity: 0.9;">Get the native app experience!</div>
+            </div>
+            <button onclick="installPWA()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Install</button>
+            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; margin-left: 8px;">×</button>
+          </div>
+        `;
+        document.body.appendChild(installBanner);
+      });
+
+      window.installPWA = function () {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("User accepted the install prompt");
+            }
+            deferredPrompt = null;
+          });
+        }
+      };
+
+      // Track PWA usage
+      window.addEventListener("appinstalled", (evt) => {
+        console.log("ChatLure PWA was installed");
+        // Track installation event
+      });
+
+      // Prevent zoom on double tap (iOS)
+      let lastTouchEnd = 0;
+      document.addEventListener(
+        "touchend",
+        function (event) {
+          const now = new Date().getTime();
+          if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+          }
+          lastTouchEnd = now;
+        },
+        false,
+      );
+
+      // Haptic feedback simulation
+      window.hapticFeedback = function (type = "light") {
+        if (navigator.vibrate) {
+          const patterns = {
+            light: [10],
+            medium: [20],
+            heavy: [30],
+            success: [10, 5, 10],
+            error: [50, 25, 50],
+          };
+          navigator.vibrate(patterns[type] || patterns.light);
+        }
+      };
+    </script>
 
     <script type="module" src="/src/main.tsx"></script>
   </body>
