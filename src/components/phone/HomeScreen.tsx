@@ -211,10 +211,10 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
 
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 pt-16">
-      {/* Home Screen Apps - ALL ORIGINAL APPS + Sponsored */}
-      <div className="px-6 pt-8 pb-32 overflow-y-auto flex-1 space-y-6">
+      {/* Home Screen Apps - Compact Layout */}
+      <div className="px-5 pt-6 pb-28 overflow-y-auto flex-1 space-y-4">
         {/* Original Apps - Row 1 */}
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-4 gap-4">
           {homeRow1.map((app, index) => (
             <AppIcon
               key={app.id}
@@ -228,7 +228,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
         </div>
 
         {/* Original Apps - Row 2 */}
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-4 gap-4">
           {homeRow2.map((app, index) => (
             <AppIcon
               key={app.id}
@@ -241,16 +241,16 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
           ))}
         </div>
 
-        {/* Sponsored Section */}
-        <div className="space-y-4 pt-4">
+        {/* Sponsored Section - More Compact */}
+        <div className="space-y-3 pt-2">
           <div className="text-center">
-            <h3 className="text-white/70 text-xs font-medium tracking-wider uppercase">
+            <h3 className="text-white/60 text-[10px] font-medium tracking-widest uppercase">
               Sponsored
             </h3>
           </div>
 
           {/* Sponsored Apps - Row 1 */}
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-4 gap-4">
             {sponsoredRow1.map((app, index) => (
               <AppIcon
                 key={app.id}
@@ -264,7 +264,7 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
           </div>
 
           {/* Sponsored Apps - Row 2 */}
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-4 gap-4">
             {sponsoredRow2.map((app, index) => (
               <AppIcon
                 key={app.id}
