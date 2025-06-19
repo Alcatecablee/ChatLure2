@@ -21,16 +21,43 @@ interface AppIconProps {
   color: string;
   onClick?: () => void;
   delay?: number;
+  isSponsored?: boolean;
 }
 
-function AppIcon({ icon, name, color, onClick, delay = 0 }: AppIconProps) {
+function AppIcon({
+  icon,
+  name,
+  color,
+  onClick,
+  delay = 0,
+  isSponsored = false,
+}: AppIconProps) {
+  const handleSponsoredClick = () => {
+    // Try to open external app or redirect to store
+    const appUrls: Record<string, string> = {
+      Spotify: "https://open.spotify.com",
+      Netflix: "https://www.netflix.com",
+      Uber: "https://www.uber.com",
+      Airbnb: "https://www.airbnb.com",
+      Instagram: "https://www.instagram.com",
+      TikTok: "https://www.tiktok.com",
+      DoorDash: "https://www.doordash.com",
+      Maps: "https://maps.google.com",
+    };
+
+    const url = appUrls[name];
+    if (url) {
+      window.open(url, "_blank");
+    }
+  };
+
   return (
     <motion.button
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay, duration: 0.3, ease: "backOut" }}
       whileTap={{ scale: 0.9 }}
-      onClick={onClick}
+      onClick={isSponsored ? handleSponsoredClick : onClick}
       className="flex flex-col items-center space-y-1 group"
     >
       <div
