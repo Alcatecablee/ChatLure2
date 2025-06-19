@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export type OnboardingStep =
   | "phone-off"
@@ -57,12 +57,12 @@ export function useOnboarding() {
     );
   }, [onboardingState]);
 
-  const nextStep = () => {
+  const nextStep = useCallback(() => {
     const stepOrder: OnboardingStep[] = [
       "phone-off",
       "booting",
       "voyeur-intro",
-      "complete"
+      "complete",
     ];
 
     const currentIndex = stepOrder.indexOf(onboardingState.currentStep);
@@ -72,46 +72,47 @@ export function useOnboarding() {
       ...prev,
       currentStep: stepOrder[nextIndex],
     }));
-  };
+  }, [onboardingState.currentStep]);
 
-  const skipOnboarding = () => {
+  const skipOnboarding = useCallback(() => {
     setOnboardingState((prev) => ({
       ...prev,
       currentStep: "complete",
       hasSeenIntro: true,
       isFirstTime: false,
     }));
-  };
+  }, []);
 
-  const powerOnPhone = () => {
+  const powerOnPhone = useCallback(() => {
     setOnboardingState((prev) => ({
       ...prev,
       currentStep: "booting",
     }));
-  };
+  }, []);
 
-  const grantPermission = (
-    permission: keyof OnboardingState["permissions"],
-  ) => {
-    setOnboardingState((prev) => ({
-      ...prev,
-      permissions: {
-        ...prev.permissions,
-        [permission]: true,
-      },
-    }));
-  };
+  const grantPermission = useCallback(
+    (permission: keyof OnboardingState["permissions"]) => {
+      setOnboardingState((prev) => ({
+        ...prev,
+        permissions: {
+          ...prev.permissions,
+          [permission]: true,
+        },
+      }));
+    },
+    [],
+  );
 
-  const completeOnboarding = () => {
+  const completeOnboarding = useCallback(() => {
     setOnboardingState((prev) => ({
       ...prev,
       currentStep: "complete",
       hasSeenIntro: true,
       isFirstTime: false,
     }));
-  };
+  }, []);
 
-  const resetOnboarding = () => {
+  const resetOnboarding = useCallback(() => {
     localStorage.removeItem("chatlure-onboarding");
     setOnboardingState({
       currentStep: "phone-off",
@@ -124,7 +125,7 @@ export function useOnboarding() {
         microphone: false,
       },
     });
-  };
+  }, []);
 
   return {
     onboardingState,
