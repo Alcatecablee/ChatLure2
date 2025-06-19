@@ -213,7 +213,6 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
                 color={app.color}
                 onClick={app.onClick || (() => onAppSelect(app.id))}
                 delay={0.6 + index * 0.1}
-                isSponsored={false}
               />
             ))}
           </div>
