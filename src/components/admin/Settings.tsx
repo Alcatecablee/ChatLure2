@@ -336,23 +336,64 @@ export function Settings() {
                 <h4 className="font-medium text-blue-400 mb-2">
                   📋 Setup Instructions
                 </h4>
-                <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
                   <li>
                     Go to{" "}
                     <a
                       href="https://www.reddit.com/prefs/apps"
                       target="_blank"
-                      className="text-blue-400 underline"
+                      className="text-blue-400 underline hover:text-blue-300"
                     >
                       Reddit App Preferences
                     </a>
                   </li>
-                  <li>Click "Create App" and select "script" type</li>
                   <li>
-                    Set redirect URI to: http://localhost:8080/auth/reddit
+                    Click "Create App" and select <strong>"script"</strong> type
+                  </li>
+                  <li>
+                    Set redirect URI to:{" "}
+                    <code className="bg-gray-700 px-2 py-1 rounded text-green-400">
+                      http://localhost:8080/auth/reddit
+                    </code>
                   </li>
                   <li>Copy the client ID and secret to the fields above</li>
+                  <li>Test the connection to verify it's working</li>
                 </ol>
+
+                <div className="mt-4 pt-4 border-t border-blue-500/20">
+                  <h5 className="font-medium text-blue-300 mb-2">
+                    🔥 Content Sources
+                  </h5>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-blue-300">• r/insaneparents</span> -
+                      Family drama
+                    </div>
+                    <div>
+                      <span className="text-blue-300">
+                        • r/relationship_advice
+                      </span>{" "}
+                      - Romance drama
+                    </div>
+                    <div>
+                      <span className="text-blue-300">• r/AmItheAsshole</span> -
+                      Moral conflicts
+                    </div>
+                    <div>
+                      <span className="text-blue-300">• r/ChoosingBeggars</span>{" "}
+                      - Entitled behavior
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-blue-500/20">
+                  <h5 className="font-medium text-blue-300 mb-1">💡 Pro Tip</h5>
+                  <p className="text-xs text-gray-400">
+                    Reddit posts with 5K+ upvotes typically convert to viral
+                    ChatLure stories. The content scanner will automatically
+                    identify high-potential posts.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
