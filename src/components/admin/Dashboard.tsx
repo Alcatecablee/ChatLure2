@@ -294,18 +294,35 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const formatTimeAgo = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60),
+    );
 
-    if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-    if (diffHours > 0)
-      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-    if (diffMinutes > 0) return `${diffMinutes} min ago`;
-    return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
+  // Calculate connection status based on real credentials
+  const connectionStatus = {
+    connections: {
+      reddit:
+        credentials?.reddit?.enabled && credentials?.reddit?.clientId !== "",
+      clerk:
+        credentials?.clerk?.enabled &&
+        credentials?.clerk?.publishableKey !== "",
+      paypal:
+        credentials?.paypal?.enabled && credentials?.paypal?.clientId !== "",
+    },
+    connected: 0,
+    total: 3,
+  };
+
+  connectionStatus.connected = Object.values(
+    connectionStatus.connections,
+  ).filter(Boolean).length;
+
+  // Calculate real story statistics
   const activeStories = stories.filter((story) => story.isActive);
   const totalViews = stories.reduce(
     (sum, story) => sum + (story.stats?.views || 0),
@@ -322,61 +339,16 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     stories.length > 0
       ? Math.round(
           stories.reduce(
-            (sum, story) => sum + (story.stats?.completionRate || 0),
+            (sum, story) => sum + (story.stats?.completions || 0),
             0,
           ) / stories.length,
         )
       : 0;
 
+  // Get top performing stories
   const topStories = stories
     .sort((a, b) => (b.stats?.views || 0) - (a.stats?.views || 0))
-    .slice(0, 5);
-
-  const getConnectionStatus = () => {
-    // Safely access credentials with fallbacks
-    const connections = {
-      reddit:
-        credentials?.reddit?.enabled && credentials?.reddit?.clientId !== "",
-      clerk:
-        credentials?.clerk?.enabled &&
-        credentials?.clerk?.publishableKey !== "",
-      paypal:
-        credentials?.paypal?.enabled && credentials?.paypal?.clientId !== "",
-    };
-
-    const connected = Object.values(connections).filter(Boolean).length;
-    const total = Object.keys(connections).length;
-
-    return { connected, total, connections };
-  };
-
-  const connectionStatus = getConnectionStatus();
-
-  const formatMetricValue = (value: number, format: string) => {
-    switch (format) {
-      case "currency":
-        return `$${value.toLocaleString()}`;
-      case "percentage":
-        return `${value}%`;
-      case "time":
-        return `${value}m`;
-      case "rating":
-        return `${value.toFixed(1)}/5.0`;
-      default:
-        return value.toLocaleString();
-    }
-  };
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case "up":
-        return <ArrowUp size={12} className="text-green-400" />;
-      case "down":
-        return <ArrowDown size={12} className="text-red-400" />;
-      default:
-        return <div className="w-3 h-3 bg-gray-400 rounded-full" />;
-    }
-  };
+    .slice(0, 3);
 
   return (
     <div className="space-y-6">
@@ -384,16 +356,16 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold mb-2">📊 ChatLure Dashboard</h2>
-          <p className="text-gray-300">
+          <p className="text-muted-foreground">
             Real-time insights into your viral story empire
           </p>
         </div>
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <div
-              className={`w-2 h-2 rounded-full ${isLiveMode ? "bg-green-400 animate-pulse" : "bg-gray-400"}`}
+              className={`w-2 h-2 rounded-full ${isLiveMode ? "bg-green-400 animate-pulse" : "bg-muted-foreground"}`}
             />
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-muted-foreground">
               {isLiveMode ? "Live" : "Static"}
             </span>
           </div>
@@ -401,7 +373,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             variant="outline"
             size="sm"
             onClick={() => setIsLiveMode(!isLiveMode)}
-            className="border-gray-600"
+            className="border-border"
           >
             {isLiveMode ? (
               <>
@@ -415,12 +387,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </>
             )}
           </Button>
-          <Button variant="outline" size="sm" className="border-gray-600">
+          <Button variant="outline" size="sm" className="border-border">
             <Download size={14} className="mr-1" />
             Export
           </Button>
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-24 bg-gray-800 border-gray-600">
+            <SelectTrigger className="w-24 bg-input border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -435,15 +407,15 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Connection Status Alert */}
       {connectionStatus.connected < connectionStatus.total && (
-        <Card className="bg-yellow-900/20 border-yellow-500/30">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <AlertTriangle className="text-yellow-400" size={20} />
+              <AlertTriangle className="text-orange-400" size={20} />
               <div className="flex-1">
-                <h4 className="font-medium text-yellow-400">
+                <h4 className="font-medium text-foreground">
                   API Configuration Needed
                 </h4>
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-muted-foreground">
                   {connectionStatus.total - connectionStatus.connected} of{" "}
                   {connectionStatus.total} services need configuration to unlock
                   full potential.
@@ -453,7 +425,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => onNavigate("settings")}
-                className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
+                className="border-border"
               >
                 <Settings size={14} className="mr-1" />
                 Configure
@@ -560,94 +532,108 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       </AnimatePresence>
 
       {/* Performance Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {performanceMetrics.map((metric, index) => (
-          <motion.div
-            key={metric.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className="bg-gray-800 border-gray-700 hover:border-gray-600 transition-colors">
-              <CardContent className="p-4">
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <BarChart3 className="text-primary" />
+            <span>Performance Metrics</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {performanceMetrics.map((metric, index) => (
+              <motion.div
+                key={metric.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-gray-400">{metric.label}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {metric.label}
+                  </p>
                   <div className="flex items-center space-x-1">
-                    {getTrendIcon(metric.trend)}
-                    <span
-                      className={`text-xs ${
-                        metric.trend === "up"
-                          ? "text-green-400"
-                          : metric.trend === "down"
-                            ? "text-red-400"
-                            : "text-gray-400"
-                      }`}
-                    >
-                      {metric.change > 0 ? "+" : ""}
-                      {metric.change}%
-                    </span>
+                    {metric.trend === "up" && (
+                      <ArrowUp size={12} className="text-green-400" />
+                    )}
+                    {metric.trend === "down" && (
+                      <ArrowDown
+                        size={12}
+                        className={
+                          metric.change > 0 ? "text-green-400" : "text-red-400"
+                        }
+                      />
+                    )}
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-white">
-                  {formatMetricValue(metric.value, metric.format)}
-                </p>
-                <Progress
-                  value={Math.abs(metric.change) * 5}
-                  className="mt-2 h-1"
-                />
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+                <div className="text-2xl font-bold text-foreground">
+                  {metric.format === "percentage"
+                    ? `${metric.value}%`
+                    : metric.format === "currency"
+                      ? `$${metric.value.toLocaleString()}`
+                      : metric.format === "rating"
+                        ? `${metric.value.toFixed(1)}/5.0`
+                        : metric.value.toLocaleString()}
+                </div>
+                <Progress value={(metric.value / 100) * 100} className="mt-2" />
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Stories Overview */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Core Stats */}
-          <Card className="bg-gray-800 border-gray-700">
+          {/* Story Overview */}
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="text-blue-400" />
-                <span>Story Performance</span>
+                <BookOpen className="text-primary" />
+                <span>Story Overview</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-6 text-center">
                 <div className="text-center">
-                  <div className="bg-blue-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <BookOpen className="text-blue-400" size={24} />
+                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <BookOpen className="text-primary" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-blue-400">
+                  <div className="text-2xl font-bold text-primary">
                     {activeStories.length}
                   </div>
-                  <div className="text-sm text-gray-400">Active Stories</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm text-muted-foreground">
+                    Active Stories
+                  </div>
+                  <div className="text-xs text-muted-foreground">
                     {stories.length - activeStories.length} inactive
                   </div>
                 </div>
 
                 <div className="text-center">
-                  <div className="bg-green-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <Eye className="text-green-400" size={24} />
+                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Eye className="text-primary" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-2xl font-bold text-primary">
                     {totalViews.toLocaleString()}
                   </div>
-                  <div className="text-sm text-gray-400">Total Views</div>
-                  <div className="text-xs text-gray-500">All time</div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Views
+                  </div>
+                  <div className="text-xs text-muted-foreground">All time</div>
                 </div>
 
                 <div className="text-center">
-                  <div className="bg-orange-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <Flame className="text-orange-400" size={24} />
+                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Flame className="text-primary" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-orange-400">
+                  <div className="text-2xl font-bold text-primary">
                     {avgViralScore}%
                   </div>
-                  <div className="text-sm text-gray-400">Avg Viral Score</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm text-muted-foreground">
+                    Avg Viral Score
+                  </div>
+                  <div className="text-xs text-muted-foreground">
                     {avgViralScore >= 80
                       ? "🔥 Excellent"
                       : avgViralScore >= 60
@@ -657,24 +643,28 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 </div>
 
                 <div className="text-center">
-                  <div className="bg-purple-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <Target className="text-purple-400" size={24} />
+                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Target className="text-primary" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-purple-400">
+                  <div className="text-2xl font-bold text-primary">
                     {avgCompletionRate}%
                   </div>
-                  <div className="text-sm text-gray-400">Completion Rate</div>
-                  <div className="text-xs text-gray-500">Users finishing</div>
+                  <div className="text-sm text-muted-foreground">
+                    Completion Rate
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Users finishing
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Top Performing Stories */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="text-orange-400" />
+                <TrendingUp className="text-primary" />
                 <span>Top Performing Stories</span>
               </CardTitle>
               <Button
@@ -694,7 +684,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors group"
+                      className="flex items-center justify-between p-3 bg-accent/50 rounded-lg hover:bg-accent/70 transition-colors group"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="text-xl">
@@ -707,10 +697,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                                 : "🏆"}
                         </div>
                         <div>
-                          <div className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+                          <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
                             {story.title}
                           </div>
-                          <div className="text-sm text-gray-400 flex items-center space-x-2">
+                          <div className="text-sm text-muted-foreground flex items-center space-x-2">
                             <span>
                               {(story.stats?.views || 0).toLocaleString()} views
                             </span>
@@ -735,14 +725,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   ))}
                 </div>
               ) : (
-                <div className="text-center text-gray-400 py-8">
+                <div className="text-center text-muted-foreground py-8">
                   <BookOpen size={32} className="mx-auto mb-3 opacity-50" />
                   <p className="mb-2">No stories created yet</p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onNavigate("story")}
-                    className="border-gray-600"
+                    className="border-border"
                   >
                     Create Your First Story
                   </Button>
@@ -755,14 +745,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* API Status */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg">🔌 System Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+              <div className="flex items-center justify-between p-2 bg-accent/50 rounded">
                 <div className="flex items-center space-x-2">
-                  <Globe className="text-orange-400" size={16} />
+                  <Globe className="text-primary" size={16} />
                   <span className="text-sm">Reddit API</span>
                 </div>
                 {connectionStatus.connections.reddit ? (
@@ -773,7 +763,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 ) : (
                   <Badge
                     variant="outline"
-                    className="text-gray-400 text-xs cursor-pointer"
+                    className="text-muted-foreground text-xs cursor-pointer"
                     onClick={() => onNavigate("settings")}
                   >
                     Setup Required
@@ -781,9 +771,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+              <div className="flex items-center justify-between p-2 bg-accent/50 rounded">
                 <div className="flex items-center space-x-2">
-                  <Shield className="text-green-400" size={16} />
+                  <Shield className="text-primary" size={16} />
                   <span className="text-sm">Clerk Auth</span>
                 </div>
                 {connectionStatus.connections.clerk ? (
@@ -794,7 +784,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 ) : (
                   <Badge
                     variant="outline"
-                    className="text-gray-400 text-xs cursor-pointer"
+                    className="text-muted-foreground text-xs cursor-pointer"
                     onClick={() => onNavigate("settings")}
                   >
                     Setup Required
@@ -802,9 +792,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+              <div className="flex items-center justify-between p-2 bg-accent/50 rounded">
                 <div className="flex items-center space-x-2">
-                  <CreditCard className="text-yellow-400" size={16} />
+                  <CreditCard className="text-primary" size={16} />
                   <span className="text-sm">PayPal</span>
                 </div>
                 {connectionStatus.connections.paypal ? (
@@ -815,7 +805,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 ) : (
                   <Badge
                     variant="outline"
-                    className="text-gray-400 text-xs cursor-pointer"
+                    className="text-muted-foreground text-xs cursor-pointer"
                     onClick={() => onNavigate("settings")}
                   >
                     Setup Required
@@ -826,7 +816,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </Card>
 
           {/* Quick Actions */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg">⚡ Quick Actions</CardTitle>
             </CardHeader>
@@ -890,7 +880,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </Card>
 
           {/* Recent Activity */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">📈 Recent Activity</CardTitle>
               <Button variant="ghost" size="sm">
@@ -906,26 +896,25 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-start space-x-3 p-2 hover:bg-gray-700/30 rounded transition-colors"
+                      className="flex items-start space-x-3 p-2 hover:bg-accent/30 rounded transition-colors"
                     >
                       <div className={`p-1 rounded ${activity.color}`}>
                         <activity.icon size={12} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white truncate">
+                        <p className="text-sm text-foreground truncate">
                           {activity.title}
                         </p>
-                        <p className="text-xs text-gray-400">{activity.time}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {activity.time}
+                        </p>
                       </div>
                     </motion.div>
                   ))
                 ) : (
-                  <div className="text-center text-gray-400 py-8">
+                  <div className="text-center text-muted-foreground py-8">
                     <Activity size={32} className="mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">No recent activity</p>
-                    <p className="text-xs">
-                      Activity will appear as you use the platform
-                    </p>
+                    <p>No recent activity</p>
                   </div>
                 )}
               </div>
