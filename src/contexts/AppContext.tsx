@@ -429,21 +429,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     config: any,
   ) => {
     try {
-      await APIClient.updateCredentials(service, config);
-      const credentials = await APIClient.getCredentials();
-      dispatch({ type: "SET_CREDENTIALS", payload: credentials });
+      // Try API first, but fall back to localStorage if it fails
+      try {
+        await APIClient.updateCredentials(service, config);
+        const credentials = await APIClient.getCredentials();
+        dispatch({ type: "SET_CREDENTIALS", payload: credentials });
+      } catch (apiError) {
+        console.warn(
+          "API not available, using localStorage fallback:",
+          apiError,
+        );
+
+        // Fallback: Save to localStorage
+        const currentCredentials = { ...state.credentials };
+        currentCredentials[service] = {
+          ...currentCredentials[service],
+          ...config,
+        };
+
+        // Save individual service settings to localStorage
+        Object.keys(config).forEach((key) => {
+          localStorage.setItem(
+            `${service}_${key}`,
+            config[key]?.toString() || "",
+          );
+        });
+
+        dispatch({ type: "SET_CREDENTIALS", payload: currentCredentials });
+      }
 
       addNotification({
         type: "success",
         title: "Credentials Updated",
-        message: `${service} credentials have been successfully updated.`,
+        message: `${service} credentials have been successfully saved.`,
       });
     } catch (error) {
       console.error("Failed to update credentials:", error);
       addNotification({
         type: "error",
         title: "Update Failed",
-        message: `Failed to update ${service} credentials. Please try again.`,
+        message: `Failed to save ${service} credentials. Please try again.`,
       });
     }
   };
