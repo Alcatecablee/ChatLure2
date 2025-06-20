@@ -295,7 +295,7 @@ export function Settings() {
                   <Input
                     id="reddit-client-id"
                     type={showSecrets.reddit ? "text" : "password"}
-                    value={credentials.reddit.clientId}
+                    value={credentials?.reddit?.clientId || ""}
                     onChange={(e) =>
                       setCredentials((prev) => ({
                         ...prev,
