@@ -82,6 +82,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     newSubscriptions: 23,
   });
   const [isLiveMode, setIsLiveMode] = useState(false);
+  const [dashboardData, setDashboardData] = useState<any>(null);
 
   // Update realtime data
   useEffect(() => {
