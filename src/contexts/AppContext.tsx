@@ -175,8 +175,54 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_STORIES", payload: stories });
     } catch (error) {
       console.error("Failed to load stories:", error);
-      // For now, initialize with empty array to avoid blocking the UI
-      dispatch({ type: "SET_STORIES", payload: [] });
+      // Initialize with demo data when API is not available
+      const demoStories = [
+        {
+          id: "demo_story_1",
+          title: "Welcome to ChatLure",
+          genre: "tutorial",
+          description:
+            "This is a demo story to showcase the platform features.",
+          isActive: true,
+          viralScore: 85,
+          source: "original" as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: ["demo", "tutorial"],
+          stats: {
+            views: 1250,
+            completions: 892,
+            shares: 145,
+            avgRating: 4.7,
+            completionRate: 71.4,
+          },
+          characters: [
+            {
+              id: "demo_char_1",
+              name: "Alex",
+              avatar: "👤",
+              role: "protagonist" as const,
+              personality: "Curious user",
+              secrets: ["New to ChatLure"],
+            },
+          ],
+          plotPoints: [
+            {
+              id: "demo_plot_1",
+              trigger: "time" as const,
+              delay: 0,
+              message: "Welcome to ChatLure! This is a demo.",
+              sender: "Alex",
+              emotions: ["excited"],
+              cliffhanger: false,
+              viralMoment: false,
+              messageType: "text" as const,
+              sortOrder: 0,
+            },
+          ],
+        },
+      ];
+      dispatch({ type: "SET_STORIES", payload: demoStories });
       dispatch({
         type: "SET_ERROR",
         payload: "API not available - using demo mode.",
@@ -200,8 +246,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_USERS", payload: users });
     } catch (error) {
       console.error("Failed to load users:", error);
-      // Initialize with empty array to avoid blocking the UI
-      dispatch({ type: "SET_USERS", payload: [] });
+      // Initialize with demo data when API is not available
+      const demoUsers = [
+        {
+          id: "demo_user_1",
+          email: "demo@example.com",
+          firstName: "Demo",
+          lastName: "User",
+          createdAt: new Date().toISOString(),
+          lastActive: new Date().toISOString(),
+          subscription: { status: "premium" as const, plan: "Pro" },
+          engagement: {
+            storiesRead: 15,
+            avgTime: "18m",
+            favoriteGenre: "drama",
+          },
+        },
+        {
+          id: "demo_user_2",
+          email: "sarah@example.com",
+          firstName: "Sarah",
+          lastName: "Johnson",
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          lastActive: new Date(Date.now() - 3600000).toISOString(),
+          subscription: { status: "free" as const },
+          engagement: {
+            storiesRead: 8,
+            avgTime: "12m",
+            favoriteGenre: "family",
+          },
+        },
+      ];
+      dispatch({ type: "SET_USERS", payload: demoUsers });
       dispatch({
         type: "SET_ERROR",
         payload: "API not available - using demo mode.",
