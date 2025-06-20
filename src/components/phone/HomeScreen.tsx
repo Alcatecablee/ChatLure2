@@ -168,60 +168,60 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     },
   ];
 
-  // Sponsored apps - Real looking apps with proper branding
+  // Sponsored apps - Realistic branded apps with proper icons and colors
   const sponsoredApps = [
     {
       id: "spotify",
-      icon: <div className="text-lg font-bold text-white">♪</div>,
+      icon: <div className="text-2xl text-white">🎵</div>,
       name: "Spotify",
       color: "#1DB954",
       isSponsored: true,
     },
     {
       id: "netflix",
-      icon: <div className="text-lg font-bold">N</div>,
+      icon: <div className="text-2xl font-bold text-white">N</div>,
       name: "Netflix",
       color: "#E50914",
       isSponsored: true,
     },
     {
       id: "uber",
-      icon: <div className="text-lg font-bold">U</div>,
+      icon: <div className="text-2xl text-white">🚗</div>,
       name: "Uber",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "airbnb",
-      icon: <div className="text-lg font-bold">𝒜</div>,
+      icon: <div className="text-2xl text-white">🏠</div>,
       name: "Airbnb",
       color: "#FF5A5F",
       isSponsored: true,
     },
     {
       id: "instagram",
-      icon: <div className="text-lg font-bold">📷</div>,
+      icon: <div className="text-2xl text-white">📸</div>,
       name: "Instagram",
       color: "#E4405F",
       isSponsored: true,
     },
     {
       id: "tiktok",
-      icon: <div className="text-lg font-bold">♫</div>,
+      icon: <div className="text-2xl text-white">🎬</div>,
       name: "TikTok",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "doordash",
-      icon: <div className="text-lg font-bold">🍔</div>,
+      icon: <div className="text-2xl text-white">🍕</div>,
       name: "DoorDash",
       color: "#FF3008",
       isSponsored: true,
     },
     {
       id: "youtube",
-      icon: <div className="text-lg font-bold">▶</div>,
+      icon: <div className="text-2xl text-white">▶️</div>,
       name: "YouTube",
       color: "#FF0000",
       isSponsored: true,
