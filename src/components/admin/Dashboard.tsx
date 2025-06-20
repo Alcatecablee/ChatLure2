@@ -535,7 +535,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <BarChart3 className="text-primary" />
+            <BarChart3 className="text-muted-foreground" />
             <span>Performance Metrics</span>
           </CardTitle>
         </CardHeader>
