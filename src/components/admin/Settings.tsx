@@ -48,6 +48,13 @@ export function Settings() {
     shareAnalytics: false,
     allowDataExport: true,
 
+    // Lock Screen Settings
+    lockScreenEnabled: true,
+    lockScreenWallpaper: "",
+    showNotificationsOnLock: true,
+    autoLockTime: 5,
+    requirePasscode: false,
+
     // Notification Settings
     emailNotifications: true,
     pushNotifications: true,
