@@ -44,10 +44,7 @@ export function apiMiddleware() {
           // Check if the API file exists
           if (fs.existsSync(apiFilePath)) {
             try {
-              // Clear the module cache to allow hot reloading
-              delete require.cache[require.resolve(apiFilePath)];
-
-              // Import and execute the API handler
+              // Import and execute the API handler with cache busting for hot reload
               const apiModule = await import(`${apiFilePath}?t=${Date.now()}`);
               const handler = apiModule.default;
 
