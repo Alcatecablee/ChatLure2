@@ -41,8 +41,7 @@ const ultimateTooltipKiller = () => ({
     config.optimizeDeps = config.optimizeDeps || {};
     config.optimizeDeps.exclude = config.optimizeDeps.exclude || [];
     config.optimizeDeps.exclude.push("@radix-ui/react-tooltip");
-    config.optimizeDeps.exclude.push("**/tooltip**");
-    config.optimizeDeps.exclude.push("**/Tooltip**");
+    config.optimizeDeps.exclude.push("@radix-ui/react-tooltip/dist");
   },
   buildStart() {
     console.log(
