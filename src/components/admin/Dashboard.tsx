@@ -337,8 +337,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-
   // Simulate some dynamic behavior for demo purposes
   useEffect(() => {
     // Add some randomness to make the mock data feel more realistic
