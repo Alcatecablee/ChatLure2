@@ -266,10 +266,12 @@ function UserManagement() {
                     </div>
                   )}
                   <div>
-                    <div className="font-semibold text-white">
+                    <div className="font-semibold text-foreground">
                       {user.firstName} {user.lastName}
                     </div>
-                    <div className="text-sm text-gray-400">{user.email}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {user.email}
+                    </div>
                     <div className="flex items-center space-x-2 mt-1">
                       <Badge
                         className={
