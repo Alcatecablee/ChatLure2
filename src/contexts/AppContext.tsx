@@ -239,8 +239,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         message: `"${story.title}" has been successfully created.`,
       });
 
-      // Track analytics
-      await APIClient.trackMetric("stories_created", 1);
+      // Track analytics (ignore if API fails)
+      try {
+        await APIClient.trackMetric("stories_created", 1);
+      } catch (analyticsError) {
+        console.warn("Analytics tracking failed:", analyticsError);
+      }
     } catch (error) {
       console.error("Failed to create story:", error);
       dispatch({
@@ -327,8 +331,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         message: `${user.firstName} ${user.lastName} has been added.`,
       });
 
-      // Track analytics
-      await APIClient.trackMetric("users_registered", 1);
+      // Track analytics (ignore if API fails)
+      try {
+        await APIClient.trackMetric("users_registered", 1);
+      } catch (analyticsError) {
+        console.warn("Analytics tracking failed:", analyticsError);
+      }
     } catch (error) {
       console.error("Failed to add user:", error);
       addNotification({
