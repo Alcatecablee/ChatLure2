@@ -17,6 +17,18 @@ export default defineConfig(({ mode }) => ({
         __dirname,
         "./src/components/ui/tooltip.tsx",
       ),
+      // Force single React instance to prevent hook conflicts
+      react: path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
+    dedupe: ["react", "react-dom"],
+  },
+  optimizeDeps: {
+    exclude: ["@radix-ui/react-tooltip"],
+    force: true,
+  },
+  define: {
+    // Prevent any tooltip-related code from executing
+    "process.env.DISABLE_TOOLTIPS": '"true"',
   },
 }));
