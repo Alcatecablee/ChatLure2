@@ -526,7 +526,7 @@ export function Settings() {
                 <Input
                   id="clerk-webhook"
                   type={showSecrets.clerk ? "text" : "password"}
-                  value={credentials.clerk.webhookSecret}
+                  value={credentials?.clerk?.webhookSecret || ""}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
