@@ -29,18 +29,27 @@ export function apiMiddleware() {
           // Parse URL to get the endpoint
           const url = new URL(req.url, `http://${req.headers.host}`);
           const apiPath = url.pathname.replace("/api", "");
+          req.query = Object.fromEntries(url.searchParams);
 
           console.log(`[API] ${req.method} ${apiPath}`);
 
-          // Route to actual API files
+          // Extract the API file name from the path
           const apiFileName = apiPath.split("/")[1].split("?")[0];
-          const apiFilePath = path.join(process.cwd(), "api", `${apiFileName}.js`);
+          const apiFilePath = path.join(
+            process.cwd(),
+            "api",
+            `${apiFileName}.js`,
+          );
 
+          // Check if the API file exists
           if (fs.existsSync(apiFilePath)) {
             try {
+              // Clear the module cache to allow hot reloading
+              delete require.cache[require.resolve(apiFilePath)];
+
               // Import and execute the API handler
-              const apiHandler = await import(apiFilePath);
-              const handler = apiHandler.default;
+              const apiModule = await import(`${apiFilePath}?t=${Date.now()}`);
+              const handler = apiModule.default;
 
               if (typeof handler === "function") {
                 return await handler(req, res);
@@ -63,16 +72,26 @@ export function apiMiddleware() {
                 }),
               );
             }
+          } else {
+            // Return 404 for unknown endpoints
+            res.statusCode = 404;
+            res.setHeader("Content-Type", "application/json");
+            return res.end(
+              JSON.stringify({
+                error: `API endpoint not found: ${apiPath}`,
+                availableEndpoints: [
+                  "/api/stories",
+                  "/api/users",
+                  "/api/credentials",
+                  "/api/analytics",
+                  "/api/health",
+                  "/api/test",
+                ],
+              }),
+            );
           }
-
-          // If no API handler found, return 404
-          res.statusCode = 404;
-          res.setHeader("Content-Type", "application/json");
-          return res.end(
-            JSON.stringify({ error: `API endpoint not found: ${apiPath}` }),
-          );
         } catch (error) {
-          console.error("[API] Error:", error);
+          console.error("[API] Middleware error:", error);
           res.statusCode = 500;
           res.setHeader("Content-Type", "application/json");
           return res.end(JSON.stringify({ error: "Internal server error" }));
@@ -80,31 +99,4 @@ export function apiMiddleware() {
       });
     },
   };
-}
-
-// Fallback handler for when no API file is found
-function fallbackResponse(res, apiPath) {
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS",
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  res.statusCode = 404;
-  return res.end(
-    JSON.stringify({
-      error: `API endpoint not found: ${apiPath}`,
-      availableEndpoints: [
-        "/api/stories",
-        "/api/users",
-        "/api/credentials",
-        "/api/analytics",
-        "/api/health",
-        "/api/test"
-      ]
-    }),
-  );
-}
 }
