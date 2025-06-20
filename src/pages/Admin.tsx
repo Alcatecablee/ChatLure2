@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   BookOpen,
   Upload,
+  Download,
   Archive,
   TrendingUp,
   Menu,
