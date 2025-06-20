@@ -88,6 +88,13 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     exclude: ["@radix-ui/react-tooltip", "@radix-ui/react-tooltip/dist"],
     force: true,
+    noDiscovery: true,
+    include: [
+      "react",
+      "react-dom",
+      "@tanstack/react-query",
+      "react-router-dom",
+    ],
   },
   build: {
     rollupOptions: {
