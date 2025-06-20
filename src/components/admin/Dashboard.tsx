@@ -833,12 +833,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <CardContent className="space-y-3">
               <Button
                 onClick={() => onNavigate("story")}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 justify-start"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 justify-start"
               >
                 <Zap size={16} className="mr-2" />
                 <div className="text-left">
                   <div className="font-semibold">Create Story</div>
-                  <div className="text-sm text-purple-200">
+                  <div className="text-sm opacity-90">
                     Build your next viral hit
                   </div>
                 </div>
@@ -846,13 +846,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
               <Button
                 onClick={() => onNavigate("import")}
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 justify-start"
+                className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 justify-start"
                 disabled={!connectionStatus.connections.reddit}
               >
                 <Globe size={16} className="mr-2" />
                 <div className="text-left">
                   <div className="font-semibold">Import from Reddit</div>
-                  <div className="text-sm text-blue-200">
+                  <div className="text-sm opacity-90">
                     {connectionStatus.connections.reddit
                       ? "Auto-source viral content"
                       : "Configure Reddit API first"}
@@ -862,12 +862,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
               <Button
                 onClick={() => onNavigate("library")}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 justify-start"
+                className="w-full bg-accent text-accent-foreground hover:bg-accent/80 justify-start"
               >
                 <BookOpen size={16} className="mr-2" />
                 <div className="text-left">
                   <div className="font-semibold">Manage Library</div>
-                  <div className="text-sm text-green-200">
+                  <div className="text-sm opacity-90">
                     Organize your collection
                   </div>
                 </div>
