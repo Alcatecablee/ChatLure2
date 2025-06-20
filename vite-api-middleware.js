@@ -7,6 +7,25 @@ export function apiMiddleware() {
     configureServer(server) {
       server.middlewares.use("/api", async (req, res, next) => {
         try {
+          // Parse request body for POST/PUT requests
+          if (req.method === "POST" || req.method === "PUT") {
+            let body = "";
+            req.on("data", (chunk) => {
+              body += chunk.toString();
+            });
+
+            await new Promise((resolve) => {
+              req.on("end", () => {
+                try {
+                  req.body = body ? JSON.parse(body) : {};
+                } catch (error) {
+                  req.body = {};
+                }
+                resolve();
+              });
+            });
+          }
+
           // Parse URL to get the endpoint
           const url = new URL(req.url, `http://${req.headers.host}`);
           const apiPath = url.pathname.replace("/api", "");
