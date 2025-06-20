@@ -78,9 +78,17 @@ export function Settings() {
 
   const saveCredentials = async () => {
     try {
+      console.log("Starting to save credentials...");
+      console.log("Reddit credentials:", credentials.reddit);
+
       // Save each service's credentials
+      console.log("Saving Reddit credentials...");
       await updateCredentials("reddit", credentials.reddit);
+
+      console.log("Saving Clerk credentials...");
       await updateCredentials("clerk", credentials.clerk);
+
+      console.log("Saving PayPal credentials...");
       await updateCredentials("paypal", credentials.paypal);
 
       setLastSaved(new Date());
@@ -90,12 +98,14 @@ export function Settings() {
         title: "Settings Saved",
         message: "All API credentials have been saved successfully.",
       });
+
+      console.log("All credentials saved successfully!");
     } catch (error) {
       console.error("Failed to save credentials:", error);
       addNotification({
         type: "error",
         title: "Save Failed",
-        message: "Failed to save credentials. Please try again.",
+        message: `Failed to save credentials: ${error.message}`,
       });
     }
   };
