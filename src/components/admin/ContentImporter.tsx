@@ -33,6 +33,8 @@ import {
 } from "lucide-react";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useApp } from "@/contexts/AppContext";
+import { redditAPI, RedditSearchParams } from "@/utils/redditApi";
+import { apiHandler } from "@/utils/apiRoutes";
 
 interface ImportedStory {
   id: string;
@@ -224,56 +226,40 @@ export default function ContentImporter() {
     error?: string;
   }> => {
     try {
-      // Reddit OAuth flow would typically happen here
-      // For now, we'll implement a real API structure but return empty results
-
-      const baseUrl = "https://oauth.reddit.com";
-      const subredditPath =
-        selectedSubreddit === "all"
-          ? "/hot"
-          : `/r/${selectedSubreddit.replace("r/", "")}/hot`;
-      const searchPath = searchQuery
-        ? `/search?q=${encodeURIComponent(searchQuery)}&sort=hot&limit=25`
-        : `${subredditPath}?limit=25`;
-
-      // This would be the real API call structure:
-      /*
-      const response = await fetch(`${baseUrl}${searchPath}`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'User-Agent': credentials.reddit.userAgent,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Reddit API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      const posts = data.data.children.map((child: any) => ({
-        id: child.data.id,
-        title: child.data.title,
-        content: child.data.selftext || child.data.title,
-        upvotes: child.data.ups,
-        comments: child.data.num_comments,
-        subreddit: child.data.subreddit_name_prefixed,
-        url: `https://reddit.com${child.data.permalink}`,
-        created: new Date(child.data.created_utc * 1000).toISOString(),
-      }));
-      */
-
-      // For development, return empty results since we need real Reddit API setup
-      addNotification({
-        type: "warning",
-        title: "API Setup Required",
-        message:
-          "Reddit API integration requires OAuth setup and access tokens. Configure in Settings to enable real data fetching.",
-      });
-
-      return {
-        success: true,
-        posts: [], // Real posts would be returned here
+      const searchParams: RedditSearchParams = {
+        query: searchQuery || undefined,
+        subreddit:
+          selectedSubreddit === "all"
+            ? undefined
+            : selectedSubreddit.replace("r/", ""),
+        sort: "hot",
+        limit: 25,
+        minScore: minViralScore,
       };
+
+      const result = await redditAPI.searchPosts(
+        credentials.reddit,
+        searchParams,
+      );
+
+      if (!result.success) {
+        if (result.error?.includes("Authentication failed")) {
+          addNotification({
+            type: "error",
+            title: "Authentication Failed",
+            message:
+              "Please check your Reddit API credentials in Settings. Make sure Client ID and Secret are correct.",
+          });
+        } else {
+          addNotification({
+            type: "error",
+            title: "Reddit API Error",
+            message: result.error || "Failed to fetch posts from Reddit",
+          });
+        }
+      }
+
+      return result;
     } catch (error) {
       return {
         success: false,
