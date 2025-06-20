@@ -465,7 +465,7 @@ export function ContentImporter({
     try {
       addNotification({
         type: "info",
-        title: "��� Scanning Reddit",
+        title: "🔍 Scanning Reddit",
         message: `Searching ${selectedSubreddit === "all" ? "all viral subreddits" : selectedSubreddit} for "${searchQuery || "high-engagement content"}"`,
       });
 
@@ -1014,10 +1014,39 @@ export function ContentImporter({
         <TabsContent value="library">
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>
-                📚 Imported Stories ({parsedStories.length})
+              <CardTitle className="flex items-center space-x-2">
+                <span>📚 Story Library ({parsedStories.length})</span>
+                {parsedStories.filter((s) => !s.isImported).length > 0 && (
+                  <Badge className="bg-yellow-500/20 text-yellow-400">
+                    {parsedStories.filter((s) => !s.isImported).length} pending
+                  </Badge>
+                )}
               </CardTitle>
               <div className="flex items-center space-x-2">
+                {parsedStories.filter((s) => !s.isImported).length > 0 && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const pendingStories = parsedStories.filter(
+                        (s) => !s.isImported,
+                      );
+                      importStories(pendingStories);
+                      setParsedStories((prev) =>
+                        prev.map((s) => ({ ...s, isImported: true })),
+                      );
+                      addNotification({
+                        type: "success",
+                        title: "Bulk Import Complete",
+                        message: `Imported ${pendingStories.length} stories to your library!`,
+                      });
+                    }}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle size={14} className="mr-1" />
+                    Import All (
+                    {parsedStories.filter((s) => !s.isImported).length})
+                  </Button>
+                )}
                 <Button variant="outline" size="sm">
                   <Filter size={16} className="mr-1" />
                   Filter
@@ -1030,24 +1059,91 @@ export function ContentImporter({
                     <SelectItem value="viral">Viral Score</SelectItem>
                     <SelectItem value="recent">Most Recent</SelectItem>
                     <SelectItem value="messages">Message Count</SelectItem>
+                    <SelectItem value="upvotes">Reddit Upvotes</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </CardHeader>
             <CardContent>
               {parsedStories.length > 0 ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {parsedStories.map((story, index) => (
-                    <StoryCard key={story.id} story={story} index={index} />
-                  ))}
-                </div>
+                <>
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-4 gap-4 mb-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">
+                        {
+                          parsedStories.filter(
+                            (s) => s.estimatedViralScore >= 80,
+                          ).length
+                        }
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        High Viral (80%+)
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-400">
+                        {
+                          parsedStories.filter((s) => s.source === "reddit")
+                            .length
+                        }
+                      </div>
+                      <div className="text-xs text-gray-400">From Reddit</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-400">
+                        {parsedStories.reduce(
+                          (sum, s) => sum + s.messages.length,
+                          0,
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Total Messages
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-400">
+                        {parsedStories.filter((s) => s.isImported).length}
+                      </div>
+                      <div className="text-xs text-gray-400">Imported</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {parsedStories.map((story, index) => (
+                      <StoryCard key={story.id} story={story} index={index} />
+                    ))}
+                  </div>
+                </>
               ) : (
-                <div className="text-center text-gray-400 py-8">
-                  <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>No stories imported yet</p>
-                  <p className="text-sm">
+                <div className="text-center text-gray-400 py-12">
+                  <FileText size={64} className="mx-auto mb-4 opacity-30" />
+                  <h3 className="text-xl font-semibold mb-2">
+                    No stories in library
+                  </h3>
+                  <p className="text-sm mb-4">
                     Use the Reddit scanner or manual import to get started
                   </p>
+                  <div className="flex justify-center space-x-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setActiveTab("reddit")}
+                      className="border-blue-500/30 text-blue-400"
+                    >
+                      <Globe size={14} className="mr-1" />
+                      Scan Reddit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setActiveTab("manual")}
+                      className="border-green-500/30 text-green-400"
+                    >
+                      <FileText size={14} className="mr-1" />
+                      Manual Import
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
