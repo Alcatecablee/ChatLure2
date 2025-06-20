@@ -38,6 +38,25 @@ const ultimateTooltipKiller = () => ({
     }
     return null;
   },
+  transform(code: string, id: string) {
+    // Transform any remaining tooltip references at the code level
+    if (
+      code.includes("@radix-ui/react-tooltip") ||
+      code.includes("TooltipProvider")
+    ) {
+      console.log(`🚫 TRANSFORMING TOOLTIP CODE IN: ${id}`);
+      return code
+        .replace(
+          /from\s+['"]@radix-ui\/react-tooltip['"]/g,
+          'from "@/components/ui/tooltip"',
+        )
+        .replace(
+          /import\s+.*@radix-ui\/react-tooltip.*/g,
+          'import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";',
+        );
+    }
+    return null;
+  },
   configResolved(config) {
     // Force exclude from optimization with extreme prejudice
     config.optimizeDeps = config.optimizeDeps || {};
@@ -46,6 +65,19 @@ const ultimateTooltipKiller = () => ({
     config.optimizeDeps.exclude.push("@radix-ui/react-tooltip/dist");
     // Prevent any pre-bundling
     config.optimizeDeps.include = config.optimizeDeps.include || [];
+
+    // Override the resolve to never resolve to the real tooltip
+    const originalResolve = config.resolve;
+    config.resolve = {
+      ...originalResolve,
+      alias: {
+        ...originalResolve?.alias,
+        "@radix-ui/react-tooltip": path.resolve(
+          __dirname,
+          "./src/components/ui/tooltip.tsx",
+        ),
+      },
+    };
   },
   buildStart() {
     console.log(
