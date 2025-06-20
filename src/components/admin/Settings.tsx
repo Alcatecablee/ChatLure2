@@ -675,7 +675,7 @@ export function Settings() {
         </Card>
 
         {/* Actions */}
-      <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
+        <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
         <div>
           <h3 className="text-white font-medium">Reset Settings</h3>
           <p className="text-gray-400 text-sm">
@@ -689,16 +689,16 @@ export function Settings() {
         >
           Reset to Defaults
         </Button>
-      </div>
+        </div>
 
-      {/* Status */}
-      <div className="flex items-center space-x-4 text-sm text-gray-400">
+        {/* Status */}
+        <div className="flex items-center space-x-4 text-sm text-gray-400">
         <Badge variant="outline" className="border-green-600 text-green-400">
           <CheckCircle className="w-3 h-3 mr-1" />
           Settings Active
         </Badge>
         <span>Configuration saved to local storage</span>
+        </div>
       </div>
-    </div>
   );
 }
