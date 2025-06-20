@@ -72,7 +72,7 @@ export function LockScreenProvider({
   }, [settings.enabled, settings.autoLockTime, lastActivity, isLocked]);
 
   // Track user activity
-  useEffect(() => {
+  React.useEffect(() => {
     const updateActivity = () => {
       setLastActivity(Date.now());
     };
