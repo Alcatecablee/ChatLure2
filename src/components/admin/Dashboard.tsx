@@ -890,25 +890,35 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-64 overflow-y-auto">
-                {recentActivity.map((activity, index) => (
-                  <motion.div
-                    key={activity.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-start space-x-3 p-2 hover:bg-gray-700/30 rounded transition-colors"
-                  >
-                    <div className={`p-1 rounded ${activity.color}`}>
-                      <activity.icon size={12} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">
-                        {activity.title}
-                      </p>
-                      <p className="text-xs text-gray-400">{activity.time}</p>
-                    </div>
-                  </motion.div>
-                ))}
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity, index) => (
+                    <motion.div
+                      key={activity.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-start space-x-3 p-2 hover:bg-gray-700/30 rounded transition-colors"
+                    >
+                      <div className={`p-1 rounded ${activity.color}`}>
+                        <activity.icon size={12} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white truncate">
+                          {activity.title}
+                        </p>
+                        <p className="text-xs text-gray-400">{activity.time}</p>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-400 py-8">
+                    <Activity size={32} className="mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">No recent activity</p>
+                    <p className="text-xs">
+                      Activity will appear as you use the platform
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
