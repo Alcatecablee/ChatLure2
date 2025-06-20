@@ -6,26 +6,41 @@ export function apiMiddleware() {
     name: "api-middleware",
     configureServer(server) {
       server.middlewares.use("/api", async (req, res, next) => {
-        // Parse URL to get the endpoint
-        const url = new URL(req.url, `http://${req.headers.host}`);
-        const apiPath = url.pathname.replace("/api", "");
+        try {
+          // Parse URL to get the endpoint
+          const url = new URL(req.url, `http://${req.headers.host}`);
+          const apiPath = url.pathname.replace("/api", "");
 
-        // Handle different endpoints
-        if (apiPath === "/stories" || apiPath.startsWith("/stories/")) {
-          return handleApiResponse(res, "stories", req);
-        } else if (apiPath === "/users" || apiPath.startsWith("/users/")) {
-          return handleApiResponse(res, "users", req);
-        } else if (
-          apiPath === "/credentials" ||
-          apiPath.startsWith("/credentials/")
-        ) {
-          return handleApiResponse(res, "credentials", req);
-        } else if (apiPath === "/analytics/dashboard") {
-          return handleApiResponse(res, "analytics", req);
+          console.log(`[API] ${req.method} ${apiPath}`);
+
+          // Handle different endpoints
+          if (apiPath === "/stories" || apiPath.startsWith("/stories/")) {
+            return handleApiResponse(res, "stories", req);
+          } else if (apiPath === "/users" || apiPath.startsWith("/users/")) {
+            return handleApiResponse(res, "users", req);
+          } else if (
+            apiPath === "/credentials" ||
+            apiPath.startsWith("/credentials/")
+          ) {
+            return handleApiResponse(res, "credentials", req);
+          } else if (apiPath === "/analytics/dashboard") {
+            return handleApiResponse(res, "analytics", req);
+          } else if (apiPath === "/test-connection") {
+            return handleApiResponse(res, "test", req);
+          }
+
+          // If no API handler found, return 404
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "application/json");
+          return res.end(
+            JSON.stringify({ error: `API endpoint not found: ${apiPath}` }),
+          );
+        } catch (error) {
+          console.error("[API] Error:", error);
+          res.statusCode = 500;
+          res.setHeader("Content-Type", "application/json");
+          return res.end(JSON.stringify({ error: "Internal server error" }));
         }
-
-        // If no API handler found, continue to next middleware
-        next();
       });
     },
   };
