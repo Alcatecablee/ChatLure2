@@ -668,6 +668,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Load initial data on mount
   useEffect(() => {
     const initializeData = async () => {
+      // Load app config from localStorage
+      try {
+        const savedConfig = localStorage.getItem("appConfig");
+        if (savedConfig) {
+          const config = JSON.parse(savedConfig);
+          dispatch({ type: "UPDATE_APP_CONFIG", payload: config });
+        }
+      } catch (error) {
+        console.warn("Failed to load app config from localStorage:", error);
+      }
+
       await Promise.all([loadStories(), loadUsers(), loadCredentials()]);
     };
 
