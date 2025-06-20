@@ -43,6 +43,7 @@ interface AppState {
   isLoading: boolean;
   notifications: Notification[];
   error: string | null;
+  appConfig: AppConfig;
 }
 
 type AppAction =
