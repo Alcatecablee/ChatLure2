@@ -99,7 +99,7 @@ function handleApiResponse(res, type, req) {
             title:
               "Caught my husband's affair through his smartwatch notifications",
             content:
-              "His Apple Watch was synced to our shared iPad. I saw a notification from 'Sarah ❤️' saying 'Can't wait to see you tonight, love you too'. My world is falling apart. We've been married 8 years. I took screenshots of everything...",
+              "His Apple Watch was synced to our shared iPad. I saw a notification from 'Sarah ��️' saying 'Can't wait to see you tonight, love you too'. My world is falling apart. We've been married 8 years. I took screenshots of everything...",
             upvotes: 23890,
             comments: 1247,
             subreddit: "r/relationship_advice",
@@ -325,6 +325,7 @@ function handleApiResponse(res, type, req) {
 
     case "credentials":
       if (req.method === "GET") {
+        // Load credentials from localStorage in browser context
         return res.end(
           JSON.stringify({
             reddit: {
@@ -346,6 +347,55 @@ function handleApiResponse(res, type, req) {
               environment: "sandbox",
               enabled: false,
             },
+          }),
+        );
+      } else if (req.method === "PUT") {
+        // Handle credentials update
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const service = url.pathname.split("/").pop(); // Get service from URL path
+
+        if (!service || !["reddit", "clerk", "paypal"].includes(service)) {
+          res.statusCode = 400;
+          return res.end(
+            JSON.stringify({
+              error: "Invalid service. Must be reddit, clerk, or paypal",
+            }),
+          );
+        }
+
+        // Validate the request body exists
+        if (!req.body) {
+          res.statusCode = 400;
+          return res.end(
+            JSON.stringify({
+              error: "Request body is required",
+            }),
+          );
+        }
+
+        // Service-specific validation
+        if (service === "reddit") {
+          const { clientId, clientSecret, userAgent } = req.body;
+          if (!clientId || !clientSecret) {
+            res.statusCode = 400;
+            return res.end(
+              JSON.stringify({
+                error: "Reddit credentials require clientId and clientSecret",
+              }),
+            );
+          }
+        }
+
+        // Mock successful save since we can't persist in middleware
+        console.log(`[API] Saving ${service} credentials:`, req.body);
+
+        res.statusCode = 200;
+        return res.end(
+          JSON.stringify({
+            success: true,
+            message: `${service} credentials saved successfully`,
+            service: service,
+            timestamp: new Date().toISOString(),
           }),
         );
       }
