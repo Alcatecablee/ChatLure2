@@ -6,83 +6,148 @@ import {
   PauseCircle,
   RotateCcw,
   Bookmark,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useState, useEffect } from "react";
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 interface StoryTimerProps {
   onBack: () => void;
 }
 
 export function StoryTimer({ onBack }: StoryTimerProps) {
-  const [selectedStory, setSelectedStory] = useState(0);
+  const { getMyStories, saveProgress, getProgress, currentUser } =
+    useDatabase();
+  const [stories, setStories] = useState<any[]>([]);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [nextDropTime, setNextDropTime] = useState(
-    new Date(Date.now() + 2 * 60 * 60 * 1000),
-  ); // 2 hours from now
+  const [totalTime, setTotalTime] = useState(0);
 
-  const stories = [
-    {
-      id: 1,
-      title: "Coffee Shop Chronicles",
-      chapter: "Chapter 5",
-      duration: 15,
-      progress: 8,
-      nextDrop: "2h 15m",
-      status: "reading",
-      color: "from-amber-500 to-orange-600",
-    },
-    {
-      id: 2,
-      title: "Office Romance",
-      chapter: "Chapter 3",
-      duration: 22,
-      progress: 22,
-      nextDrop: "4h 30m",
-      status: "completed",
-      color: "from-pink-500 to-rose-600",
-    },
-    {
-      id: 3,
-      title: "University Drama",
-      chapter: "Chapter 1",
-      duration: 18,
-      progress: 0,
-      nextDrop: "New!",
-      status: "new",
-      color: "from-blue-500 to-purple-600",
-    },
-    {
-      id: 4,
-      title: "Neighborhood Secrets",
-      chapter: "Chapter 7",
-      duration: 25,
-      progress: 12,
-      nextDrop: "Tomorrow",
-      status: "reading",
-      color: "from-green-500 to-teal-600",
-    },
-  ];
+  useEffect(() => {
+    loadStories();
+  }, []);
 
-  const currentStory = stories[selectedStory];
+  useEffect(() => {
+    if (stories.length > 0) {
+      loadStoryProgress(stories[selectedStoryIndex]);
+    }
+  }, [selectedStoryIndex, stories]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isPlaying) {
+    if (isPlaying && currentTime < totalTime) {
       interval = setInterval(() => {
         setCurrentTime((prev) => {
-          if (prev >= currentStory.duration * 60) {
+          const newTime = prev + 1;
+          if (newTime >= totalTime) {
             setIsPlaying(false);
-            return currentStory.duration * 60;
+            return totalTime;
           }
-          return prev + 1;
+
+          // Save progress every 10 seconds
+          if (newTime % 10 === 0 && stories[selectedStoryIndex]) {
+            saveStoryProgress(newTime);
+          }
+
+          return newTime;
         });
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, currentStory.duration]);
+  }, [isPlaying, currentTime, totalTime, selectedStoryIndex, stories]);
+
+  const loadStories = async () => {
+    try {
+      const myStories = await getMyStories();
+
+      // If no user stories, create demo stories for the timer
+      if (myStories.length === 0) {
+        const demoStories = [
+          {
+            id: "demo-1",
+            title: "Coffee Shop Chronicles",
+            description: "A tale of love and betrayal over lattes",
+            readingTime: 15,
+            status: "reading",
+            progress: 0,
+            nextDrop: "2h 15m",
+          },
+          {
+            id: "demo-2",
+            title: "University Drama",
+            description: "Campus secrets revealed",
+            readingTime: 22,
+            status: "new",
+            progress: 0,
+            nextDrop: "Tomorrow",
+          },
+          {
+            id: "demo-3",
+            title: "Office Romance",
+            description: "Workplace relationships get complicated",
+            readingTime: 18,
+            status: "reading",
+            progress: 45,
+            nextDrop: "4h 30m",
+          },
+        ];
+        setStories(demoStories);
+        setTotalTime(demoStories[0].readingTime * 60);
+      } else {
+        const formattedStories = myStories.map((story) => ({
+          id: story.id,
+          title: story.title,
+          description: story.description,
+          readingTime: story.readingTime,
+          status: "reading",
+          progress: 0,
+          nextDrop: "Available now",
+        }));
+        setStories(formattedStories);
+        if (formattedStories.length > 0) {
+          setTotalTime(formattedStories[0].readingTime * 60);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load stories:", error);
+    }
+  };
+
+  const loadStoryProgress = async (story: any) => {
+    if (!story || !currentUser) return;
+
+    try {
+      const progress = await getProgress(story.id);
+      if (progress) {
+        const timeInSeconds = Math.floor(
+          (progress.progress / 100) * (story.readingTime * 60),
+        );
+        setCurrentTime(timeInSeconds);
+      } else {
+        setCurrentTime(0);
+      }
+      setTotalTime(story.readingTime * 60);
+    } catch (error) {
+      console.error("Failed to load progress:", error);
+      setCurrentTime(0);
+      setTotalTime(story.readingTime * 60);
+    }
+  };
+
+  const saveStoryProgress = async (timeInSeconds: number) => {
+    const story = stories[selectedStoryIndex];
+    if (!story || !currentUser) return;
+
+    try {
+      const progressPercent = (timeInSeconds / totalTime) * 100;
+      await saveProgress(story.id, progressPercent, `time:${timeInSeconds}`);
+    } catch (error) {
+      console.error("Failed to save progress:", error);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -90,13 +155,25 @@ export function StoryTimer({ onBack }: StoryTimerProps) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const getTimeUntilDrop = () => {
-    const now = new Date();
-    const diff = nextDropTime.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
+  const handleStorySelect = (index: number) => {
+    // Save current progress before switching
+    if (stories[selectedStoryIndex]) {
+      saveStoryProgress(currentTime);
+    }
+
+    setSelectedStoryIndex(index);
+    setIsPlaying(false);
   };
+
+  const handleReset = () => {
+    setCurrentTime(0);
+    setIsPlaying(false);
+    if (stories[selectedStoryIndex]) {
+      saveStoryProgress(0);
+    }
+  };
+
+  const currentStory = stories[selectedStoryIndex];
 
   return (
     <div className="w-full h-full bg-black text-white flex flex-col">
@@ -115,133 +192,160 @@ export function StoryTimer({ onBack }: StoryTimerProps) {
         <div className="w-16"></div>
       </div>
 
-      {/* Next Drop Countdown */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-4 bg-gradient-to-r from-purple-900/30 to-blue-900/30"
-      >
-        <div className="text-center">
-          <div className="text-xs text-gray-400 mb-1">Next Story Drop</div>
-          <div className="text-2xl font-bold text-purple-400">
-            {getTimeUntilDrop()}
-          </div>
-          <div className="text-xs text-gray-300 mt-1">
-            Drama in the Park - Chapter 4
-          </div>
-        </div>
-      </motion.div>
-
       {/* Current Story Player */}
-      <div className="p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className={`p-6 rounded-xl bg-gradient-to-br ${currentStory.color} mb-4`}
-        >
-          <h2 className="text-xl font-bold mb-2">{currentStory.title}</h2>
-          <p className="text-white/80 mb-4">{currentStory.chapter}</p>
-
-          {/* Progress Bar */}
-          <div className="mb-4">
-            <div className="flex justify-between text-sm mb-2">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(currentStory.duration * 60)}</span>
-            </div>
-            <Progress
-              value={(currentTime / (currentStory.duration * 60)) * 100}
-              className="h-2 bg-white/20"
-            />
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center justify-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentTime(0)}
-              className="text-white/80 hover:text-white"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="text-white hover:text-white"
-            >
-              {isPlaying ? (
-                <PauseCircle className="w-8 h-8" />
-              ) : (
-                <PlayCircle className="w-8 h-8" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/80 hover:text-white"
-            >
-              <Bookmark className="w-5 h-5" />
-            </Button>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Story List */}
-      <div className="flex-1 overflow-y-auto px-4">
-        <h3 className="font-semibold mb-3 text-gray-300">Your Stories</h3>
-        {stories.map((story, index) => (
+      {currentStory && (
+        <div className="p-4">
           <motion.div
-            key={story.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            onClick={() => setSelectedStory(index)}
-            className={`p-3 rounded-lg mb-2 cursor-pointer transition-colors ${
-              selectedStory === index
-                ? "bg-purple-900/30 border border-purple-500/30"
-                : "bg-gray-900/50 hover:bg-gray-800/50"
-            }`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-6 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 mb-4"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h4 className="font-medium">{story.title}</h4>
-                <p className="text-sm text-gray-400">{story.chapter}</p>
+                <h2 className="text-xl font-bold mb-2">{currentStory.title}</h2>
+                <p className="text-white/80 text-sm">
+                  {currentStory.description}
+                </p>
               </div>
               <div className="text-right">
-                <div className="text-xs text-gray-400">Next Drop</div>
-                <div className="text-sm font-medium text-purple-400">
-                  {story.nextDrop}
+                <div className="text-xs text-white/60">Status</div>
+                <div className="text-sm font-medium capitalize">
+                  {currentStory.status}
                 </div>
               </div>
             </div>
 
-            {/* Reading Progress */}
-            <div className="mt-2">
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <div className="flex justify-between text-sm mb-2">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(totalTime)}</span>
+              </div>
               <Progress
-                value={(story.progress / story.duration) * 100}
-                className="h-1 bg-gray-700"
+                value={totalTime > 0 ? (currentTime / totalTime) * 100 : 0}
+                className="h-2 bg-white/20"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>{story.progress}m read</span>
-                <span>{story.duration}m total</span>
+              <div className="text-xs text-white/60 mt-1 text-center">
+                {totalTime > 0
+                  ? Math.round((currentTime / totalTime) * 100)
+                  : 0}
+                % Complete
               </div>
             </div>
+
+            {/* Controls */}
+            <div className="flex items-center justify-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                className="text-white/80 hover:text-white"
+              >
+                <RotateCcw className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="text-white hover:text-white"
+                disabled={currentTime >= totalTime}
+              >
+                {isPlaying ? (
+                  <PauseCircle className="w-8 h-8" />
+                ) : (
+                  <PlayCircle className="w-8 h-8" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white/80 hover:text-white"
+                onClick={() => {
+                  // Add bookmark functionality
+                  console.log("Bookmark story");
+                }}
+              >
+                <Bookmark className="w-5 h-5" />
+              </Button>
+            </div>
           </motion.div>
-        ))}
+        </div>
+      )}
+
+      {/* Story List */}
+      <div className="flex-1 overflow-y-auto px-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-gray-300">Your Stories</h3>
+          <div className="flex items-center space-x-2 text-sm text-gray-400">
+            <BookOpen className="w-4 h-4" />
+            <span>{stories.length} stories</span>
+          </div>
+        </div>
+
+        {stories.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No stories to read yet</p>
+            <p className="text-sm">
+              Create your first story to start timing your reading!
+            </p>
+          </div>
+        ) : (
+          stories.map((story, index) => (
+            <motion.div
+              key={story.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              onClick={() => handleStorySelect(index)}
+              className={`p-3 rounded-lg mb-2 cursor-pointer transition-colors ${
+                selectedStoryIndex === index
+                  ? "bg-purple-900/30 border border-purple-500/30"
+                  : "bg-gray-900/50 hover:bg-gray-800/50"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{story.title}</h4>
+                  <p className="text-sm text-gray-400 line-clamp-1">
+                    {story.description}
+                  </p>
+                </div>
+                <div className="text-right ml-3">
+                  <div className="text-xs text-gray-400">Reading Time</div>
+                  <div className="text-sm font-medium text-purple-400">
+                    {story.readingTime}m
+                  </div>
+                </div>
+              </div>
+
+              {/* Reading Progress */}
+              <div className="mt-2">
+                <Progress
+                  value={story.progress || 0}
+                  className="h-1 bg-gray-700"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>{Math.round(story.progress || 0)}% read</span>
+                  <span className="capitalize">{story.status}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
 
       {/* Bottom Actions */}
       <div className="p-4 border-t border-gray-800">
         <Button className="w-full bg-purple-600 hover:bg-purple-700 mb-2">
           <Clock className="w-4 h-4 mr-2" />
-          Set Reading Reminder
+          Set Reading Goals
         </Button>
         <Button
           variant="outline"
           className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
         >
-          View Release Schedule
+          View Reading Stats
         </Button>
       </div>
     </div>
