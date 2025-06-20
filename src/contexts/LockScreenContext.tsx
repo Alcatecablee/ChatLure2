@@ -54,7 +54,7 @@ export function LockScreenProvider({
   }, [settings]);
 
   // Auto-lock functionality
-  useEffect(() => {
+  React.useEffect(() => {
     if (!settings.enabled || settings.autoLockTime <= 0) return;
 
     const checkAutoLock = () => {
