@@ -266,9 +266,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   };
 
   const activeStories = stories.filter((story) => story.isActive);
-  const totalViews = stories.reduce(
-    (sum, story) => sum + (story.stats?.views || 0),
-    0,
+  const totalViews = stories.reduce((sum, story) => {
+    console.log(`Story "${story.title}" has ${story.stats?.views || 0} views`);
+    return sum + (story.stats?.views || 0);
+  }, 0);
+  console.log(
+    `Total calculated views: ${totalViews}, from ${stories.length} stories`,
   );
   const avgViralScore =
     stories.length > 0
