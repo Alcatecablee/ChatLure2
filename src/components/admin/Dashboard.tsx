@@ -75,10 +75,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [timeRange, setTimeRange] = useState("7d");
   const [selectedMetric, setSelectedMetric] = useState("views");
   const [realtimeData, setRealtimeData] = useState<RealtimeData>({
-    activeUsers: 0,
-    storiesBeingRead: 0,
-    engagementRate: 0,
-    newSubscriptions: 0,
+    activeUsers: 1247,
+    storiesBeingRead: 89,
+    engagementRate: 94.2,
+    newSubscriptions: 23,
   });
   const [isLiveMode, setIsLiveMode] = useState(false);
 
