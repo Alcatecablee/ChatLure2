@@ -206,6 +206,20 @@ function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
+// Create a default context value to prevent null errors
+const defaultContextValue = {
+  state: initialState,
+  dispatch: (() => {}) as React.Dispatch<AppAction>,
+  addStory: () => {},
+  updateStory: () => {},
+  deleteStory: () => {},
+  importStories: () => {},
+  addNotification: () => {},
+  getStoryById: () => undefined,
+  getStoriesByGenre: () => [],
+  getActiveStories: () => [],
+};
+
 // Context
 const AppContext = createContext<{
   state: AppState;
@@ -221,7 +235,7 @@ const AppContext = createContext<{
   getStoryById: (id: string) => Story | undefined;
   getStoriesByGenre: (genre: string) => Story[];
   getActiveStories: () => Story[];
-} | null>(null);
+}>(defaultContextValue);
 
 // Provider component
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -419,7 +433,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 // Hook to use the context
 export function useApp() {
   const context = useContext(AppContext);
-  if (!context) {
+  if (context === defaultContextValue) {
     throw new Error("useApp must be used within an AppProvider");
   }
   return context;
