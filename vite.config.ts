@@ -78,12 +78,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    exclude: [
-      "@radix-ui/react-tooltip",
-      "@radix-ui/react-tooltip/dist",
-      "**/tooltip**",
-      "**/Tooltip**",
-    ],
+    exclude: ["@radix-ui/react-tooltip", "@radix-ui/react-tooltip/dist"],
     force: true,
   },
   build: {
@@ -91,8 +86,8 @@ export default defineConfig(({ mode }) => ({
       external: [
         "@radix-ui/react-tooltip",
         "@radix-ui/react-tooltip/dist",
-        /.*tooltip.*/,
-        /.*Tooltip.*/,
+        /.*tooltip.*/i,
+        /.*Tooltip.*/i,
       ],
     },
   },
