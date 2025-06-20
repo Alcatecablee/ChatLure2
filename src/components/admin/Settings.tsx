@@ -14,6 +14,7 @@ import {
   RefreshCw,
   TestTube,
 } from "lucide-react";
+import { useApp, useCredentials } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,30 +47,9 @@ interface ApiCredentials {
 }
 
 export function Settings() {
-  const [credentials, setCredentials] = useState<ApiCredentials>({
-    reddit: {
-      clientId: localStorage.getItem("reddit_client_id") || "",
-      clientSecret: localStorage.getItem("reddit_client_secret") || "",
-      userAgent: localStorage.getItem("reddit_user_agent") || "ChatLure:v1.0",
-      enabled: localStorage.getItem("reddit_enabled") === "true",
-    },
-    clerk: {
-      publishableKey: localStorage.getItem("clerk_publishable_key") || "",
-      secretKey: localStorage.getItem("clerk_secret_key") || "",
-      webhookSecret: localStorage.getItem("clerk_webhook_secret") || "",
-      enabled: localStorage.getItem("clerk_enabled") === "true",
-    },
-    paypal: {
-      clientId: localStorage.getItem("paypal_client_id") || "",
-      clientSecret: localStorage.getItem("paypal_client_secret") || "",
-      planId: localStorage.getItem("paypal_plan_id") || "",
-      environment:
-        (localStorage.getItem("paypal_environment") as
-          | "sandbox"
-          | "production") || "sandbox",
-      enabled: localStorage.getItem("paypal_enabled") === "true",
-    },
-  });
+  const { updateCredentials, addNotification } = useApp();
+  const globalCredentials = useCredentials();
+  const [credentials, setCredentials] = useState(globalCredentials);
 
   const [showSecrets, setShowSecrets] = useState({
     reddit: false,
@@ -91,48 +71,33 @@ export function Settings() {
 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  const saveCredentials = () => {
-    // Save to localStorage
-    localStorage.setItem("reddit_client_id", credentials.reddit.clientId);
-    localStorage.setItem(
-      "reddit_client_secret",
-      credentials.reddit.clientSecret,
-    );
-    localStorage.setItem("reddit_user_agent", credentials.reddit.userAgent);
-    localStorage.setItem(
-      "reddit_enabled",
-      credentials.reddit.enabled.toString(),
-    );
+  // Update local state when global credentials change
+  useEffect(() => {
+    setCredentials(globalCredentials);
+  }, [globalCredentials]);
 
-    localStorage.setItem(
-      "clerk_publishable_key",
-      credentials.clerk.publishableKey,
-    );
-    localStorage.setItem("clerk_secret_key", credentials.clerk.secretKey);
-    localStorage.setItem(
-      "clerk_webhook_secret",
-      credentials.clerk.webhookSecret,
-    );
-    localStorage.setItem("clerk_enabled", credentials.clerk.enabled.toString());
+  const saveCredentials = async () => {
+    try {
+      // Save each service's credentials
+      await updateCredentials("reddit", credentials.reddit);
+      await updateCredentials("clerk", credentials.clerk);
+      await updateCredentials("paypal", credentials.paypal);
 
-    localStorage.setItem("paypal_client_id", credentials.paypal.clientId);
-    localStorage.setItem(
-      "paypal_client_secret",
-      credentials.paypal.clientSecret,
-    );
-    localStorage.setItem("paypal_plan_id", credentials.paypal.planId);
-    localStorage.setItem("paypal_environment", credentials.paypal.environment);
-    localStorage.setItem(
-      "paypal_enabled",
-      credentials.paypal.enabled.toString(),
-    );
+      setLastSaved(new Date());
 
-    setLastSaved(new Date());
-
-    // Dispatch event for other components to listen to
-    window.dispatchEvent(
-      new CustomEvent("credentials-updated", { detail: credentials }),
-    );
+      addNotification({
+        type: "success",
+        title: "Settings Saved",
+        message: "All API credentials have been saved successfully.",
+      });
+    } catch (error) {
+      console.error("Failed to save credentials:", error);
+      addNotification({
+        type: "error",
+        title: "Save Failed",
+        message: "Failed to save credentials. Please try again.",
+      });
+    }
   };
 
   const testConnection = async (service: keyof typeof connectionStatus) => {
@@ -142,27 +107,29 @@ export function Settings() {
       // Simulate API testing
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Mock success for demo - in real app, make actual API calls
-      if (
-        service === "reddit" &&
-        credentials.reddit.clientId &&
-        credentials.reddit.clientSecret
-      ) {
-        setConnectionStatus((prev) => ({ ...prev, reddit: "connected" }));
-      } else if (
-        service === "clerk" &&
-        credentials.clerk.publishableKey &&
-        credentials.clerk.secretKey
-      ) {
-        setConnectionStatus((prev) => ({ ...prev, clerk: "connected" }));
-      } else if (
-        service === "paypal" &&
-        credentials.paypal.clientId &&
-        credentials.paypal.clientSecret
-      ) {
-        setConnectionStatus((prev) => ({ ...prev, paypal: "connected" }));
+      // Test actual API connections
+      const response = await fetch(`/api/test-connection/${service}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials[service]),
+      });
+
+      if (response.ok) {
+        setConnectionStatus((prev) => ({ ...prev, [service]: "connected" }));
+        addNotification({
+          type: "success",
+          title: "Connection Successful",
+          message: `${service} API connection tested successfully.`,
+        });
       } else {
         setConnectionStatus((prev) => ({ ...prev, [service]: "error" }));
+        addNotification({
+          type: "error",
+          title: "Connection Failed",
+          message: `Failed to connect to ${service} API. Check your credentials.`,
+        });
       }
     } catch (error) {
       setConnectionStatus((prev) => ({ ...prev, [service]: "error" }));
