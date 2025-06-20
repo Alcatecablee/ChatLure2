@@ -9,6 +9,17 @@ export default async function handler(req, res) {
   const { method } = req;
   const { action } = req.query;
 
+  // Set CORS headers
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (method === "OPTIONS") {
+    res.statusCode = 200;
+    return res.end();
+  }
+
   try {
     switch (method) {
       case "GET":
@@ -19,9 +30,7 @@ export default async function handler(req, res) {
           const stories = StoryAPI.getAll();
           const users = UserAPI.getAll();
 
-          res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json");
-          return res.end(JSON.stringify({
+          const response = {
             health,
             stats: {
               ...dashboardMetrics,
@@ -37,11 +46,15 @@ export default async function handler(req, res) {
               latestStory: stories[0] || null,
               latestUser: users[0] || null,
             },
-          });
+          };
+
+          res.statusCode = 200;
+          return res.end(JSON.stringify(response));
         } else {
           // Basic health check
           const health = healthCheck();
-          return res.status(200).json(health);
+          res.statusCode = 200;
+          return res.end(JSON.stringify(health));
         }
 
       case "POST":
@@ -75,25 +88,34 @@ export default async function handler(req, res) {
             console.error("Database test error:", error);
           }
 
-          return res.status(200).json({
+          const response = {
             status: "test_completed",
             results: testResults,
             allPassed:
               testResults.read && testResults.write && testResults.delete,
-          });
+          };
+
+          res.statusCode = 200;
+          return res.end(JSON.stringify(response));
         }
 
-        return res.status(400).json({ error: "Invalid action" });
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Invalid action" }));
 
       default:
-        res.setHeader("Allow", ["GET", "POST"]);
-        return res.status(405).json({ error: `Method ${method} not allowed` });
+        res.statusCode = 405;
+        return res.end(
+          JSON.stringify({ error: `Method ${method} not allowed` }),
+        );
     }
   } catch (error) {
     console.error("Health API error:", error);
-    return res.status(500).json({
-      error: "Internal server error",
-      details: error.message,
-    });
+    res.statusCode = 500;
+    return res.end(
+      JSON.stringify({
+        error: "Internal server error",
+        details: error.message,
+      }),
+    );
   }
 }
