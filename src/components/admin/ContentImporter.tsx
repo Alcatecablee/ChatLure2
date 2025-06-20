@@ -169,7 +169,7 @@ export function ContentImporter({
   const [isProcessing, setIsProcessing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubreddit, setSelectedSubreddit] = useState("all");
-  const [minViralScore, setMinViralScore] = useState(70);
+  const [minViralScore, setMinViralScore] = useState(10);
   const [autoConvert, setAutoConvert] = useState(true);
 
   // Reddit content with fallback system (CORS-safe approach)
