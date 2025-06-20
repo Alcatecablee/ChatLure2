@@ -184,60 +184,60 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     },
   ];
 
-  // Sponsored apps - Realistic branded apps with proper icons and colors
+  // Sponsored apps - using configurable icons from app settings
   const sponsoredApps = [
     {
       id: "spotify",
-      icon: <div className="text-2xl text-white">🎵</div>,
+      icon: renderIcon(appConfig.sponsoredApps.spotify, "Spotify"),
       name: "Spotify",
       color: "#1DB954",
       isSponsored: true,
     },
     {
       id: "netflix",
-      icon: <div className="text-2xl font-bold text-white">N</div>,
+      icon: renderIcon(appConfig.sponsoredApps.netflix, "Netflix"),
       name: "Netflix",
       color: "#E50914",
       isSponsored: true,
     },
     {
       id: "uber",
-      icon: <div className="text-2xl text-white">🚗</div>,
+      icon: renderIcon(appConfig.sponsoredApps.uber, "Uber"),
       name: "Uber",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "airbnb",
-      icon: <div className="text-2xl text-white">🏠</div>,
+      icon: renderIcon(appConfig.sponsoredApps.airbnb, "Airbnb"),
       name: "Airbnb",
       color: "#FF5A5F",
       isSponsored: true,
     },
     {
       id: "instagram",
-      icon: <div className="text-2xl text-white">📸</div>,
+      icon: renderIcon(appConfig.sponsoredApps.instagram, "Instagram"),
       name: "Instagram",
       color: "#E4405F",
       isSponsored: true,
     },
     {
       id: "tiktok",
-      icon: <div className="text-2xl text-white">🎬</div>,
+      icon: renderIcon(appConfig.sponsoredApps.tiktok, "TikTok"),
       name: "TikTok",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "doordash",
-      icon: <div className="text-2xl text-white">🍕</div>,
+      icon: renderIcon(appConfig.sponsoredApps.doordash, "DoorDash"),
       name: "DoorDash",
       color: "#FF3008",
       isSponsored: true,
     },
     {
       id: "youtube",
-      icon: <div className="text-2xl text-white">▶️</div>,
+      icon: renderIcon(appConfig.sponsoredApps.youtube, "YouTube"),
       name: "YouTube",
       color: "#FF0000",
       isSponsored: true,
