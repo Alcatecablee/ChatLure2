@@ -32,23 +32,41 @@ export function apiMiddleware() {
 
           console.log(`[API] ${req.method} ${apiPath}`);
 
-          // Handle different endpoints
-          if (apiPath === "/stories" || apiPath.startsWith("/stories/")) {
-            return handleApiResponse(res, "stories", req);
-          } else if (apiPath === "/users" || apiPath.startsWith("/users/")) {
-            return handleApiResponse(res, "users", req);
-          } else if (
-            apiPath === "/credentials" ||
-            apiPath.startsWith("/credentials/")
-          ) {
-            return handleApiResponse(res, "credentials", req);
-          } else if (apiPath === "/analytics/dashboard") {
-            return handleApiResponse(res, "analytics", req);
-          } else if (apiPath.startsWith("/test-connection/")) {
-            const service = apiPath.replace("/test-connection/", "");
-            return handleApiResponse(res, `test-${service}`, req);
-          } else if (apiPath.startsWith("/reddit/")) {
-            return handleApiResponse(res, "reddit", req);
+          // Route to actual API files
+          const apiFileName = apiPath.split("/")[1].split("?")[0];
+          const apiFilePath = path.join(
+            process.cwd(),
+            "api",
+            `${apiFileName}.js`,
+          );
+
+          if (fs.existsSync(apiFilePath)) {
+            try {
+              // Import and execute the API handler
+              const apiHandler = await import(apiFilePath);
+              const handler = apiHandler.default;
+
+              if (typeof handler === "function") {
+                return await handler(req, res);
+              } else {
+                console.error(`[API] Invalid handler in ${apiFilePath}`);
+                res.statusCode = 500;
+                res.setHeader("Content-Type", "application/json");
+                return res.end(
+                  JSON.stringify({ error: "Invalid API handler" }),
+                );
+              }
+            } catch (error) {
+              console.error(`[API] Error loading ${apiFilePath}:`, error);
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              return res.end(
+                JSON.stringify({
+                  error: "API handler error",
+                  details: error.message,
+                }),
+              );
+            }
           }
 
           // If no API handler found, return 404
