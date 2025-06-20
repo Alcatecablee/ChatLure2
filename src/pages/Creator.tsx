@@ -259,14 +259,7 @@ function FanInteractions() {
   );
 }
 
-// Creator Import Component (without Reddit)
-function CreatorContentImporter({
-  onImport,
-}: {
-  onImport: (stories: any[]) => void;
-}) {
-  return <ContentImporter onImport={onImport} />;
-}
+// Creator Dashboard now uses the custom CreatorContentImporter component
 
 const Creator = () => {
   const [section, setSection] = useState("dashboard");
