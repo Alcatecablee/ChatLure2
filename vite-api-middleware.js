@@ -47,10 +47,31 @@ export function apiMiddleware() {
 }
 
 function handleApiResponse(res, type, req) {
-  // For now, return mock data since we can't easily execute the Node.js API files
+  // Return mock data for development
   res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle OPTIONS requests for CORS
+  if (req.method === "OPTIONS") {
+    res.statusCode = 200;
+    return res.end();
+  }
 
   switch (type) {
+    case "test":
+      res.statusCode = 200;
+      return res.end(
+        JSON.stringify({
+          status: "connected",
+          message: "API middleware is working",
+          timestamp: new Date().toISOString(),
+        }),
+      );
     case "stories":
       if (req.method === "GET") {
         return res.end(
