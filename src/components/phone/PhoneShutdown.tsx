@@ -51,7 +51,7 @@ export function PhoneShutdown({ onPremiumUpgrade }: PhoneShutdownProps) {
             className="absolute -top-8 -right-8"
           >
             <img
-              src="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
+              src="https://cdn.builder.io/api/v1/assets/4fad96d56bab4dd5bf3f69370c695246/default-12-6ca444?format=webp&width=800"
               alt="ChatLure Logo"
               className="w-12 h-12 rounded-lg opacity-50"
             />

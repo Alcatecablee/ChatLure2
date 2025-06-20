@@ -48,7 +48,7 @@ export function PhoneOff({ onPowerOn }: PhoneOffProps) {
           className="mb-4 relative"
         >
           <img
-            src="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
+            src="https://cdn.builder.io/api/v1/assets/4fad96d56bab4dd5bf3f69370c695246/default-12-6ca444?format=webp&width=800"
             alt="ChatLure Logo"
             className="w-20 h-20 rounded-xl mx-auto"
           />
@@ -72,17 +72,17 @@ export function PhoneOff({ onPowerOn }: PhoneOffProps) {
       <motion.div
         className="relative z-50 mb-32"
         initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ 
-          opacity: 1, 
-          scale: isHovered ? 1.1 : 1
+        animate={{
+          opacity: 1,
+          scale: isHovered ? 1.1 : 1,
         }}
         transition={{ duration: 0.3 }}
       >
         <motion.div
           className="absolute -inset-8 bg-purple-600/20 rounded-full blur-2xl"
-          animate={{ 
+          animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3]
+            opacity: [0.3, 0.6, 0.3],
           }}
           transition={{ duration: 2, repeat: Infinity }}
         />
