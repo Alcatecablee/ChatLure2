@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Wifi, Battery, Signal, Zap, BatteryLow } from "lucide-react";
 import { useBatteryContext } from "@/contexts/BatteryContext";
 
 export function StatusBar() {
