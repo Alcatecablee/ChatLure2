@@ -310,10 +310,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const connectionStatus = getConnectionStatus();
 
-  const [performanceMetrics, setPerformanceMetrics] = useState<
-    PerformanceMetric[]
-  >([]);
-
   const formatMetricValue = (value: number, format: string) => {
     switch (format) {
       case "currency":
@@ -690,7 +686,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                             : index === 1
                               ? "🥈"
                               : index === 2
-                                ? "���"
+                                ? "🥉"
                                 : "🏆"}
                         </div>
                         <div>
