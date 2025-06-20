@@ -576,10 +576,12 @@ const Admin = () => {
             <div className="p-6 border-b border-sidebar-border">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-card rounded-lg border border-border flex items-center justify-center">
-                    <span className="text-lg font-bold text-foreground">
-                      💬
-                    </span>
+                  <div className="w-8 h-8 bg-card rounded-lg border border-border flex items-center justify-center overflow-hidden">
+                    <img
+                      src="https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800"
+                      alt="ChatLure"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <h1 className="text-xl font-bold text-sidebar-foreground">
