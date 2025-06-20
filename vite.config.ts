@@ -2,13 +2,31 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
+// Custom plugin to block @radix-ui/react-tooltip completely
+const blockTooltipPlugin = () => ({
+  name: "block-tooltip",
+  resolveId(id: string) {
+    if (id === "@radix-ui/react-tooltip" || id.includes("react-tooltip")) {
+      return path.resolve(__dirname, "./src/components/ui/tooltip.tsx");
+    }
+    return null;
+  },
+  load(id: string) {
+    if (id.includes("react-tooltip")) {
+      // Return empty module to prevent any loading
+      return "export const TooltipProvider = ({ children }) => children; export const Tooltip = ({ children }) => children; export const TooltipTrigger = ({ children }) => children; export const TooltipContent = () => null; export default {};";
+    }
+    return null;
+  },
+});
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
   },
-  plugins: [react()],
+  plugins: [react(), blockTooltipPlugin()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
