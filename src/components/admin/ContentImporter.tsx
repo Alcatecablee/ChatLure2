@@ -451,7 +451,7 @@ export function ContentImporter({
     setIsProcessing(true);
 
     // Check if Reddit credentials are configured
-    if (!credentials.reddit.enabled || !credentials.reddit.clientId) {
+    if (!credentials?.reddit?.enabled || !credentials?.reddit?.clientId) {
       addNotification({
         type: "error",
         title: "Reddit Not Configured",
