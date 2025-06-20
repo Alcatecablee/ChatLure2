@@ -1,15 +1,13 @@
-import { AnimatePresence } from "framer-motion";
-import { usePhoneNavigation } from "@/hooks/usePhoneNavigation";
-import { useBatteryContext } from "@/contexts/BatteryContext";
-import { useOnboarding } from "@/hooks/useOnboarding";
-import { StatusBar } from "./StatusBar";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { HomeScreen } from "./HomeScreen";
-import { PhoneShutdown } from "./PhoneShutdown";
-import { PhoneApp } from "../apps/Phone";
-import { ChatLureApp } from "../apps/ChatLure";
-import { SettingsApp } from "../apps/Settings";
-import { CameraApp } from "../apps/Camera";
-import { CalculatorApp } from "../apps/Calculator";
+import { StatusBar } from "./StatusBar";
+import { LockScreen } from "./LockScreen";
+import { useLockScreen } from "@/contexts/LockScreenContext";
+import { useBattery } from "@/contexts/BatteryContext";
+
+// App imports
+import { ChatLure } from "../apps/ChatLure";
 import { ChatLurePremium } from "../apps/ChatLurePremium";
 import { Inbox } from "../apps/Inbox";
 import { StoryTimer } from "../apps/StoryTimer";
@@ -18,89 +16,153 @@ import { Soundtrack } from "../apps/Soundtrack";
 import { Browse } from "../apps/Browse";
 import { Schedule } from "../apps/Schedule";
 import { Gallery } from "../apps/Gallery";
-import { useState, useEffect, useCallback } from "react";
+import { Settings } from "../apps/Settings";
+import { Calculator } from "../apps/Calculator";
+import { Camera } from "../apps/Camera";
+import { Maps } from "../apps/Maps";
+import { Music } from "../apps/Music";
+import { Safari } from "../apps/Safari";
+import { Calendar } from "../apps/Calendar";
+import { Photos } from "../apps/Photos";
 
 export function PhoneInterface() {
-  const { currentApp, navigateToApp, goHome } = usePhoneNavigation();
-  const { battery, instantCharge } = useBatteryContext();
-  const { skipOnboarding } = useOnboarding();
-  const [showPremiumUpgrade, setShowPremiumUpgrade] = useState(false);
+  const [currentApp, setCurrentApp] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [previousApp, setPreviousApp] = useState<string | null>(null);
+  const { battery } = useBattery();
+  const { isLocked, unlock, settings } = useLockScreen();
 
-  // Skip onboarding immediately on mount
-  useEffect(() => {
-    skipOnboarding();
-  }, [skipOnboarding]);
+  const handleAppClick = (appId: string) => {
+    if (isLocked || isAnimating || battery.isDead) return;
 
-  // Check if phone should be dead due to battery
+    setIsAnimating(true);
+    setPreviousApp(currentApp);
+    setCurrentApp(appId);
+  };
+
+  const handleBackClick = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentApp(null);
+  };
+
+  const renderApp = () => {
+    if (!currentApp) return null;
+
+    const appProps = {
+      onBack: handleBackClick,
+      onNavigate: handleAppClick,
+    };
+
+    switch (currentApp) {
+      case "chatlure":
+        return <ChatLure {...appProps} />;
+      case "chatlure-premium":
+        return <ChatLurePremium {...appProps} />;
+      case "inbox":
+        return <Inbox {...appProps} />;
+      case "story-timer":
+        return <StoryTimer {...appProps} />;
+      case "discover":
+        return <Discover {...appProps} />;
+      case "soundtrack":
+        return <Soundtrack {...appProps} />;
+      case "browse":
+        return <Browse {...appProps} />;
+      case "schedule":
+        return <Schedule {...appProps} />;
+      case "gallery":
+        return <Gallery {...appProps} />;
+      case "settings":
+        return <Settings {...appProps} />;
+      case "calculator":
+        return <Calculator {...appProps} />;
+      case "camera":
+        return <Camera {...appProps} />;
+      case "maps":
+        return <Maps {...appProps} />;
+      case "music":
+        return <Music {...appProps} />;
+      case "safari":
+        return <Safari {...appProps} />;
+      case "calendar":
+        return <Calendar {...appProps} />;
+      case "photos":
+        return <Photos {...appProps} />;
+      default:
+        return null;
+    }
+  };
+
   if (battery.isDead) {
     return (
-      <div className="relative w-full h-full overflow-hidden">
-        <StatusBar />
-        <PhoneShutdown onPremiumUpgrade={() => setShowPremiumUpgrade(true)} />
-        {showPremiumUpgrade && (
-          <div className="absolute inset-0 z-50">
-            <ChatLurePremium
-              onBack={() => setShowPremiumUpgrade(false)}
-              onUpgrade={() => {
-                instantCharge();
-                setShowPremiumUpgrade(false);
-              }}
-            />
+      <div className="w-full h-full bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 border-2 border-red-500 rounded flex items-center justify-center">
+            <span className="text-red-500 text-xs">🔋</span>
           </div>
-        )}
+          <p className="text-white text-sm">Battery Dead</p>
+          <p className="text-gray-400 text-xs">Connect to charger</p>
+        </div>
       </div>
     );
   }
 
-  const renderCurrentApp = () => {
-    switch (currentApp) {
-      case "home":
-        return <HomeScreen onAppSelect={navigateToApp} />;
-      case "phone":
-        return <PhoneApp onBack={goHome} />;
-      case "messages":
-        return <ChatLureApp onBack={goHome} />;
-      case "settings":
-        return <SettingsApp onBack={goHome} />;
-      case "camera":
-        return <CameraApp onBack={goHome} />;
-      case "calculator":
-        return <CalculatorApp onBack={goHome} />;
-      case "inbox":
-        return <Inbox onBack={goHome} />;
-      case "story-timer":
-        return <StoryTimer onBack={goHome} />;
-      case "discover":
-        return <Discover onBack={goHome} />;
-      case "soundtrack":
-        return <Soundtrack onBack={goHome} />;
-      case "browse":
-        return <Browse onBack={goHome} />;
-      case "schedule":
-        return <Schedule onBack={goHome} />;
-      case "gallery":
-        return <Gallery onBack={goHome} />;
-      default:
-        return (
-          <div className="w-full h-full bg-black flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-white text-xl mb-2">App Coming Soon</h2>
-              <button
-                onClick={goHome}
-                className="text-ios-blue hover:text-ios-blue/80"
-              >
-                Go Home
-              </button>
-            </div>
-          </div>
-        );
-    }
-  };
-
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="w-full h-full bg-black flex flex-col relative">
+      {/* Status Bar */}
       <StatusBar />
-      <AnimatePresence mode="wait">{renderCurrentApp()}</AnimatePresence>
+
+      {/* Main Screen Area */}
+      <div className="flex-1 relative bg-black overflow-hidden">
+        <AnimatePresence
+          mode="wait"
+          onExitComplete={() => setIsAnimating(false)}
+        >
+          {currentApp ? (
+            <motion.div
+              key={currentApp}
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "-100%", opacity: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                opacity: { duration: 0.2 },
+              }}
+              className="absolute inset-0"
+            >
+              {renderApp()}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="home"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 1.1, opacity: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                opacity: { duration: 0.15 },
+              }}
+              className="absolute inset-0"
+            >
+              <HomeScreen onAppClick={handleAppClick} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Lock Screen Overlay */}
+        {settings.enabled && (
+          <LockScreen
+            isLocked={isLocked}
+            onUnlock={unlock}
+            wallpaper={settings.wallpaper}
+          />
+        )}
+      </div>
     </div>
   );
 }
