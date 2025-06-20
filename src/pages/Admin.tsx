@@ -722,8 +722,8 @@ const Admin = () => {
               <Badge variant="outline" className="text-xs">
                 {sections.find((s) => s.key === section)?.label}
               </Badge>
-              <span className="text-gray-400">•</span>
-              <span className="text-sm text-gray-400">
+              <span className="text-muted-foreground">•</span>
+              <span className="text-sm text-muted-foreground">
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
