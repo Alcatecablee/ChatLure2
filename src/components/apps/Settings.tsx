@@ -81,9 +81,9 @@ export function SettingsApp({ onBack }: SettingsAppProps) {
         </button>
         <div className="flex items-center space-x-2">
           <img
-            src="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
+            src="https://cdn.builder.io/api/v1/assets/e980716d00e74498a7a36072ff1bc031/default-12-12ba5b?format=webp&width=800"
             alt="ChatLure Logo"
-            className="w-6 h-6 rounded"
+            className="w-6 h-6 rounded-full"
           />
           <h1 className="text-lg font-semibold">ChatLure Settings</h1>
         </div>
