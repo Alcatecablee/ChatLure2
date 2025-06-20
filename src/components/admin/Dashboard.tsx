@@ -210,6 +210,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         return `${value}%`;
       case "time":
         return `${value}m`;
+      case "rating":
+        return `${value.toFixed(1)}/5.0`;
       default:
         return value.toLocaleString();
     }
