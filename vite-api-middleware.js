@@ -190,6 +190,86 @@ function handleApiResponse(res, type, req) {
         );
       }
       break;
+
+    case "test-reddit":
+      if (req.method === "POST") {
+        const { clientId, clientSecret, userAgent } = req.body;
+
+        // Validate credentials format
+        if (!clientId || !clientSecret || !userAgent) {
+          res.statusCode = 400;
+          return res.end(
+            JSON.stringify({
+              error:
+                "Missing required credentials: clientId, clientSecret, or userAgent",
+            }),
+          );
+        }
+
+        // Mock successful Reddit connection
+        res.statusCode = 200;
+        return res.end(
+          JSON.stringify({
+            success: true,
+            message: "Reddit API connection successful",
+            availableSubreddits: "50+ viral content sources",
+            rateLimit: "60 requests per minute",
+            permissions: ["read", "history"],
+          }),
+        );
+      }
+      break;
+
+    case "test-clerk":
+      if (req.method === "POST") {
+        const { publishableKey, secretKey } = req.body;
+
+        if (!publishableKey || !secretKey) {
+          res.statusCode = 400;
+          return res.end(
+            JSON.stringify({
+              error: "Missing required Clerk credentials",
+            }),
+          );
+        }
+
+        res.statusCode = 200;
+        return res.end(
+          JSON.stringify({
+            success: true,
+            message: "Clerk API connection successful",
+            environment: publishableKey.startsWith("pk_test_")
+              ? "test"
+              : "production",
+          }),
+        );
+      }
+      break;
+
+    case "test-paypal":
+      if (req.method === "POST") {
+        const { clientId, clientSecret, environment } = req.body;
+
+        if (!clientId || !clientSecret) {
+          res.statusCode = 400;
+          return res.end(
+            JSON.stringify({
+              error: "Missing required PayPal credentials",
+            }),
+          );
+        }
+
+        res.statusCode = 200;
+        return res.end(
+          JSON.stringify({
+            success: true,
+            message: "PayPal API connection successful",
+            environment: environment || "sandbox",
+            webhooksConfigured: true,
+          }),
+        );
+      }
+      break;
     case "stories":
       if (req.method === "GET") {
         return res.end(
