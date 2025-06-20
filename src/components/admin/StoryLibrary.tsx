@@ -1,39 +1,23 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useApp, useStories } from "@/contexts/AppContext";
 import {
   Search,
   Filter,
   Eye,
+  Heart,
+  MessageCircle,
   Edit,
   Trash2,
-  Star,
-  Share,
-  Play,
-  Pause,
-  TrendingUp,
-  Users,
-  Clock,
-  BarChart3,
-  Download,
-  Upload,
-  Copy,
-  MessageSquare,
-  Image,
-  Mic,
-  Video,
-  Zap,
-  Settings,
+  MoreVertical,
   Archive,
-  ChevronDown,
-  ChevronUp,
-  Calendar,
-  Tag,
-  MapPin,
+  Share,
+  BookOpen,
+  Clock,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -42,594 +26,436 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface Story {
-  id: string;
-  title: string;
-  genre: string;
-  description: string;
-  characters: Character[];
-  messageCount: number;
-  viralScore: number;
-  isActive: boolean;
-  isPublished: boolean;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  stats: StoryStats;
-  media: {
-    images: number;
-    audio: number;
-    video: number;
-  };
-  source: "original" | "reddit" | "imported";
-  difficulty: "easy" | "medium" | "hard";
-  estimatedDuration: string;
-}
-
-interface Character {
-  id: string;
-  name: string;
-  avatar: string;
-  role: "protagonist" | "antagonist" | "supporting";
-}
-
-interface StoryStats {
-  views: number;
-  completions: number;
-  shares: number;
-  avgRating: number;
-  completionRate: number;
-  avgEngagementTime: number;
-  peakViewers: number;
-  comments: number;
-}
-
-const SAMPLE_STORIES: Story[] = [
-  {
-    id: "1",
-    title: "Mom Saw the Texts",
-    genre: "family",
-    description:
-      "Teenage daughter's secret relationship exposed when strict mother goes through her phone",
-    characters: [
-      { id: "1", name: "Lena", avatar: "👧", role: "protagonist" },
-      { id: "2", name: "Zoey", avatar: "👭", role: "supporting" },
-      { id: "3", name: "Mom", avatar: "👩‍💼", role: "antagonist" },
-    ],
-    messageCount: 24,
-    viralScore: 95,
-    isActive: true,
-    isPublished: true,
-    tags: ["family", "secrets", "teens", "strict-parents"],
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-15",
-    stats: {
-      views: 125000,
-      completions: 89000,
-      shares: 12500,
-      avgRating: 4.8,
-      completionRate: 71.2,
-      avgEngagementTime: 1280,
-      peakViewers: 5600,
-      comments: 3200,
-    },
-    media: { images: 8, audio: 2, video: 1 },
-    source: "original",
-    difficulty: "medium",
-    estimatedDuration: "25 minutes",
-  },
-  {
-    id: "2",
-    title: "The Affair Exposed",
-    genre: "scandal",
-    description:
-      "Wife discovers husband's 6-month affair through his Apple Watch notifications",
-    characters: [
-      { id: "1", name: "Sarah", avatar: "👩‍💼", role: "protagonist" },
-      { id: "2", name: "Marcus", avatar: "👨‍💼", role: "antagonist" },
-      { id: "3", name: "Jessica", avatar: "👩‍🎨", role: "antagonist" },
-    ],
-    messageCount: 31,
-    viralScore: 98,
-    isActive: true,
-    isPublished: true,
-    tags: ["affair", "marriage", "betrayal", "technology"],
-    createdAt: "2024-01-14",
-    updatedAt: "2024-01-16",
-    stats: {
-      views: 287000,
-      completions: 198000,
-      shares: 28000,
-      avgRating: 4.9,
-      completionRate: 69.0,
-      avgEngagementTime: 1450,
-      peakViewers: 8900,
-      comments: 7800,
-    },
-    media: { images: 12, audio: 5, video: 3 },
-    source: "reddit",
-    difficulty: "hard",
-    estimatedDuration: "32 minutes",
-  },
-  {
-    id: "3",
-    title: "Inheritance War",
-    genre: "money",
-    description:
-      "Family turns against each other when wealthy grandmother's will is read",
-    characters: [
-      { id: "1", name: "Emma", avatar: "👩‍⚖️", role: "protagonist" },
-      { id: "2", name: "Brother", avatar: "👨‍💼", role: "antagonist" },
-      { id: "3", name: "Cousin", avatar: "👩‍🎭", role: "supporting" },
-    ],
-    messageCount: 18,
-    viralScore: 88,
-    isActive: false,
-    isPublished: false,
-    tags: ["money", "family", "inheritance", "greed"],
-    createdAt: "2024-01-12",
-    updatedAt: "2024-01-13",
-    stats: {
-      views: 45000,
-      completions: 28000,
-      shares: 3200,
-      avgRating: 4.5,
-      completionRate: 62.2,
-      avgEngagementTime: 980,
-      peakViewers: 1200,
-      comments: 890,
-    },
-    media: { images: 3, audio: 0, video: 0 },
-    source: "imported",
-    difficulty: "easy",
-    estimatedDuration: "18 minutes",
-  },
-];
-
-const GENRE_COLORS = {
-  family: "bg-blue-500/20 text-blue-400",
-  scandal: "bg-red-500/20 text-red-400",
-  romance: "bg-pink-500/20 text-pink-400",
-  money: "bg-green-500/20 text-green-400",
-  mystery: "bg-purple-500/20 text-purple-400",
-  drama: "bg-orange-500/20 text-orange-400",
-};
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 export function StoryLibrary() {
-  const { updateStory, deleteStory, addNotification } = useApp();
-  const storiesFromContext = useStories();
-  const [stories, setStories] = useState<Story[]>(
-    storiesFromContext.length > 0 ? storiesFromContext : SAMPLE_STORIES,
-  );
-
-  // Update local state when global state changes
-  useEffect(() => {
-    if (storiesFromContext.length > 0) {
-      setStories(storiesFromContext);
-    }
-  }, [storiesFromContext]);
+  const { getMyStories, getTrendingStories, updateStory, currentUser } =
+    useDatabase();
+  const [stories, setStories] = useState<any[]>([]);
+  const [filteredStories, setFilteredStories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("all");
-  const [sortBy, setSortBy] = useState("viral");
-  const [showInactive, setShowInactive] = useState(false);
-  const [selectedStories, setSelectedStories] = useState<string[]>([]);
-  const [expandedStory, setExpandedStory] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
 
-  const filteredStories = stories.filter((story) => {
-    const matchesSearch =
-      story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.tags.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+  useEffect(() => {
+    loadStories();
+  }, []);
 
-    const matchesGenre =
-      selectedGenre === "all" || story.genre === selectedGenre;
-    const matchesActive = showInactive || story.isActive;
+  useEffect(() => {
+    filterAndSortStories();
+  }, [stories, searchQuery, statusFilter, categoryFilter, sortBy]);
 
-    return matchesSearch && matchesGenre && matchesActive;
-  });
+  const loadStories = async () => {
+    setLoading(true);
+    try {
+      const [myStories, trendingStories] = await Promise.all([
+        getMyStories(),
+        getTrendingStories(),
+      ]);
 
-  const sortedStories = [...filteredStories].sort((a, b) => {
-    switch (sortBy) {
-      case "viral":
-        return b.viralScore - a.viralScore;
-      case "views":
-        return b.stats.views - a.stats.views;
-      case "recent":
-        return (
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-      case "rating":
-        return b.stats.avgRating - a.stats.avgRating;
-      case "completion":
-        return b.stats.completionRate - a.stats.completionRate;
-      default:
-        return 0;
+      // Combine and enhance stories with additional metadata
+      const enhancedStories = myStories.map((story) => ({
+        ...story,
+        isTrending: trendingStories.some((t) => t.id === story.id),
+        createdAt: new Date(story.createdAt),
+        updatedAt: new Date(story.updatedAt),
+      }));
+
+      setStories(enhancedStories);
+    } catch (error) {
+      console.error("Failed to load stories:", error);
+      // Fallback to demo data if needed
+      setStories([]);
+    } finally {
+      setLoading(false);
     }
-  });
+  };
 
-  const toggleStorySelection = (storyId: string) => {
-    setSelectedStories((prev) =>
-      prev.includes(storyId)
-        ? prev.filter((id) => id !== storyId)
-        : [...prev, storyId],
+  const filterAndSortStories = () => {
+    let filtered = stories.filter((story) => {
+      const matchesSearch =
+        story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        story.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        story.tags.some((tag: string) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
+
+      const matchesStatus =
+        statusFilter === "all" || story.status === statusFilter;
+      const matchesCategory =
+        categoryFilter === "all" || story.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesCategory;
+    });
+
+    // Sort stories
+    switch (sortBy) {
+      case "newest":
+        filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        break;
+      case "oldest":
+        filtered.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        break;
+      case "mostViewed":
+        filtered.sort((a, b) => b.stats.views - a.stats.views);
+        break;
+      case "mostLiked":
+        filtered.sort((a, b) => b.stats.likes - a.stats.likes);
+        break;
+      case "alphabetical":
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+    }
+
+    setFilteredStories(filtered);
+  };
+
+  const handleStatusChange = async (storyId: string, newStatus: string) => {
+    try {
+      await updateStory(storyId, { status: newStatus });
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId ? { ...story, status: newStatus } : story,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update story status:", error);
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
+      Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+      "day",
     );
   };
 
-  const toggleStoryActive = (storyId: string) => {
-    const story = stories.find((s) => s.id === storyId);
-    if (story) {
-      const updatedStory = { ...story, isActive: !story.isActive };
-      updateStory(updatedStory);
-      setStories((prev) =>
-        prev.map((s) => (s.id === storyId ? updatedStory : s)),
-      );
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "published":
+        return "bg-green-600";
+      case "draft":
+        return "bg-yellow-600";
+      case "archived":
+        return "bg-gray-600";
+      default:
+        return "bg-gray-600";
     }
   };
 
-  const StoryCard = ({ story }: { story: Story }) => (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      className={`bg-gray-800 border border-gray-700 rounded-lg p-4 transition-all hover:border-gray-600 ${
-        selectedStories.includes(story.id) ? "ring-2 ring-purple-500" : ""
-      }`}
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-start space-x-3 flex-1">
-          <input
-            type="checkbox"
-            checked={selectedStories.includes(story.id)}
-            onChange={() => toggleStorySelection(story.id)}
-            className="mt-1 rounded"
-          />
-          <div className="flex-1">
-            <h3 className="font-semibold text-white mb-1">{story.title}</h3>
-            <p className="text-sm text-gray-400 mb-2 line-clamp-2">
-              {story.description}
-            </p>
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      drama: "bg-red-500",
+      romance: "bg-pink-500",
+      scandal: "bg-purple-500",
+      mystery: "bg-indigo-500",
+      comedy: "bg-green-500",
+    };
+    return colors[category] || "bg-gray-500";
+  };
 
-            <div className="flex items-center space-x-2 mb-2">
-              <Badge
-                className={
-                  GENRE_COLORS[story.genre as keyof typeof GENRE_COLORS]
-                }
-              >
-                {story.genre}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                {story.source}
-              </Badge>
-              {!story.isActive && (
-                <Badge
-                  variant="secondary"
-                  className="bg-gray-600 text-gray-300 text-xs"
-                >
-                  Inactive
-                </Badge>
-              )}
-              <div className="flex items-center space-x-1 text-orange-400">
-                <TrendingUp size={12} />
-                <span className="text-xs font-bold">{story.viralScore}%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-1">
-          <Button variant="ghost" size="sm">
-            <Eye size={14} />
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Edit size={14} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggleStoryActive(story.id)}
-            className={story.isActive ? "text-green-400" : "text-gray-400"}
-          >
-            {story.isActive ? <Play size={14} /> : <Pause size={14} />}
-          </Button>
-        </div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
       </div>
+    );
+  }
 
-      <div className="grid grid-cols-3 gap-4 mb-3 text-sm">
-        <div className="text-center">
-          <div className="text-blue-400 font-bold">
-            {story.stats.views.toLocaleString()}
-          </div>
-          <div className="text-gray-500 text-xs">Views</div>
-        </div>
-        <div className="text-center">
-          <div className="text-green-400 font-bold">
-            {story.stats.completionRate}%
-          </div>
-          <div className="text-gray-500 text-xs">Completion</div>
-        </div>
-        <div className="text-center">
-          <div className="text-yellow-400 font-bold">
-            {story.stats.avgRating}
-          </div>
-          <div className="text-gray-500 text-xs">Rating</div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-        <div className="flex items-center space-x-3">
-          <span className="flex items-center space-x-1">
-            <MessageSquare size={12} />
-            <span>{story.messageCount}</span>
-          </span>
-          <span className="flex items-center space-x-1">
-            <Users size={12} />
-            <span>{story.characters.length}</span>
-          </span>
-          <span className="flex items-center space-x-1">
-            <Clock size={12} />
-            <span>{story.estimatedDuration}</span>
-          </span>
-        </div>
-        <div className="flex items-center space-x-1">
-          {story.media.images > 0 && (
-            <span className="flex items-center space-x-1">
-              <Image size={12} />
-              <span>{story.media.images}</span>
-            </span>
-          )}
-          {story.media.audio > 0 && (
-            <span className="flex items-center space-x-1">
-              <Mic size={12} />
-              <span>{story.media.audio}</span>
-            </span>
-          )}
-          {story.media.video > 0 && (
-            <span className="flex items-center space-x-1">
-              <Video size={12} />
-              <span>{story.media.video}</span>
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-1 mb-3">
-        {story.tags.slice(0, 3).map((tag, index) => (
-          <Badge
-            key={index}
-            variant="secondary"
-            className="text-xs bg-gray-700 text-gray-300"
-          >
-            {tag}
-          </Badge>
-        ))}
-        {story.tags.length > 3 && (
-          <Badge
-            variant="secondary"
-            className="text-xs bg-gray-700 text-gray-300"
-          >
-            +{story.tags.length - 3}
-          </Badge>
-        )}
-      </div>
-
+  return (
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500">
-          Updated {new Date(story.updatedAt).toLocaleDateString()}
-        </span>
+        <div>
+          <h2 className="text-2xl font-bold text-white">Story Library</h2>
+          <p className="text-gray-400 mt-1">
+            Manage and track your published stories ({stories.length} total)
+          </p>
+        </div>
         <Button
-          variant="ghost"
-          size="sm"
-          onClick={() =>
-            setExpandedStory(expandedStory === story.id ? null : story.id)
-          }
+          onClick={loadStories}
+          variant="outline"
+          className="border-gray-600"
         >
-          {expandedStory === story.id ? (
-            <ChevronUp size={14} />
-          ) : (
-            <ChevronDown size={14} />
-          )}
+          <Clock className="w-4 h-4 mr-2" />
+          Refresh
         </Button>
       </div>
 
-      {expandedStory === story.id && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className="mt-4 pt-4 border-t border-gray-700"
-        >
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <h5 className="font-semibold mb-2 text-gray-300">Characters</h5>
-              <div className="space-y-1">
-                {story.characters.map((char) => (
-                  <div key={char.id} className="flex items-center space-x-2">
-                    <span>{char.avatar}</span>
-                    <span className="text-gray-400">{char.name}</span>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${
-                        char.role === "protagonist"
-                          ? "border-green-500 text-green-400"
-                          : char.role === "antagonist"
-                            ? "border-red-500 text-red-400"
-                            : "border-blue-500 text-blue-400"
-                      }`}
-                    >
-                      {char.role}
-                    </Badge>
-                  </div>
-                ))}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gray-900 border-gray-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Published Stories</p>
+                <p className="text-2xl font-bold text-green-400">
+                  {stories.filter((s) => s.status === "published").length}
+                </p>
               </div>
+              <BookOpen className="w-8 h-8 text-green-400" />
             </div>
-            <div>
-              <h5 className="font-semibold mb-2 text-gray-300">
-                Advanced Stats
-              </h5>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Shares:</span>
-                  <span className="text-blue-400">
-                    {story.stats.shares.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Comments:</span>
-                  <span className="text-purple-400">
-                    {story.stats.comments.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Peak Viewers:</span>
-                  <span className="text-orange-400">
-                    {story.stats.peakViewers.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Avg Time:</span>
-                  <span className="text-green-400">
-                    {Math.floor(story.stats.avgEngagementTime / 60)}m
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </motion.div>
-  );
+          </CardContent>
+        </Card>
 
-  return (
-    <div className="w-full max-w-7xl mx-auto p-6 bg-gray-900 text-white rounded-xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center space-x-3">
-            <Archive className="text-purple-400" />
-            <span>Story Library</span>
-            <Badge
-              variant="secondary"
-              className="bg-purple-500/20 text-purple-400"
+        <Card className="bg-gray-900 border-gray-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Total Views</p>
+                <p className="text-2xl font-bold text-blue-400">
+                  {stories
+                    .reduce((sum, s) => sum + s.stats.views, 0)
+                    .toLocaleString()}
+                </p>
+              </div>
+              <Eye className="w-8 h-8 text-blue-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-900 border-gray-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Total Likes</p>
+                <p className="text-2xl font-bold text-red-400">
+                  {stories
+                    .reduce((sum, s) => sum + s.stats.likes, 0)
+                    .toLocaleString()}
+                </p>
+              </div>
+              <Heart className="w-8 h-8 text-red-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-900 border-gray-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Trending</p>
+                <p className="text-2xl font-bold text-orange-400">
+                  {stories.filter((s) => s.isTrending).length}
+                </p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-orange-400" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card className="bg-gray-900 border-gray-700">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search stories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-gray-800 border-gray-600 text-white"
+              />
+            </div>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="drama">Drama</SelectItem>
+                <SelectItem value="romance">Romance</SelectItem>
+                <SelectItem value="scandal">Scandal</SelectItem>
+                <SelectItem value="mystery">Mystery</SelectItem>
+                <SelectItem value="comedy">Comedy</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="mostViewed">Most Viewed</SelectItem>
+                <SelectItem value="mostLiked">Most Liked</SelectItem>
+                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Stories Grid */}
+      {filteredStories.length === 0 ? (
+        <Card className="bg-gray-900 border-gray-700">
+          <CardContent className="p-12 text-center">
+            <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400 opacity-50" />
+            <h3 className="text-xl font-semibold text-white mb-2">
+              {stories.length === 0
+                ? "No stories yet"
+                : "No stories match your filters"}
+            </h3>
+            <p className="text-gray-400 mb-4">
+              {stories.length === 0
+                ? "Create your first story to get started!"
+                : "Try adjusting your search or filter criteria"}
+            </p>
+            {stories.length === 0 && (
+              <Button className="bg-purple-600 hover:bg-purple-700">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Create Your First Story
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredStories.map((story, index) => (
+            <motion.div
+              key={story.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
             >
-              {stories.length} Stories
-            </Badge>
-          </h1>
-          <p className="text-gray-400 mt-1">
-            Manage and organize your ChatLure stories
-          </p>
-        </div>
+              <Card className="bg-gray-900 border-gray-700 hover:border-gray-600 transition-colors h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-white text-lg line-clamp-2 mb-2">
+                        {story.title}
+                      </CardTitle>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Badge
+                          className={`${getStatusColor(story.status)} text-white`}
+                        >
+                          {story.status}
+                        </Badge>
+                        <Badge
+                          className={`${getCategoryColor(story.category)} text-white`}
+                        >
+                          {story.category}
+                        </Badge>
+                        {story.isTrending && (
+                          <Badge className="bg-orange-600 text-white">
+                            <TrendingUp className="w-3 h-3 mr-1" />
+                            Trending
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
 
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm">
-            <Download size={16} className="mr-2" />
-            Export
-          </Button>
-          <Button variant="outline" size="sm">
-            <Upload size={16} className="mr-2" />
-            Import
-          </Button>
-          <Button className="bg-green-600 hover:bg-green-700">
-            <Zap size={16} className="mr-2" />
-            New Story
-          </Button>
-        </div>
-      </div>
+                <CardContent className="pt-0">
+                  <p className="text-gray-400 text-sm line-clamp-3 mb-4">
+                    {story.description}
+                  </p>
 
-      <div className="flex items-center space-x-4 mb-6">
-        <div className="flex-1">
-          <div className="relative">
-            <Search
-              size={20}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search stories by title, description, or tags..."
-              className="pl-10 bg-gray-800 border-gray-700"
-            />
-          </div>
-        </div>
+                  <div className="space-y-3">
+                    {/* Stats */}
+                    <div className="flex items-center justify-between text-sm text-gray-400">
+                      <div className="flex items-center space-x-4">
+                        <span className="flex items-center">
+                          <Eye className="w-3 h-3 mr-1" />
+                          {story.stats.views}
+                        </span>
+                        <span className="flex items-center">
+                          <Heart className="w-3 h-3 mr-1" />
+                          {story.stats.likes}
+                        </span>
+                        <span className="flex items-center">
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          {story.stats.comments}
+                        </span>
+                      </div>
+                      <span>{story.readingTime}m read</span>
+                    </div>
 
-        <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-          <SelectTrigger className="w-40 bg-gray-800 border-gray-700">
-            <SelectValue placeholder="All Genres" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Genres</SelectItem>
-            <SelectItem value="family">Family</SelectItem>
-            <SelectItem value="scandal">Scandal</SelectItem>
-            <SelectItem value="romance">Romance</SelectItem>
-            <SelectItem value="money">Money</SelectItem>
-            <SelectItem value="mystery">Mystery</SelectItem>
-            <SelectItem value="drama">Drama</SelectItem>
-          </SelectContent>
-        </Select>
+                    {/* Tags */}
+                    {story.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {story.tags.slice(0, 3).map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                        {story.tags.length > 3 && (
+                          <span className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">
+                            +{story.tags.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
 
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-40 bg-gray-800 border-gray-700">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="viral">Viral Score</SelectItem>
-            <SelectItem value="views">Most Views</SelectItem>
-            <SelectItem value="recent">Most Recent</SelectItem>
-            <SelectItem value="rating">Highest Rated</SelectItem>
-            <SelectItem value="completion">Completion Rate</SelectItem>
-          </SelectContent>
-        </Select>
+                    {/* Date */}
+                    <div className="text-xs text-gray-500">
+                      Created {formatDate(story.createdAt)} • Updated{" "}
+                      {formatDate(story.updatedAt)}
+                    </div>
 
-        <div className="flex items-center space-x-2">
-          <Switch checked={showInactive} onCheckedChange={setShowInactive} />
-          <span className="text-sm text-gray-400">Show Inactive</span>
-        </div>
-      </div>
-
-      {selectedStories.length > 0 && (
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-300">
-              {selectedStories.length} stories selected
-            </span>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Star size={14} className="mr-1" />
-                Favorite
-              </Button>
-              <Button variant="outline" size="sm">
-                <Share size={14} className="mr-1" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm">
-                <Archive size={14} className="mr-1" />
-                Archive
-              </Button>
-              <Button variant="destructive" size="sm">
-                <Trash2 size={14} className="mr-1" />
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {sortedStories.map((story) => (
-          <StoryCard key={story.id} story={story} />
-        ))}
-      </div>
-
-      {sortedStories.length === 0 && (
-        <div className="text-center text-gray-400 py-12">
-          <Archive size={48} className="mx-auto mb-4 opacity-50" />
-          <p className="text-lg">No stories found</p>
-          <p className="text-sm">Try adjusting your search or filters</p>
+                    {/* Actions */}
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:text-white flex-1"
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:text-white"
+                      >
+                        <Share className="w-3 h-3" />
+                      </Button>
+                      {story.status === "published" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleStatusChange(story.id, "archived")
+                          }
+                          className="border-gray-600 text-gray-300 hover:text-yellow-400"
+                        >
+                          <Archive className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </div>
       )}
     </div>
