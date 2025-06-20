@@ -337,6 +337,279 @@ const Admin = () => {
             />
           </div>
         )}
+        {section === "monetization" && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">💰 Creator Monetization</h2>
+            <div className="grid grid-cols-3 gap-6 mb-6">
+              <div className="bg-gradient-to-r from-green-600 to-green-400 p-6 rounded-xl text-white">
+                <h3 className="text-lg font-semibold mb-2">Monthly Revenue</h3>
+                <p className="text-3xl font-bold">$24,580</p>
+                <p className="text-sm opacity-80">+18% from last month</p>
+              </div>
+              <div className="bg-gradient-to-r from-purple-600 to-purple-400 p-6 rounded-xl text-white">
+                <h3 className="text-lg font-semibold mb-2">
+                  Premium Subscribers
+                </h3>
+                <p className="text-3xl font-bold">1,247</p>
+                <p className="text-sm opacity-80">+156 this month</p>
+              </div>
+              <div className="bg-gradient-to-r from-blue-600 to-blue-400 p-6 rounded-xl text-white">
+                <h3 className="text-lg font-semibold mb-2">
+                  Avg. Revenue per User
+                </h3>
+                <p className="text-3xl font-bold">$19.70</p>
+                <p className="text-sm opacity-80">+$2.40 vs last month</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-gray-800 p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-purple-400 mb-4">
+                  🔥 Premium Story Performance
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-gray-700 rounded">
+                    <span>"Office Affair Part 3"</span>
+                    <span className="text-green-400 font-semibold">$1,234</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-700 rounded">
+                    <span>"Toxic Family Drama"</span>
+                    <span className="text-green-400 font-semibold">$987</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-700 rounded">
+                    <span>"Best Friend Betrayal"</span>
+                    <span className="text-green-400 font-semibold">$756</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-blue-400 mb-4">
+                  💎 Premium Features
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-700 rounded">
+                    <span>Early Access Stories</span>
+                    <span className="text-blue-400">Active</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-700 rounded">
+                    <span>Exclusive Content</span>
+                    <span className="text-blue-400">Active</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-700 rounded">
+                    <span>Creator Tips</span>
+                    <span className="text-blue-400">Active</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-700 rounded">
+                    <span>Private Messages</span>
+                    <span className="text-green-400">Premium Only</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {section === "subscriptions" && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">
+              👑 Premium Subscription Tiers
+            </h2>
+            <div className="grid grid-cols-3 gap-6 mb-6">
+              {/* Basic Tier */}
+              <div className="bg-gray-800 border border-gray-600 p-6 rounded-xl">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-semibold text-blue-400">Basic</h3>
+                  <p className="text-3xl font-bold text-white mt-2">
+                    $4.99<span className="text-sm text-gray-400">/month</span>
+                  </p>
+                </div>
+                <ul className="space-y-2 text-sm text-gray-300">
+                  <li>✓ Access to all free stories</li>
+                  <li>✓ Basic chat features</li>
+                  <li>✓ Standard resolution media</li>
+                  <li>✓ Community features</li>
+                </ul>
+                <div className="mt-4 text-center">
+                  <span className="text-blue-400 font-semibold">
+                    847 subscribers
+                  </span>
+                </div>
+              </div>
+
+              {/* Premium Tier */}
+              <div className="bg-gradient-to-br from-purple-800 to-purple-600 border border-purple-500 p-6 rounded-xl">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-semibold text-white">Premium</h3>
+                  <p className="text-3xl font-bold text-white mt-2">
+                    $14.99
+                    <span className="text-sm text-purple-200">/month</span>
+                  </p>
+                  <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded-full">
+                    POPULAR
+                  </span>
+                </div>
+                <ul className="space-y-2 text-sm text-purple-100">
+                  <li>✓ All Basic features</li>
+                  <li>✓ Early access to new stories</li>
+                  <li>✓ Exclusive premium content</li>
+                  <li>✓ HD media and animations</li>
+                  <li>✓ Creator tip features</li>
+                  <li>✓ Priority support</li>
+                </ul>
+                <div className="mt-4 text-center">
+                  <span className="text-white font-semibold">
+                    1,247 subscribers
+                  </span>
+                </div>
+              </div>
+
+              {/* VIP Tier */}
+              <div className="bg-gradient-to-br from-yellow-600 to-yellow-400 border border-yellow-500 p-6 rounded-xl text-black">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-semibold">VIP</h3>
+                  <p className="text-3xl font-bold mt-2">
+                    $29.99<span className="text-sm opacity-70">/month</span>
+                  </p>
+                  <span className="bg-black text-yellow-400 text-xs px-2 py-1 rounded-full">
+                    EXCLUSIVE
+                  </span>
+                </div>
+                <ul className="space-y-2 text-sm">
+                  <li>✓ All Premium features</li>
+                  <li>✓ Private story requests</li>
+                  <li>✓ Direct creator messaging</li>
+                  <li>✓ Custom avatar & badges</li>
+                  <li>✓ Exclusive VIP events</li>
+                  <li>✓ Revenue sharing program</li>
+                </ul>
+                <div className="mt-4 text-center">
+                  <span className="font-semibold">89 subscribers</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-6 rounded-xl">
+              <h3 className="text-xl font-semibold text-green-400 mb-4">
+                💰 Revenue Breakdown
+              </h3>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-400">$4,235</p>
+                  <p className="text-sm text-gray-400">Basic Tier</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-purple-400">$18,705</p>
+                  <p className="text-sm text-gray-400">Premium Tier</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-yellow-400">$2,670</p>
+                  <p className="text-sm text-gray-400">VIP Tier</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-400">$25,610</p>
+                  <p className="text-sm text-gray-400">Total Monthly</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {section === "payouts" && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">💸 Creator Payouts</h2>
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="bg-green-800 p-4 rounded-xl text-center">
+                <h3 className="text-lg font-semibold text-green-300">
+                  Total Payouts
+                </h3>
+                <p className="text-2xl font-bold text-white">$18,456</p>
+                <p className="text-sm text-green-200">This month</p>
+              </div>
+              <div className="bg-blue-800 p-4 rounded-xl text-center">
+                <h3 className="text-lg font-semibold text-blue-300">
+                  Active Creators
+                </h3>
+                <p className="text-2xl font-bold text-white">67</p>
+                <p className="text-sm text-blue-200">Earning revenue</p>
+              </div>
+              <div className="bg-purple-800 p-4 rounded-xl text-center">
+                <h3 className="text-lg font-semibold text-purple-300">
+                  Avg. Creator Earnings
+                </h3>
+                <p className="text-2xl font-bold text-white">$275</p>
+                <p className="text-sm text-purple-200">Per month</p>
+              </div>
+              <div className="bg-yellow-800 p-4 rounded-xl text-center">
+                <h3 className="text-lg font-semibold text-yellow-300">
+                  Platform Fee
+                </h3>
+                <p className="text-2xl font-bold text-white">20%</p>
+                <p className="text-sm text-yellow-200">Industry standard</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-6 rounded-xl">
+              <h3 className="text-xl font-semibold text-yellow-400 mb-4">
+                🏆 Top Earning Creators
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-4 bg-gray-700 rounded">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      S
+                    </div>
+                    <div>
+                      <p className="font-semibold">StoryQueen_Sarah</p>
+                      <p className="text-sm text-gray-400">
+                        Relationship Drama Specialist
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-green-400 font-semibold">$2,547</p>
+                    <p className="text-sm text-gray-400">This month</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center p-4 bg-gray-700 rounded">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      D
+                    </div>
+                    <div>
+                      <p className="font-semibold">DramaKing_Dave</p>
+                      <p className="text-sm text-gray-400">
+                        Office Politics Expert
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-green-400 font-semibold">$1,892</p>
+                    <p className="text-sm text-gray-400">This month</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center p-4 bg-gray-700 rounded">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      M
+                    </div>
+                    <div>
+                      <p className="font-semibold">MessyMia_Stories</p>
+                      <p className="text-sm text-gray-400">
+                        Family Drama Creator
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-green-400 font-semibold">$1,634</p>
+                    <p className="text-sm text-gray-400">This month</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {section === "settings" && (
           <div>
             <Settings />
