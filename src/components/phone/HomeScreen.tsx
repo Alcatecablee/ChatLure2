@@ -169,16 +169,22 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
   const systemApps = [
     { id: "phone", icon: <Phone size={24} />, name: "Phone", color: "#34C759" },
     {
-      id: "messages",
-      icon: <MessageCircle size={24} />,
-      name: "ChatLure",
-      color: "#000000",
+      id: "chatlure-premium",
+      icon: (
+        <div className="relative w-full h-full">
+          <img
+            src="https://cdn.builder.io/api/v1/assets/e980716d00e74498a7a36072ff1bc031/default-12-12ba5b?format=webp&width=800"
+            alt="ChatLure Premium"
+            className="w-full h-full rounded-xl object-cover"
+          />
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+            <span className="text-[10px] text-white font-bold">⭐</span>
+          </div>
+        </div>
+      ),
+      name: "ChatLure+",
+      color: "#F59E0B",
     },
-    {
-      id: "camera",
-      icon: <Camera size={24} />,
-      name: "Camera",
-      color: "#636366",
     },
     {
       id: "settings",
