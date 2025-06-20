@@ -7,8 +7,12 @@ const ultimateTooltipKiller = () => ({
   name: "ultimate-tooltip-killer",
   enforce: "pre" as const,
   resolveId(id: string, importer?: string) {
-    // Kill ANY tooltip-related imports
-    if (id.includes("tooltip") || id.includes("Tooltip")) {
+    // Kill ANY tooltip-related imports with extreme prejudice
+    if (
+      id.includes("tooltip") ||
+      id.includes("Tooltip") ||
+      id.includes("@radix-ui/react-tooltip")
+    ) {
       console.log(`🚫 BLOCKED TOOLTIP IMPORT: ${id} from ${importer}`);
       return "\0virtual:empty-tooltip";
     }
@@ -17,23 +21,33 @@ const ultimateTooltipKiller = () => ({
   load(id: string) {
     if (id === "\0virtual:empty-tooltip") {
       return `
-        export const TooltipProvider = ({ children }) => children;
-        export const Tooltip = ({ children }) => children;
-        export const TooltipTrigger = ({ children }) => children;
+        import React from 'react';
+        export const TooltipProvider = ({ children }) => React.createElement('div', {}, children);
+        export const Tooltip = ({ children }) => React.createElement('div', {}, children);
+        export const TooltipTrigger = ({ children }) => React.createElement('div', {}, children);
         export const TooltipContent = () => null;
-        export default {};
+        export default {
+          Provider: ({ children }) => React.createElement('div', {}, children),
+          Root: ({ children }) => React.createElement('div', {}, children),
+          Trigger: ({ children }) => React.createElement('div', {}, children),
+          Content: () => null,
+        };
       `;
     }
     return null;
   },
   configResolved(config) {
-    // Force exclude from optimization
+    // Force exclude from optimization with extreme prejudice
     config.optimizeDeps = config.optimizeDeps || {};
     config.optimizeDeps.exclude = config.optimizeDeps.exclude || [];
     config.optimizeDeps.exclude.push("@radix-ui/react-tooltip");
+    config.optimizeDeps.exclude.push("**/tooltip**");
+    config.optimizeDeps.exclude.push("**/Tooltip**");
   },
   buildStart() {
-    console.log("🔥 ULTIMATE TOOLTIP KILLER ACTIVATED");
+    console.log(
+      "🔥 ULTIMATE TOOLTIP KILLER ACTIVATED - MAXIMUM DESTRUCTION MODE",
+    );
   },
 });
 
