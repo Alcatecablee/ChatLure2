@@ -4,18 +4,22 @@ import path from "path";
 
 // ULTIMATE NUCLEAR TOOLTIP BLOCKING PLUGIN
 const ultimateTooltipKiller = () => ({
-  name: 'ultimate-tooltip-killer',
-  enforce: 'pre' as const,
+  name: "ultimate-tooltip-killer",
+  enforce: "pre" as const,
   resolveId(id: string, importer?: string) {
     // Kill ANY tooltip-related imports with extreme prejudice
-    if (id.includes('tooltip') || id.includes('Tooltip') || id.includes('@radix-ui/react-tooltip')) {
+    if (
+      id.includes("tooltip") ||
+      id.includes("Tooltip") ||
+      id.includes("@radix-ui/react-tooltip")
+    ) {
       console.log(`🚫 BLOCKED TOOLTIP IMPORT: ${id} from ${importer}`);
-      return '\0virtual:empty-tooltip';
+      return "\0virtual:empty-tooltip";
     }
     return null;
   },
   load(id: string) {
-    if (id === '\0virtual:empty-tooltip') {
+    if (id === "\0virtual:empty-tooltip") {
       return `
         import React from 'react';
         export const TooltipProvider = ({ children }) => React.createElement('div', {}, children);
@@ -36,13 +40,15 @@ const ultimateTooltipKiller = () => ({
     // Force exclude from optimization with extreme prejudice
     config.optimizeDeps = config.optimizeDeps || {};
     config.optimizeDeps.exclude = config.optimizeDeps.exclude || [];
-    config.optimizeDeps.exclude.push('@radix-ui/react-tooltip');
-    config.optimizeDeps.exclude.push('**/tooltip**');
-    config.optimizeDeps.exclude.push('**/Tooltip**');
+    config.optimizeDeps.exclude.push("@radix-ui/react-tooltip");
+    config.optimizeDeps.exclude.push("**/tooltip**");
+    config.optimizeDeps.exclude.push("**/Tooltip**");
   },
   buildStart() {
-    console.log('🔥 ULTIMATE TOOLTIP KILLER ACTIVATED - MAXIMUM DESTRUCTION MODE');
-  }
+    console.log(
+      "🔥 ULTIMATE TOOLTIP KILLER ACTIVATED - MAXIMUM DESTRUCTION MODE",
+    );
+  },
 });
 
 // https://vitejs.dev/config/
@@ -58,19 +64,18 @@ export default defineConfig(({ mode }) => ({
       // Force any @radix-ui/react-tooltip imports to use our safe fallback
       "@radix-ui/react-tooltip": path.resolve(
         __dirname,
-        "./src/components/ui/tooltip.tsx"
+        "./src/components/ui/tooltip.tsx",
       ),
       // Block all possible tooltip import patterns
       "@radix-ui/react-tooltip/dist": path.resolve(
         __dirname,
-        "./src/components/ui/tooltip.tsx"
+        "./src/components/ui/tooltip.tsx",
       ),
       // Force single React instance to prevent hook conflicts
-      "react": path.resolve(__dirname, "./node_modules/react"),
+      react: path.resolve(__dirname, "./node_modules/react"),
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
     dedupe: ["react", "react-dom"],
-  },
   },
   build: {
     rollupOptions: {
