@@ -4,23 +4,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
-// Safe tooltip provider that just renders children
-const SafeTooltipProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  return <>{children}</>;
-};
-
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <SafeTooltipProvider>
+      <DatabaseProvider>
         <AppProvider>
           <Toaster />
           <Sonner />
@@ -34,7 +28,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </AppProvider>
-      </SafeTooltipProvider>
+      </DatabaseProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );
