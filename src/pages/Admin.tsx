@@ -185,13 +185,13 @@ function UserManagement() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search users..."
-              className="pl-9 bg-gray-800 border-gray-600"
+              className="pl-9 bg-input border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <Button
             onClick={handleRefresh}
             variant="outline"
-            className="border-gray-600"
+            className="border-border"
             disabled={isRefreshing}
           >
             <RefreshCw
