@@ -652,8 +652,8 @@ const Admin = () => {
             </nav>
 
             {/* Footer Stats */}
-            <div className="p-4 border-t border-gray-700">
-              <Card className="bg-gray-800/50 border-gray-600">
+            <div className="p-4 border-t border-sidebar-border">
+              <Card className="bg-sidebar-accent/50 border-sidebar-border">
                 <CardContent className="p-4">
                   <h3 className="text-sm font-semibold text-purple-400 mb-3 flex items-center">
                     <Activity size={14} className="mr-2" />
