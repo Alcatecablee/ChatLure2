@@ -387,23 +387,25 @@ function AppSettings() {
     }
   };
 
-  const handleIconUpdate = (category: string, key: string, value: string) => {
+  const handleIconUpdate = async (
+    category: string,
+    key: string,
+    value: string,
+  ) => {
     if (category === "phone") {
-      setAppConfig((prev) => ({
-        ...prev,
+      await updateAppConfig({
         phoneIcons: {
-          ...prev.phoneIcons,
+          ...appConfig.phoneIcons,
           [key]: value,
         },
-      }));
+      });
     } else if (category === "sponsored") {
-      setAppConfig((prev) => ({
-        ...prev,
+      await updateAppConfig({
         sponsoredApps: {
-          ...prev.sponsoredApps,
+          ...appConfig.sponsoredApps,
           [key]: value,
         },
-      }));
+      });
     }
   };
 
