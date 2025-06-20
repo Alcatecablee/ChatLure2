@@ -150,36 +150,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const [performanceMetrics, setPerformanceMetrics] = useState<
     PerformanceMetric[]
-  >([
-    {
-      label: "Total Revenue",
-      value: 24847,
-      change: 12.5,
-      trend: "up",
-      format: "currency",
-    },
-    {
-      label: "Active Subscribers",
-      value: 1847,
-      change: 8.3,
-      trend: "up",
-      format: "number",
-    },
-    {
-      label: "Avg. Engagement Time",
-      value: 14,
-      change: -2.1,
-      trend: "down",
-      format: "time",
-    },
-    {
-      label: "Story Completion Rate",
-      value: 87,
-      change: 5.7,
-      trend: "up",
-      format: "percentage",
-    },
-  ]);
+  >([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
 
   const formatMetricValue = (value: number, format: string) => {
     switch (format) {
