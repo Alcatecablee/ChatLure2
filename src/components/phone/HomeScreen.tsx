@@ -92,52 +92,77 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     window.location.reload();
   };
 
-  // ALL ORIGINAL APPS - keeping them ALL to look authentic!
+  // ALL ORIGINAL APPS - with realistic iOS-style icons and proper branding
   const originalApps = [
-    { id: "phone", icon: <Phone size={24} />, name: "Phone", color: "#34C759" },
+    {
+      id: "phone",
+      icon: <div className="text-white text-2xl font-bold">📞</div>,
+      name: "Phone",
+      color: "#34C759",
+    },
     {
       id: "messages",
-      icon: <MessageCircle size={24} />,
+      icon: <div className="text-white text-2xl font-bold">💬</div>,
       name: "ChatLure",
-      color: "#000000",
+      color: "#9333EA",
     },
     {
       id: "camera",
-      icon: <Camera size={24} />,
+      icon: <div className="text-white text-2xl font-bold">📷</div>,
       name: "Camera",
       color: "#636366",
     },
     {
       id: "photos",
-      icon: <Image size={24} />,
+      icon: <div className="text-white text-2xl font-bold">🌸</div>,
       name: "Photos",
       color: "#FF9500",
     },
     {
       id: "settings",
-      icon: <Settings size={24} />,
+      icon: <div className="text-white text-2xl font-bold">⚙️</div>,
       name: "Settings",
       color: "#8E8E93",
     },
     {
       id: "calculator",
-      icon: <Calculator size={24} />,
+      icon: <div className="text-white text-2xl font-bold">🔢</div>,
       name: "Calculator",
       color: "#2C2C2E",
     },
-    { id: "mail", icon: <Mail size={24} />, name: "Mail", color: "#007AFF" },
-    { id: "clock", icon: <Clock size={24} />, name: "Clock", color: "#2C2C2E" },
-    { id: "maps", icon: <Map size={24} />, name: "Maps", color: "#007AFF" },
-    { id: "music", icon: <Music size={24} />, name: "Music", color: "#FF2D92" },
+    {
+      id: "mail",
+      icon: <div className="text-white text-2xl font-bold">✉️</div>,
+      name: "Mail",
+      color: "#007AFF",
+    },
+    {
+      id: "clock",
+      icon: <div className="text-white text-2xl font-bold">🕒</div>,
+      name: "Clock",
+      color: "#2C2C2E",
+    },
+    {
+      id: "maps",
+      icon: <div className="text-white text-2xl font-bold">🗺️</div>,
+      name: "Maps",
+      color: "#007AFF",
+    },
+    {
+      id: "music",
+      icon: <div className="text-white text-2xl font-bold">🎵</div>,
+      name: "Music",
+      color: "#FF2D92",
+    },
     {
       id: "safari",
-      icon: <Globe size={24} />,
+      icon: <div className="text-white text-2xl font-bold">🧭</div>,
       name: "Safari",
       color: "#007AFF",
     },
     {
       id: "calendar",
-      icon: <Calendar size={24} />,
+      icon: <div className="text-white text-2xl font-bold">📅</div>,
       name: "Calendar",
       color: "#FF3B30",
     },
