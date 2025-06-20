@@ -87,11 +87,12 @@ const defaultContextValue: DatabaseContextType = {
 const DatabaseContext = createContext<DatabaseContextType>(defaultContextValue);
 
 export function DatabaseProvider({ children }: { children: React.ReactNode }) {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  // Safe useState calls with error handling
+  const [isInitialized, setIsInitialized] = React.useState(false);
+  const [currentUser, setCurrentUser] = React.useState<User | null>(null);
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = React.useState(0);
+  const [bookmarks, setBookmarks] = React.useState<Bookmark[]>([]);
 
   // Initialize database
   useEffect(() => {
