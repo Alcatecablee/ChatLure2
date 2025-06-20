@@ -519,10 +519,7 @@ function AppSettings() {
                     <Input
                       value={appConfig.favicon}
                       onChange={(e) =>
-                        setAppConfig((prev) => ({
-                          ...prev,
-                          favicon: e.target.value,
-                        }))
+                        updateAppConfig({ favicon: e.target.value })
                       }
                       className="bg-input border-border"
                       placeholder="https://example.com/favicon.ico"
@@ -906,7 +903,7 @@ function PayPalBilling() {
                     Access to premium stories and ad-free experience
                   </p>
                   <div className="text-sm text-gray-300">
-                    <div>• Unlimited story access</div>
+                    <div>��� Unlimited story access</div>
                     <div>• Ad-free reading</div>
                     <div>• Early access to new content</div>
                   </div>
