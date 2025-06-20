@@ -474,7 +474,7 @@ function AppSettings() {
             </>
           ) : (
             <>
-              <Settings size={16} className="mr-2" />
+              <SettingsIcon size={16} className="mr-2" />
               Save Settings
             </>
           )}
