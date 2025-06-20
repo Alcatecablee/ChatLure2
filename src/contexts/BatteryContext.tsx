@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useState } from "react";
 import { useBattery, BatteryState } from "@/hooks/useBattery";
 
 interface BatteryContextType {
