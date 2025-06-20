@@ -172,46 +172,68 @@ export function ContentImporter({
   const [minViralScore, setMinViralScore] = useState(70);
   const [autoConvert, setAutoConvert] = useState(true);
 
-  // Mock Reddit data for demo
-  const mockRedditPosts: RedditPost[] = [
-    {
-      id: "1",
-      title: "My mom went through my phone and found my secret relationship",
-      content:
-        "I (17F) have been dating Taylor (18M) for 3 months. My mom is super strict and doesn't want me dating until college. I thought I was being careful but she found all our texts...",
-      upvotes: 12500,
-      comments: 856,
-      subreddit: "r/insaneparents",
-      url: "https://reddit.com/r/insaneparents/...",
-      created: "2024-01-15",
-      author: "throwaway_teen",
-      flair: "Advice",
-    },
-    {
-      id: "2",
-      title: "Caught my husband having an affair through his Apple Watch",
-      content:
-        "I was doing laundry and his watch lit up with a text from 'Jessica' saying 'Can't wait to see you tonight baby 💕'. My world just collapsed...",
-      upvotes: 23400,
-      comments: 1240,
-      subreddit: "r/relationship_advice",
-      url: "https://reddit.com/r/relationship_advice/...",
-      created: "2024-01-14",
-      author: "betrayed_wife_34",
-    },
-    {
-      id: "3",
-      title: "My MIL demanded I give her my wedding dress for her daughter",
-      content:
-        "My monster-in-law showed up to my house unannounced demanding I hand over my $3000 wedding dress because 'it's only fair' that her daughter gets to wear it too...",
-      upvotes: 18700,
-      comments: 967,
-      subreddit: "r/entitledparents",
-      url: "https://reddit.com/r/entitledparents/...",
-      created: "2024-01-13",
-      author: "bridezilla_nightmare",
-    },
-  ];
+  // Real Reddit API integration
+  const fetchFromRedditAPI = async (subreddit: string, query: string) => {
+    const { clientId, clientSecret, userAgent } = credentials.reddit;
+
+    try {
+      // Get Reddit OAuth token
+      const authResponse = await fetch(
+        "https://www.reddit.com/api/v1/access_token",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": userAgent,
+          },
+          body: "grant_type=client_credentials",
+        },
+      );
+
+      if (!authResponse.ok) {
+        throw new Error(`Authentication failed: ${authResponse.status}`);
+      }
+
+      const authData = await authResponse.json();
+      const accessToken = authData.access_token;
+
+      // Search Reddit posts
+      const searchUrl =
+        subreddit === "all"
+          ? `https://oauth.reddit.com/search?q=${encodeURIComponent(query)}&sort=hot&limit=25`
+          : `https://oauth.reddit.com/r/${subreddit.replace("r/", "")}/search?q=${encodeURIComponent(query)}&sort=hot&limit=25&restrict_sr=1`;
+
+      const searchResponse = await fetch(searchUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "User-Agent": userAgent,
+        },
+      });
+
+      if (!searchResponse.ok) {
+        throw new Error(`Search failed: ${searchResponse.status}`);
+      }
+
+      const searchData = await searchResponse.json();
+
+      return searchData.data.children.map((child: any) => ({
+        id: child.data.id,
+        title: child.data.title,
+        content: child.data.selftext || child.data.title,
+        upvotes: child.data.ups,
+        comments: child.data.num_comments,
+        subreddit: child.data.subreddit_name_prefixed,
+        url: `https://reddit.com${child.data.permalink}`,
+        created: new Date(child.data.created_utc * 1000).toLocaleDateString(),
+        author: child.data.author,
+        flair: child.data.link_flair_text,
+      }));
+    } catch (error) {
+      console.error("Reddit API Error:", error);
+      throw error;
+    }
+  };
 
   const calculateViralScore = (messages: ImportedMessage[]): number => {
     let score = 50;
