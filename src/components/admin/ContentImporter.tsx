@@ -423,7 +423,11 @@ export function ContentImporter({
     setIsProcessing(true);
 
     // Check if Reddit credentials are configured
-    if (!credentials.reddit.enabled || !credentials.reddit.clientId) {
+    if (
+      !credentials.reddit.enabled ||
+      !credentials.reddit.clientId ||
+      !credentials.reddit.clientSecret
+    ) {
       addNotification({
         type: "error",
         title: "Reddit Not Configured",
@@ -435,36 +439,37 @@ export function ContentImporter({
     }
 
     try {
-      // For now, use mock data but with credential validation
       addNotification({
         type: "info",
         title: "Scanning Reddit",
         message: `Searching ${selectedSubreddit === "all" ? "all subreddits" : selectedSubreddit} for "${searchQuery || "viral content"}"`,
       });
 
-      // Simulate API call with credentials
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const filtered = mockRedditPosts.filter(
-        (post) =>
-          (selectedSubreddit === "all" ||
-            post.subreddit === selectedSubreddit) &&
-          (!searchQuery ||
-            post.title.toLowerCase().includes(searchQuery.toLowerCase())),
+      // Use real Reddit API
+      const posts = await fetchFromRedditAPI(
+        selectedSubreddit,
+        searchQuery || "drama toxic relationship affair betrayed",
       );
 
-      setRedditPosts(filtered);
+      // Filter by viral score
+      const filteredPosts = posts.filter(
+        (post) => post.upvotes >= minViralScore * 10,
+      );
+
+      setRedditPosts(filteredPosts);
 
       addNotification({
         type: "success",
         title: "Reddit Scan Complete",
-        message: `Found ${filtered.length} potential viral posts`,
+        message: `Found ${filteredPosts.length} potential viral posts from Reddit API`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Reddit fetch error:", error);
       addNotification({
         type: "error",
         title: "Reddit Scan Failed",
         message:
+          error.message ||
           "Failed to fetch content from Reddit. Check your API credentials.",
       });
     }
