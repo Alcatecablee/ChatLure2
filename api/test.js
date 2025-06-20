@@ -6,20 +6,29 @@ import {
   healthCheck,
 } from "../src/lib/api-server.js";
 
+// Helper function for consistent responses
+function sendResponse(res, statusCode, data) {
+  res.statusCode = statusCode;
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  return res.end(JSON.stringify(data));
+}
+
 export default async function handler(req, res) {
   const { method } = req;
   const { action, entity } = req.query;
 
+  // Handle CORS preflight
+  if (method === "OPTIONS") {
+    return sendResponse(res, 200, {});
+  }
+
   try {
-    // CORS headers for easier testing
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-    if (method === "OPTIONS") {
-      return res.status(200).end();
-    }
-
     switch (method) {
       case "GET":
         if (action === "all") {
@@ -30,7 +39,7 @@ export default async function handler(req, res) {
           const metrics = AnalyticsAPI.getDashboardMetrics();
           const health = healthCheck();
 
-          return res.status(200).json({
+          return sendResponse(res, 200, {
             health,
             metrics,
             data: {
@@ -50,28 +59,23 @@ export default async function handler(req, res) {
         }
 
         if (entity === "stories") {
-          return res.status(200).json(StoryAPI.getAll());
+          return sendResponse(res, 200, StoryAPI.getAll());
         }
 
         if (entity === "users") {
-          return res.status(200).json(UserAPI.getAll());
+          return sendResponse(res, 200, UserAPI.getAll());
         }
 
         if (entity === "analytics") {
-          return res.status(200).json(AnalyticsAPI.getDashboardMetrics());
+          return sendResponse(res, 200, AnalyticsAPI.getDashboardMetrics());
         }
 
         if (entity === "health") {
-          return res.status(200).json(healthCheck());
+          return sendResponse(res, 200, healthCheck());
         }
 
         // Default: return test endpoints
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        return res.end(JSON.stringify({
+        return sendResponse(res, 200, {
           message: "ChatLure Database Test API",
           endpoints: [
             "GET /api/test?action=all - Get everything",
@@ -126,7 +130,7 @@ export default async function handler(req, res) {
             ],
           });
 
-          return res.status(201).json({
+          return sendResponse(res, 201, {
             message: "Test story created successfully",
             story: testStory,
           });
@@ -147,7 +151,7 @@ export default async function handler(req, res) {
             },
           });
 
-          return res.status(201).json({
+          return sendResponse(res, 201, {
             message: "Test user created successfully",
             user: testUser,
           });
@@ -167,21 +171,20 @@ export default async function handler(req, res) {
             });
           }
 
-          return res.status(201).json({
+          return sendResponse(res, 201, {
             message: "Test analytics tracked successfully",
             metrics,
           });
         }
 
-        return res
-          .status(400)
-          .json({ error: "Invalid action for POST request" });
+        return sendResponse(res, 400, {
+          error: "Invalid action for POST request",
+        });
 
       case "DELETE":
         if (action === "cleanup") {
           // Delete test entries
           const stories = StoryAPI.getAll();
-          const users = UserAPI.getAll();
 
           let deleted = { stories: 0, users: 0 };
 
@@ -197,23 +200,24 @@ export default async function handler(req, res) {
           // Note: Users don't have a delete method in the current API
           // This is intentional for data safety
 
-          return res.status(200).json({
+          return sendResponse(res, 200, {
             message: "Test cleanup completed",
             deleted,
           });
         }
 
-        return res
-          .status(400)
-          .json({ error: "Invalid action for DELETE request" });
+        return sendResponse(res, 400, {
+          error: "Invalid action for DELETE request",
+        });
 
       default:
-        res.setHeader("Allow", ["GET", "POST", "DELETE", "OPTIONS"]);
-        return res.status(405).json({ error: `Method ${method} not allowed` });
+        return sendResponse(res, 405, {
+          error: `Method ${method} not allowed`,
+        });
     }
   } catch (error) {
     console.error("Test API error:", error);
-    return res.status(500).json({
+    return sendResponse(res, 500, {
       error: "Internal server error",
       message: error.message,
       stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
