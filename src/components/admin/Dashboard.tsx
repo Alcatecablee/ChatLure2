@@ -378,37 +378,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
-  // Simulate some dynamic behavior for demo purposes
-  useEffect(() => {
-    // Add some randomness to make the mock data feel more realistic
-    const updateMockData = () => {
-      // Slightly vary the real-time data periodically
-      if (isLiveMode) {
-        setRealtimeData((prev) => ({
-          activeUsers: Math.max(
-            1000,
-            prev.activeUsers + Math.floor(Math.random() * 20) - 10,
-          ),
-          storiesBeingRead: Math.max(
-            50,
-            prev.storiesBeingRead + Math.floor(Math.random() * 8) - 4,
-          ),
-          engagementRate: Math.max(
-            80,
-            Math.min(100, prev.engagementRate + (Math.random() - 0.5) * 2),
-          ),
-          newSubscriptions: Math.max(
-            0,
-            prev.newSubscriptions + (Math.random() > 0.7 ? 1 : 0),
-          ),
-        }));
-      }
-    };
-
-    const interval = setInterval(updateMockData, 5000);
-    return () => clearInterval(interval);
-  }, [isLiveMode]);
-
   return (
     <div className="space-y-6">
       {/* Header */}
