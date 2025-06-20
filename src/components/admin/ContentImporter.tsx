@@ -292,40 +292,129 @@ export function ContentImporter({
   };
 
   const convertRedditToStory = (post: RedditPost): ImportedStory => {
-    // This is a simplified conversion - in real app, use AI/NLP
-    const messages: ImportedMessage[] = [
-      {
-        id: "1",
-        timestamp: Date.now().toString(),
-        sender: "User",
-        message: `I need to tell someone about this... ${post.content.substring(0, 100)}...`,
-        emotion: "anxious",
-        isCliffhanger: true,
-        hasMedia: false,
-      },
-      {
-        id: "2",
-        timestamp: (Date.now() + 180000).toString(),
-        sender: "Friend",
-        message: "OMG what happened?! Tell me everything!",
-        emotion: "concerned",
-        isCliffhanger: false,
-        hasMedia: false,
-      },
-    ];
+    // Enhanced conversion with better story structure
+    const messages: ImportedMessage[] = [];
+
+    // Determine genre and characters based on subreddit
+    let genre = "drama";
+    let characters = ["User", "BestFriend"];
+
+    if (post.subreddit.includes("parent")) {
+      genre = "family";
+      characters = ["Teen", "BestFriend", "Mom"];
+    } else if (post.subreddit.includes("relationship")) {
+      genre = "romance";
+      characters = ["Partner1", "Partner2", "Friend"];
+    } else if (
+      post.subreddit.includes("Asshole") ||
+      post.subreddit.includes("advice")
+    ) {
+      genre = "moral";
+      characters = ["Person", "Friend", "Advisor"];
+    }
+
+    // Opening hook - always start strong
+    messages.push({
+      id: "msg_1",
+      timestamp: Date.now().toString(),
+      sender: characters[0],
+      message:
+        "I can't believe what just happened... I need to tell someone this",
+      emotion: "shocked",
+      isCliffhanger: true,
+      hasMedia: false,
+    });
+
+    // Friend's concerned response
+    messages.push({
+      id: "msg_2",
+      timestamp: (Date.now() + 120000).toString(),
+      sender: characters[1],
+      message: "OMG what?? Are you okay? What happened??",
+      emotion: "concerned",
+      isCliffhanger: false,
+      hasMedia: false,
+    });
+
+    // Main story revelation - use post title
+    messages.push({
+      id: "msg_3",
+      timestamp: (Date.now() + 240000).toString(),
+      sender: characters[0],
+      message: post.title + " 😭",
+      emotion: "devastated",
+      isCliffhanger: true,
+      hasMedia: false,
+    });
+
+    // Add urgency
+    messages.push({
+      id: "msg_4",
+      timestamp: (Date.now() + 300000).toString(),
+      sender: characters[1],
+      message: "WAIT WHAT?! Tell me EVERYTHING right now!",
+      emotion: "urgent",
+      isCliffhanger: false,
+      hasMedia: false,
+    });
+
+    // Story details - use content chunks
+    if (post.content && post.content.length > 100) {
+      const contentParts = post.content
+        .substring(0, 400)
+        .split(". ")
+        .slice(0, 3);
+      contentParts.forEach((part, index) => {
+        if (part.trim()) {
+          messages.push({
+            id: `msg_${5 + index}`,
+            timestamp: (Date.now() + 360000 + index * 180000).toString(),
+            sender: characters[0],
+            message:
+              part.trim() + (index === contentParts.length - 1 ? "..." : "."),
+            emotion:
+              index === contentParts.length - 1 ? "terrified" : "explaining",
+            isCliffhanger: index === contentParts.length - 1,
+            hasMedia: false,
+          });
+        }
+      });
+    }
+
+    // Calculate viral score based on multiple factors
+    let viralScore = 50;
+    viralScore += Math.min(Math.floor(post.upvotes / 200), 30); // Up to 30 pts for upvotes
+    viralScore += Math.min(Math.floor(post.comments / 50), 15); // Up to 15 pts for engagement
+    if (post.title.length > 50) viralScore += 5; // Detailed titles
+    if (post.content && post.content.length > 500) viralScore += 10; // Rich content
+
+    // Genre-specific bonuses
+    if (
+      post.subreddit.includes("insane") ||
+      post.subreddit.includes("entitled")
+    )
+      viralScore += 10;
+    if (
+      post.subreddit.includes("relationship") ||
+      post.subreddit.includes("Asshole")
+    )
+      viralScore += 8;
 
     return {
-      id: post.id,
-      title: post.title,
-      characters: ["User", "Friend"],
+      id: `reddit_${post.id}`,
+      title:
+        post.title.length > 60
+          ? post.title.substring(0, 60) + "..."
+          : post.title,
+      characters,
       messages,
-      genre: post.subreddit.includes("parent") ? "family" : "drama",
-      estimatedViralScore: Math.min(Math.floor(post.upvotes / 100) + 60, 100),
+      genre,
+      estimatedViralScore: Math.min(viralScore, 100),
       source: "reddit",
       sourceUrl: post.url,
       upvotes: post.upvotes,
       comments: post.comments,
-      tags: [post.subreddit.replace("r/", ""), "reddit"],
+      tags: [post.subreddit.replace("r/", ""), "reddit", genre, "viral"],
       isImported: false,
       createdAt: post.created,
     };
