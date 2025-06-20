@@ -473,7 +473,7 @@ export function Settings() {
                 <Label htmlFor="clerk-publishable">Publishable Key</Label>
                 <Input
                   id="clerk-publishable"
-                  value={credentials.clerk.publishableKey}
+                  value={credentials?.clerk?.publishableKey || ""}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
