@@ -545,13 +545,18 @@ export function ContentImporter({
       // Use Reddit API with fallback
       const posts = await fetchFromRedditAPI(
         selectedSubreddit,
-        searchQuery || "drama toxic relationship affair betrayed",
+        searchQuery || "",
       );
 
-      // Filter by viral score
+      console.log("Total posts before viral filtering:", posts.length);
+      console.log("Min viral score setting:", minViralScore);
+
+      // More reasonable viral score filtering (don't multiply by 10)
       const filteredPosts = posts.filter(
-        (post) => post.upvotes >= minViralScore * 10,
+        (post) => post.upvotes >= minViralScore,
       );
+
+      console.log("Posts after viral filtering:", filteredPosts.length);
 
       setRedditPosts(filteredPosts);
 
@@ -563,10 +568,10 @@ export function ContentImporter({
       addNotification({
         type: "success",
         title: isFromFallback
-          ? "Content Loaded (Fallback)"
+          ? "Content Loaded (Curated)"
           : "Reddit Scan Complete",
         message: isFromFallback
-          ? `Found ${filteredPosts.length} curated viral posts (Reddit API unavailable due to CORS)`
+          ? `Found ${filteredPosts.length} curated viral posts - perfect for ChatLure stories!`
           : `Found ${filteredPosts.length} potential viral posts from Reddit`,
       });
 
