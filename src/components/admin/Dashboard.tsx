@@ -139,12 +139,27 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         const data = await APIClient.getDashboardMetrics();
         setDashboardData(data);
 
+        // Calculate active stories being read (stories with recent views)
+        const activeStoriesBeingRead = stories.filter(
+          (story) => story.stats?.views > 0,
+        ).length;
+
+        // Calculate current engagement rate from real rating data
+        const engagementRate = data.avgRating
+          ? (data.avgRating / 5.0) * 100
+          : 0;
+
+        // Estimate new subscriptions based on premium users
+        const premiumUsers = users.filter(
+          (user) => user.subscription?.status === "premium",
+        ).length;
+
         // Update realtime data with real values
         setRealtimeData({
           activeUsers: data.totalUsers,
-          storiesBeingRead: data.activeStories,
-          engagementRate: data.avgRating * 20, // Convert 5-point scale to percentage
-          newSubscriptions: Math.floor(data.totalUsers * 0.1), // Estimate based on total users
+          storiesBeingRead: activeStoriesBeingRead,
+          engagementRate: engagementRate,
+          newSubscriptions: premiumUsers,
         });
 
         // Create real performance metrics from API data
