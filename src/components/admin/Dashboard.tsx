@@ -129,11 +129,15 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     .slice(0, 5);
 
   const getConnectionStatus = () => {
+    // Safely access credentials with fallbacks
     const connections = {
-      reddit: credentials.reddit.enabled && credentials.reddit.clientId !== "",
+      reddit:
+        credentials?.reddit?.enabled && credentials?.reddit?.clientId !== "",
       clerk:
-        credentials.clerk.enabled && credentials.clerk.publishableKey !== "",
-      paypal: credentials.paypal.enabled && credentials.paypal.clientId !== "",
+        credentials?.clerk?.enabled &&
+        credentials?.clerk?.publishableKey !== "",
+      paypal:
+        credentials?.paypal?.enabled && credentials?.paypal?.clientId !== "",
     };
 
     const connected = Object.values(connections).filter(Boolean).length;
