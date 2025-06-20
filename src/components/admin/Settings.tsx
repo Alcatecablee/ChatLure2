@@ -384,27 +384,71 @@ export function Settings() {
                 />
               </div>
 
-              <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
-                <h4 className="font-medium text-blue-400 mb-2">
-                  📋 Setup Instructions
-                </h4>
-                <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
-                  <li>
-                    Go to{" "}
-                    <a
-                      href="https://www.reddit.com/prefs/apps"
-                      target="_blank"
-                      className="text-blue-400 underline"
-                    >
-                      Reddit App Preferences
-                    </a>
-                  </li>
-                  <li>Click "Create App" and select "script" type</li>
-                  <li>
-                    Set redirect URI to: http://localhost:8080/auth/reddit
-                  </li>
-                  <li>Copy the client ID and secret to the fields above</li>
-                </ol>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-400 mb-2">
+                    📋 Setup Instructions
+                  </h4>
+                  <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                    <li>
+                      Go to{" "}
+                      <a
+                        href="https://www.reddit.com/prefs/apps"
+                        target="_blank"
+                        className="text-blue-400 underline"
+                      >
+                        Reddit App Preferences
+                      </a>
+                    </li>
+                    <li>Click "Create App" and select "script" type</li>
+                    <li>
+                      Set redirect URI to: http://localhost:8080/auth/reddit
+                    </li>
+                    <li>Copy the client ID and secret to the fields above</li>
+                  </ol>
+                </div>
+
+                <div className="bg-gray-900/50 border border-gray-600 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-300 mb-2">
+                    📊 Current Status
+                  </h4>
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Client ID:</span>
+                      <span className="text-green-400 font-mono text-xs">
+                        {credentials.reddit.clientId
+                          ? `${credentials.reddit.clientId.substring(0, 8)}...`
+                          : "Not set"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Client Secret:</span>
+                      <span className="text-green-400 font-mono text-xs">
+                        {credentials.reddit.clientSecret
+                          ? `${credentials.reddit.clientSecret.substring(0, 8)}...`
+                          : "Not set"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Enabled:</span>
+                      <span
+                        className={
+                          credentials.reddit.enabled
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }
+                      >
+                        {credentials.reddit.enabled ? "✓ Yes" : "✗ No"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Last Saved:</span>
+                      <span className="text-blue-400 text-xs">
+                        {lastSaved ? lastSaved.toLocaleTimeString() : "Never"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
