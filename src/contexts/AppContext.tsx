@@ -293,8 +293,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_CREDENTIALS", payload: credentials });
     } catch (error) {
       console.error("Failed to load credentials:", error);
-      // Use default credentials state when API is not available
-      dispatch({ type: "SET_CREDENTIALS", payload: initialState.credentials });
+
+      // Fallback: Load from localStorage
+      const credentials: ApiCredentials = {
+        reddit: {
+          clientId: localStorage.getItem("reddit_clientId") || "",
+          clientSecret: localStorage.getItem("reddit_clientSecret") || "",
+          userAgent:
+            localStorage.getItem("reddit_userAgent") || "ChatLure:v1.0",
+          enabled: localStorage.getItem("reddit_enabled") === "true",
+        },
+        clerk: {
+          publishableKey: localStorage.getItem("clerk_publishableKey") || "",
+          secretKey: localStorage.getItem("clerk_secretKey") || "",
+          webhookSecret: localStorage.getItem("clerk_webhookSecret") || "",
+          enabled: localStorage.getItem("clerk_enabled") === "true",
+        },
+        paypal: {
+          clientId: localStorage.getItem("paypal_clientId") || "",
+          clientSecret: localStorage.getItem("paypal_clientSecret") || "",
+          planId: localStorage.getItem("paypal_planId") || "",
+          environment:
+            (localStorage.getItem("paypal_environment") as
+              | "sandbox"
+              | "production") || "sandbox",
+          enabled: localStorage.getItem("paypal_enabled") === "true",
+        },
+      };
+
+      dispatch({ type: "SET_CREDENTIALS", payload: credentials });
     }
   };
 
