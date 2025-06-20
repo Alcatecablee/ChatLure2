@@ -707,7 +707,7 @@ const Admin = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <div className="bg-gray-900/50 border-b border-gray-700 p-4 flex items-center justify-between">
+        <div className="bg-card/50 border-b border-border p-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {!sidebarOpen && (
               <Button
