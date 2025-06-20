@@ -11,9 +11,13 @@ export default async function handler(req, res) {
           // Get single story
           const story = await StoryAPI.getById(id);
           if (!story) {
-            return res.status(404).json({ error: "Story not found" });
+            res.statusCode = 404;
+            res.setHeader("Content-Type", "application/json");
+            return res.end(JSON.stringify({ error: "Story not found" }));
           }
-          return res.status(200).json(story);
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          return res.end(JSON.stringify(story));
         } else {
           // Get all stories
           const stories = await StoryAPI.getAll();
