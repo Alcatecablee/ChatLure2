@@ -47,30 +47,15 @@ interface ApiCredentials {
 }
 
 export function Settings() {
-  const [credentials, setCredentials] = useState<ApiCredentials>({
-    reddit: {
-      clientId: localStorage.getItem("reddit_client_id") || "",
-      clientSecret: localStorage.getItem("reddit_client_secret") || "",
-      userAgent: localStorage.getItem("reddit_user_agent") || "ChatLure:v1.0",
-      enabled: localStorage.getItem("reddit_enabled") === "true",
-    },
-    clerk: {
-      publishableKey: localStorage.getItem("clerk_publishable_key") || "",
-      secretKey: localStorage.getItem("clerk_secret_key") || "",
-      webhookSecret: localStorage.getItem("clerk_webhook_secret") || "",
-      enabled: localStorage.getItem("clerk_enabled") === "true",
-    },
-    paypal: {
-      clientId: localStorage.getItem("paypal_client_id") || "",
-      clientSecret: localStorage.getItem("paypal_client_secret") || "",
-      planId: localStorage.getItem("paypal_plan_id") || "",
-      environment:
-        (localStorage.getItem("paypal_environment") as
-          | "sandbox"
-          | "production") || "sandbox",
-      enabled: localStorage.getItem("paypal_enabled") === "true",
-    },
-  });
+  const { dispatch, addNotification } = useApp();
+  const contextCredentials = useCredentials();
+  const [credentials, setCredentials] =
+    useState<ApiCredentials>(contextCredentials);
+
+  // Sync with context when it updates
+  useEffect(() => {
+    setCredentials(contextCredentials);
+  }, [contextCredentials]);
 
   const [showSecrets, setShowSecrets] = useState({
     reddit: false,
