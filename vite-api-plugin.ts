@@ -17,25 +17,25 @@ export function apiRoutesPlugin(): Plugin {
           let query: any = {};
 
           if (pathname.startsWith("/stories")) {
-            handlerPath = "./api/stories.ts";
+            handlerPath = "./api/stories.js";
             if (pathname !== "/stories") {
               const id = pathname.split("/")[2];
               query.id = id;
             }
           } else if (pathname.startsWith("/users")) {
-            handlerPath = "./api/users.ts";
+            handlerPath = "./api/users.js";
             if (pathname !== "/users") {
               const id = pathname.split("/")[2];
               query.id = id;
             }
           } else if (pathname.startsWith("/credentials")) {
-            handlerPath = "./api/credentials.ts";
+            handlerPath = "./api/credentials.js";
             if (pathname !== "/credentials") {
               const service = pathname.split("/")[2];
               query.service = service;
             }
           } else if (pathname.startsWith("/analytics")) {
-            handlerPath = "./api/analytics.ts";
+            handlerPath = "./api/analytics.js";
             const parts = pathname.split("/");
             if (parts.length > 2) {
               query.action = parts[2];
