@@ -46,14 +46,6 @@ export function StatusBar() {
     return "text-white";
   };
 
-  const getBatteryIcon = () => {
-    if (battery.isCharging)
-      return <Zap size={16} className={getBatteryColor()} />;
-    if (battery.level <= 15)
-      return <BatteryLow size={16} className={getBatteryColor()} />;
-    return <Battery size={16} className={getBatteryColor()} />;
-  };
-
   return (
     <div className="absolute top-0 left-0 right-0 h-statusbar bg-transparent z-40 flex items-center justify-between px-6 pt-4">
       {/* Left side - Time */}
