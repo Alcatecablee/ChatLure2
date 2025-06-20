@@ -497,14 +497,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     config: any,
   ) => {
     try {
+      console.log(`Updating ${service} credentials:`, config);
+
       // Try API first, but fall back to localStorage if it fails
       try {
+        console.log(`Calling API for ${service}...`);
         await APIClient.updateCredentials(service, config);
+        console.log(`API call successful for ${service}`);
+
         const credentials = await APIClient.getCredentials();
         dispatch({ type: "SET_CREDENTIALS", payload: credentials });
+        console.log(`Credentials updated in state for ${service}`);
       } catch (apiError) {
         console.warn(
-          "API not available, using localStorage fallback:",
+          `API not available for ${service}, using localStorage fallback:`,
           apiError,
         );
 
@@ -517,13 +523,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         // Save individual service settings to localStorage
         Object.keys(config).forEach((key) => {
-          localStorage.setItem(
-            `${service}_${key}`,
-            config[key]?.toString() || "",
-          );
+          const value = config[key]?.toString() || "";
+          localStorage.setItem(`${service}_${key}`, value);
+          console.log(`Saved to localStorage: ${service}_${key} = ${value}`);
         });
 
         dispatch({ type: "SET_CREDENTIALS", payload: currentCredentials });
+        console.log(`Fallback successful for ${service}`);
       }
 
       addNotification({
@@ -532,12 +538,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         message: `${service} credentials have been successfully saved.`,
       });
     } catch (error) {
-      console.error("Failed to update credentials:", error);
+      console.error(`Failed to update ${service} credentials:`, error);
       addNotification({
         type: "error",
         title: "Update Failed",
         message: `Failed to save ${service} credentials. Please try again.`,
       });
+      throw error; // Re-throw so Settings component can catch it
     }
   };
 
