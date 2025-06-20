@@ -794,7 +794,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
               <div className="flex items-center justify-between p-2 bg-accent/50 rounded">
                 <div className="flex items-center space-x-2">
-                  <CreditCard className="text-primary" size={16} />
+                  <CreditCard className="text-muted-foreground" size={16} />
                   <span className="text-sm">PayPal</span>
                 </div>
                 {connectionStatus.connections.paypal ? (
