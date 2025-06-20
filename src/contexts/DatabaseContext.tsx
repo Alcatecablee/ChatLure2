@@ -95,7 +95,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   const [bookmarks, setBookmarks] = React.useState<Bookmark[]>([]);
 
   // Initialize database
-  useEffect(() => {
+  React.useEffect(() => {
     const initDB = async () => {
       try {
         await db.init();
