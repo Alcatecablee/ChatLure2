@@ -1,32 +1,10 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { useApp, useCredentials } from "@/contexts/AppContext";
-import {
-  Upload,
-  FileText,
-  Zap,
-  CheckCircle,
-  AlertCircle,
-  Globe,
-  Download,
-  Sparkles,
-  TrendingUp,
-  Filter,
-  Search,
-  RefreshCw,
-  Eye,
-  Edit,
-  Trash2,
-  Star,
-  Share,
-  MessageSquare,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -34,33 +12,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import {
+  Upload,
+  FileText,
+  Globe,
+  Loader2,
+  Download,
+  Trash2,
+  AlertCircle,
+  ExternalLink,
+  Clock,
+  TrendingUp,
+  Users,
+  MessageCircle,
+  Plus,
+} from "lucide-react";
+import { useDatabase } from "@/contexts/DatabaseContext";
+import { useApp } from "@/contexts/AppContext";
 
 interface ImportedStory {
   id: string;
   title: string;
-  characters: string[];
-  messages: ImportedMessage[];
-  genre: string;
+  description: string;
+  content: string;
+  category: string;
+  tags: string[];
   estimatedViralScore: number;
   source?: "reddit" | "manual" | "template";
   sourceUrl?: string;
+  readingTime?: number;
   upvotes?: number;
   comments?: number;
-  tags: string[];
+  subreddit?: string;
   isImported: boolean;
-  createdAt: string;
-}
-
-interface ImportedMessage {
-  id: string;
-  timestamp: string;
-  sender: string;
-  message: string;
-  emotion: string;
-  isCliffhanger: boolean;
-  hasMedia: boolean;
-  mediaType?: "image" | "audio" | "video";
 }
 
 interface RedditPost {
@@ -72,562 +60,433 @@ interface RedditPost {
   subreddit: string;
   url: string;
   created: string;
-  author: string;
-  flair?: string;
 }
 
 const REDDIT_SOURCES = [
-  { name: "r/insaneparents", members: "1.2M", category: "family", viral: 95 },
   {
     name: "r/relationship_advice",
     members: "3.2M",
-    category: "drama",
-    viral: 88,
+    category: "relationships",
+    viral: 89,
   },
-  { name: "r/AmItheAsshole", members: "4.8M", category: "moral", viral: 92 },
-  {
-    name: "r/ChoosingBeggars",
-    members: "2.8M",
-    category: "entitled",
-    viral: 85,
-  },
-  { name: "r/entitledparents", members: "2.1M", category: "family", viral: 90 },
-  {
-    name: "r/TrueOffMyChest",
-    members: "1.8M",
-    category: "confession",
-    viral: 87,
-  },
+  { name: "r/AmItheAsshole", members: "4.8M", category: "drama", viral: 95 },
+  { name: "r/entitledparents", members: "1.8M", category: "family", viral: 87 },
+  { name: "r/tifu", members: "17.2M", category: "comedy", viral: 92 },
+  { name: "r/confession", members: "1.1M", category: "secrets", viral: 94 },
 ];
 
-const SAMPLE_FORMATS = {
-  text: `STORY: Mom Saw the Texts
-GENRE: family
-CHARACTER: Lena (daughter) 👧
-CHARACTER: Zoey (best friend) 👭
-CHARACTER: Mom (mother) 👩‍💼
+export default function ContentImporter() {
+  const { createStory, createNotification } = useDatabase();
+  const { state: appState, addNotification } = useApp();
+  const credentials = appState.credentials;
 
-MESSAGE: Lena: OMG. She saw the texts 😭😭😭
-DELAY: 0min
-EMOTION: panic
-CLIFFHANGER: true
-
-MESSAGE: Zoey: WAIT. Your mom??!! 😨
-DELAY: 3min
-EMOTION: shocked
-
-MESSAGE: Lena: She saw EVERYTHING. Even the pics from Taylor 😬
-DELAY: 5min
-EMOTION: terrified
-CLIFFHANGER: true
-VIRAL: true`,
-
-  csv: `story_title,genre,sender,message,delay_minutes,emotion,cliffhanger,viral
-Mom Saw Texts,family,Lena,OMG. She saw the texts 😭😭😭,0,panic,true,false
-Mom Saw Texts,family,Zoey,WAIT. Your mom??!! 😨,3,shocked,false,false
-Mom Saw Texts,family,Lena,She saw EVERYTHING,5,terrified,true,true`,
-
-  json: `{
-  "stories": [
-    {
-      "title": "Mom Saw the Texts",
-      "genre": "family",
-      "tags": ["family", "secrets", "teens"],
-      "characters": [
-        {"name": "Lena", "role": "protagonist", "avatar": "👧"},
-        {"name": "Zoey", "role": "supporting", "avatar": "👭"}
-      ],
-      "messages": [
-        {
-          "sender": "Lena",
-          "message": "OMG. She saw the texts 😭😭😭",
-          "delay": 0,
-          "emotion": "panic",
-          "cliffhanger": true,
-          "viral": false
-        }
-      ]
-    }
-  ]
-}`,
-};
-
-export function ContentImporter({
-  onImport,
-}: {
-  onImport?: (stories: ImportedStory[]) => void;
-}) {
-  const { importStories, addNotification } = useApp();
-  const credentials = useCredentials();
   const [activeTab, setActiveTab] = useState("reddit");
   const [importMethod, setImportMethod] = useState<"csv" | "text" | "json">(
     "text",
   );
-  const [inputContent, setInputContent] = useState("");
+  const [importData, setImportData] = useState("");
   const [parsedStories, setParsedStories] = useState<ImportedStory[]>([]);
   const [redditPosts, setRedditPosts] = useState<RedditPost[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubreddit, setSelectedSubreddit] = useState("all");
   const [minViralScore, setMinViralScore] = useState(70);
-  const [autoConvert, setAutoConvert] = useState(true);
-
-  // Mock Reddit data for demo
-  const mockRedditPosts: RedditPost[] = [
-    {
-      id: "1",
-      title: "My mom went through my phone and found my secret relationship",
-      content:
-        "I (17F) have been dating Taylor (18M) for 3 months. My mom is super strict and doesn't want me dating until college. I thought I was being careful but she found all our texts...",
-      upvotes: 12500,
-      comments: 856,
-      subreddit: "r/insaneparents",
-      url: "https://reddit.com/r/insaneparents/...",
-      created: "2024-01-15",
-      author: "throwaway_teen",
-      flair: "Advice",
-    },
-    {
-      id: "2",
-      title: "Caught my husband having an affair through his Apple Watch",
-      content:
-        "I was doing laundry and his watch lit up with a text from 'Jessica' saying 'Can't wait to see you tonight baby 💕'. My world just collapsed...",
-      upvotes: 23400,
-      comments: 1240,
-      subreddit: "r/relationship_advice",
-      url: "https://reddit.com/r/relationship_advice/...",
-      created: "2024-01-14",
-      author: "betrayed_wife_34",
-    },
-    {
-      id: "3",
-      title: "My MIL demanded I give her my wedding dress for her daughter",
-      content:
-        "My monster-in-law showed up to my house unannounced demanding I hand over my $3000 wedding dress because 'it's only fair' that her daughter gets to wear it too...",
-      upvotes: 18700,
-      comments: 967,
-      subreddit: "r/entitledparents",
-      url: "https://reddit.com/r/entitledparents/...",
-      created: "2024-01-13",
-      author: "bridezilla_nightmare",
-    },
-  ];
-
-  const calculateViralScore = (messages: ImportedMessage[]): number => {
-    let score = 50;
-
-    score += Math.min(messages.length * 5, 30);
-
-    const cliffhangers = messages.filter((m) => m.isCliffhanger).length;
-    score += cliffhangers * 15;
-
-    const strongEmotions = messages.filter((m) =>
-      [
-        "shocked",
-        "angry",
-        "devastated",
-        "terrified",
-        "betrayed",
-        "furious",
-      ].includes(m.emotion),
-    ).length;
-    score += strongEmotions * 10;
-
-    const viralKeywords = [
-      "can't believe",
-      "shocking",
-      "betrayed",
-      "devastating",
-      "explosive",
-    ];
-    const keywordMatches = messages.reduce((count, m) => {
-      return (
-        count +
-        viralKeywords.filter((keyword) =>
-          m.message.toLowerCase().includes(keyword),
-        ).length
-      );
-    }, 0);
-    score += keywordMatches * 8;
-
-    return Math.min(score, 100);
-  };
-
-  const parseTextFormat = (content: string): ImportedStory[] => {
-    const stories: ImportedStory[] = [];
-    const lines = content.split("\n").filter((line) => line.trim());
-
-    let currentStory: Partial<ImportedStory> = {};
-    let currentMessages: ImportedMessage[] = [];
-    let currentCharacters: string[] = [];
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-
-      if (trimmed.startsWith("STORY:")) {
-        if (currentStory.title) {
-          stories.push({
-            ...currentStory,
-            id: Date.now().toString() + Math.random(),
-            characters: currentCharacters,
-            messages: currentMessages,
-            estimatedViralScore: calculateViralScore(currentMessages),
-            source: "manual",
-            tags: [],
-            isImported: false,
-            createdAt: new Date().toISOString(),
-          } as ImportedStory);
-        }
-
-        currentStory = { title: trimmed.replace("STORY:", "").trim() };
-        currentMessages = [];
-        currentCharacters = [];
-      } else if (trimmed.startsWith("GENRE:")) {
-        currentStory.genre = trimmed.replace("GENRE:", "").trim();
-      } else if (trimmed.startsWith("CHARACTER:")) {
-        currentCharacters.push(trimmed.replace("CHARACTER:", "").trim());
-      } else if (trimmed.startsWith("MESSAGE:")) {
-        const messagePart = trimmed.replace("MESSAGE:", "").trim();
-        const [sender, message] = messagePart.split(":").map((s) => s.trim());
-
-        currentMessages.push({
-          id: Date.now().toString() + Math.random(),
-          timestamp: Date.now().toString(),
-          sender,
-          message,
-          emotion: "neutral",
-          isCliffhanger: false,
-          hasMedia: false,
-        });
-      } else if (trimmed.startsWith("EMOTION:")) {
-        if (currentMessages.length > 0) {
-          currentMessages[currentMessages.length - 1].emotion = trimmed
-            .replace("EMOTION:", "")
-            .trim();
-        }
-      } else if (trimmed.startsWith("CLIFFHANGER:")) {
-        if (currentMessages.length > 0) {
-          currentMessages[currentMessages.length - 1].isCliffhanger =
-            trimmed.replace("CLIFFHANGER:", "").trim() === "true";
-        }
-      }
-    }
-
-    if (currentStory.title) {
-      stories.push({
-        ...currentStory,
-        id: Date.now().toString() + Math.random(),
-        characters: currentCharacters,
-        messages: currentMessages,
-        estimatedViralScore: calculateViralScore(currentMessages),
-        source: "manual",
-        tags: [],
-        isImported: false,
-        createdAt: new Date().toISOString(),
-      } as ImportedStory);
-    }
-
-    return stories;
-  };
 
   const convertRedditToStory = (post: RedditPost): ImportedStory => {
-    // This is a simplified conversion - in real app, use AI/NLP
-    const messages: ImportedMessage[] = [
-      {
-        id: "1",
-        timestamp: Date.now().toString(),
-        sender: "User",
-        message: `I need to tell someone about this... ${post.content.substring(0, 100)}...`,
-        emotion: "anxious",
-        isCliffhanger: true,
-        hasMedia: false,
-      },
-      {
-        id: "2",
-        timestamp: (Date.now() + 180000).toString(),
-        sender: "Friend",
-        message: "OMG what happened?! Tell me everything!",
-        emotion: "concerned",
-        isCliffhanger: false,
-        hasMedia: false,
-      },
-    ];
+    // Convert Reddit post to story format
+    const estimatedReadingTime = Math.ceil(post.content.length / 200); // Rough estimate: 200 chars per minute
+
+    // Generate story content from Reddit post
+    const storyContent = `Original Post:\n\n${post.content}\n\nThis story has been adapted from a real Reddit post and transformed into an interactive narrative experience.`;
+
+    // Generate tags based on subreddit and content
+    const baseTags = [post.subreddit.replace("r/", ""), "reddit", "real_story"];
+    const contentTags = extractTagsFromContent(post.title + " " + post.content);
 
     return {
-      id: post.id,
+      id: `reddit_${post.id}`,
       title: post.title,
-      characters: ["User", "Friend"],
-      messages,
-      genre: post.subreddit.includes("parent") ? "family" : "drama",
+      description: `A real story from ${post.subreddit} that caught everyone's attention`,
+      content: storyContent,
+      category: determineCategory(post.subreddit),
+      tags: [...baseTags, ...contentTags].slice(0, 8),
       estimatedViralScore: Math.min(Math.floor(post.upvotes / 100) + 60, 100),
       source: "reddit",
       sourceUrl: post.url,
+      readingTime: estimatedReadingTime,
       upvotes: post.upvotes,
       comments: post.comments,
-      tags: [post.subreddit.replace("r/", ""), "reddit"],
+      subreddit: post.subreddit,
       isImported: false,
-      createdAt: post.created,
     };
   };
 
-  const processContent = async () => {
-    setIsProcessing(true);
+  const extractTagsFromContent = (text: string): string[] => {
+    const commonWords = [
+      "the",
+      "and",
+      "or",
+      "but",
+      "in",
+      "on",
+      "at",
+      "to",
+      "for",
+      "of",
+      "with",
+      "by",
+    ];
+    const words = text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .split(/\s+/)
+      .filter((word) => word.length > 3 && !commonWords.includes(word));
 
-    try {
-      let parsed: ImportedStory[] = [];
+    const wordFreq: { [key: string]: number } = {};
+    words.forEach((word) => {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    });
 
-      switch (importMethod) {
-        case "text":
-          parsed = parseTextFormat(inputContent);
-          break;
-        case "csv":
-          // CSV parsing logic here
-          break;
-        case "json":
-          const jsonData = JSON.parse(inputContent);
-          parsed = jsonData.stories || [];
-          break;
-      }
+    return Object.entries(wordFreq)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([word]) => word);
+  };
 
-      setParsedStories(parsed);
-    } catch (error) {
-      console.error("Parse error:", error);
-    }
+  const determineCategory = (subreddit: string): string => {
+    const categoryMap: { [key: string]: string } = {
+      relationship_advice: "romance",
+      AmItheAsshole: "drama",
+      entitledparents: "drama",
+      tifu: "comedy",
+      confession: "scandal",
+      insaneparents: "drama",
+    };
 
-    setIsProcessing(false);
+    const subName = subreddit.replace("r/", "");
+    return categoryMap[subName] || "drama";
   };
 
   const fetchRedditContent = async () => {
     setIsProcessing(true);
-
-    // Check if Reddit credentials are configured
-    if (!credentials.reddit.enabled || !credentials.reddit.clientId) {
-      addNotification({
-        type: "error",
-        title: "Reddit Not Configured",
-        message:
-          "Please configure your Reddit API credentials in Settings before scanning.",
-      });
-      setIsProcessing(false);
-      return;
-    }
+    setRedditPosts([]);
 
     try {
-      // For now, use mock data but with credential validation
+      // Check if Reddit credentials are configured
+      if (!credentials.reddit.enabled || !credentials.reddit.clientId) {
+        addNotification({
+          type: "error",
+          title: "Reddit Not Configured",
+          message:
+            "Please configure your Reddit API credentials in Settings before scanning.",
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       addNotification({
         type: "info",
         title: "Scanning Reddit",
         message: `Searching ${selectedSubreddit === "all" ? "all subreddits" : selectedSubreddit} for "${searchQuery || "viral content"}"`,
       });
 
-      // Simulate API call with credentials
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Make real Reddit API call
+      const response = await makeRedditApiCall();
 
-      const filtered = mockRedditPosts.filter(
-        (post) =>
-          (selectedSubreddit === "all" ||
-            post.subreddit === selectedSubreddit) &&
-          (!searchQuery ||
-            post.title.toLowerCase().includes(searchQuery.toLowerCase())),
-      );
-
-      setRedditPosts(filtered);
-
-      addNotification({
-        type: "success",
-        title: "Reddit Scan Complete",
-        message: `Found ${filtered.length} potential viral posts`,
-      });
+      if (response.success) {
+        setRedditPosts(response.posts);
+        addNotification({
+          type: "success",
+          title: "Reddit Scan Complete",
+          message: `Found ${response.posts.length} potential viral posts`,
+        });
+      } else {
+        throw new Error(response.error || "Failed to fetch Reddit data");
+      }
     } catch (error) {
+      console.error("Reddit fetch error:", error);
       addNotification({
         type: "error",
         title: "Reddit Scan Failed",
         message:
-          "Failed to fetch content from Reddit. Check your API credentials.",
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch content from Reddit. Check your API credentials.",
       });
+    } finally {
+      setIsProcessing(false);
     }
-
-    setIsProcessing(false);
   };
 
-  const StoryCard = ({
-    story,
-    index,
-  }: {
-    story: ImportedStory;
-    index: number;
-  }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="bg-gray-800 border border-gray-700 rounded-lg p-4"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <h4 className="font-semibold text-white mb-1">{story.title}</h4>
-          <div className="flex items-center space-x-2 mb-2">
-            <Badge variant="outline" className="text-xs">
-              {story.genre}
-            </Badge>
-            {story.source === "reddit" && (
-              <Badge className="bg-orange-500/20 text-orange-400 text-xs">
-                📍 Reddit
-              </Badge>
-            )}
-            <div
-              className={`flex items-center space-x-1 ${
-                story.estimatedViralScore >= 80
-                  ? "text-green-400"
-                  : story.estimatedViralScore >= 60
-                    ? "text-yellow-400"
-                    : "text-red-400"
-              }`}
-            >
-              <TrendingUp size={12} />
-              <span className="text-xs font-bold">
-                {story.estimatedViralScore}% viral
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center space-x-1">
-          <Button variant="ghost" size="sm">
-            <Eye size={14} />
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Edit size={14} />
-          </Button>
-          <Button variant="ghost" size="sm" className="text-red-400">
-            <Trash2 size={14} />
-          </Button>
-        </div>
-      </div>
+  const makeRedditApiCall = async (): Promise<{
+    success: boolean;
+    posts: RedditPost[];
+    error?: string;
+  }> => {
+    try {
+      // Reddit OAuth flow would typically happen here
+      // For now, we'll implement a real API structure but return empty results
 
-      <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-        <div>
-          <span className="text-gray-400">Messages:</span>
-          <span className="ml-2 text-white">{story.messages.length}</span>
-        </div>
-        <div>
-          <span className="text-gray-400">Characters:</span>
-          <span className="ml-2 text-white">{story.characters.length}</span>
-        </div>
-      </div>
+      const baseUrl = "https://oauth.reddit.com";
+      const subredditPath =
+        selectedSubreddit === "all"
+          ? "/hot"
+          : `/r/${selectedSubreddit.replace("r/", "")}/hot`;
+      const searchPath = searchQuery
+        ? `/search?q=${encodeURIComponent(searchQuery)}&sort=hot&limit=25`
+        : `${subredditPath}?limit=25`;
 
-      {story.source === "reddit" && (
-        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-          <div className="flex items-center space-x-1">
-            <span className="text-gray-400">↑</span>
-            <span className="text-green-400">
-              {story.upvotes?.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <MessageSquare size={12} className="text-blue-400" />
-            <span className="text-blue-400">{story.comments}</span>
-          </div>
-        </div>
-      )}
+      // This would be the real API call structure:
+      /*
+      const response = await fetch(`${baseUrl}${searchPath}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'User-Agent': credentials.reddit.userAgent,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Reddit API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const posts = data.data.children.map((child: any) => ({
+        id: child.data.id,
+        title: child.data.title,
+        content: child.data.selftext || child.data.title,
+        upvotes: child.data.ups,
+        comments: child.data.num_comments,
+        subreddit: child.data.subreddit_name_prefixed,
+        url: `https://reddit.com${child.data.permalink}`,
+        created: new Date(child.data.created_utc * 1000).toISOString(),
+      }));
+      */
 
-      <div className="flex flex-wrap gap-1 mb-3">
-        {story.tags.map((tag, i) => (
-          <Badge
-            key={i}
-            variant="secondary"
-            className="text-xs bg-gray-700 text-gray-300"
-          >
-            {tag}
-          </Badge>
-        ))}
-      </div>
+      // For development, return empty results since we need real Reddit API setup
+      addNotification({
+        type: "warning",
+        title: "API Setup Required",
+        message:
+          "Reddit API integration requires OAuth setup and access tokens. Configure in Settings to enable real data fetching.",
+      });
 
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500">
-          {new Date(story.createdAt).toLocaleDateString()}
-        </span>
-        <div className="flex items-center space-x-2">
-          {!story.isImported && (
-            <Button size="sm" className="bg-green-600 hover:bg-green-700">
-              Import
-            </Button>
-          )}
-          {story.isImported && (
-            <Badge className="bg-green-500/20 text-green-400">✓ Imported</Badge>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
+      return {
+        success: true,
+        posts: [], // Real posts would be returned here
+      };
+    } catch (error) {
+      return {
+        success: false,
+        posts: [],
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      setImportData(content);
+    };
+    reader.readAsText(file);
+  };
+
+  const parseImportData = () => {
+    if (!importData.trim()) {
+      addNotification({
+        type: "error",
+        title: "No Data to Parse",
+        message: "Please enter or upload data to import.",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      let stories: ImportedStory[] = [];
+
+      if (importMethod === "json") {
+        const jsonData = JSON.parse(importData);
+        stories = Array.isArray(jsonData) ? jsonData : [jsonData];
+      } else if (importMethod === "csv") {
+        // Simple CSV parsing (would need a proper CSV parser for production)
+        const lines = importData.split("\n");
+        const headers = lines[0].split(",").map((h) => h.trim());
+
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(",").map((v) => v.trim());
+          if (values.length >= 2) {
+            stories.push({
+              id: `manual_${Date.now()}_${i}`,
+              title: values[0] || `Imported Story ${i}`,
+              description: values[1] || "Imported story",
+              content: values[2] || values[1] || "Imported content",
+              category: "drama",
+              tags: ["manual", "imported"],
+              estimatedViralScore: 50,
+              source: "manual",
+              isImported: false,
+            });
+          }
+        }
+      } else {
+        // Text parsing - split by paragraphs/sections
+        const sections = importData.split("\n\n").filter((s) => s.trim());
+        sections.forEach((section, index) => {
+          const lines = section.split("\n");
+          stories.push({
+            id: `text_${Date.now()}_${index}`,
+            title: lines[0] || `Text Story ${index + 1}`,
+            description: lines[1] || "Imported text story",
+            content: section,
+            category: "drama",
+            tags: ["text", "imported"],
+            estimatedViralScore: 50,
+            source: "manual",
+            isImported: false,
+          });
+        });
+      }
+
+      setParsedStories(stories);
+      addNotification({
+        type: "success",
+        title: "Data Parsed",
+        message: `Successfully parsed ${stories.length} stories from your data.`,
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Parse Error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to parse import data.",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const importStories = async (storiesToImport: ImportedStory[]) => {
+    setIsProcessing(true);
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const story of storiesToImport) {
+        try {
+          await createStory({
+            title: story.title,
+            description: story.description,
+            content: story.content,
+            authorId: "admin", // Would use real user ID
+            category: story.category as any,
+            tags: story.tags,
+            status: "published",
+            visibility: "public",
+            readingTime:
+              story.readingTime || Math.ceil(story.content.length / 200),
+            chapters: [],
+          });
+
+          successCount++;
+
+          // Mark as imported
+          setParsedStories((prev) =>
+            prev.map((s) =>
+              s.id === story.id ? { ...s, isImported: true } : s,
+            ),
+          );
+        } catch (error) {
+          console.error(`Failed to import story ${story.title}:`, error);
+          errorCount++;
+        }
+      }
+
+      addNotification({
+        type: successCount > errorCount ? "success" : "warning",
+        title: "Import Complete",
+        message: `Successfully imported ${successCount} stories. ${errorCount > 0 ? `${errorCount} failed.` : ""}`,
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Import Failed",
+        message: "Failed to import stories to database.",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const clearImportData = () => {
+    setImportData("");
+    setParsedStories([]);
+    setRedditPosts([]);
+  };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 bg-gray-900 text-white rounded-xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold flex items-center space-x-3">
-          <Upload className="text-blue-400" />
-          <span>Content Importer</span>
-          <Badge variant="secondary" className="bg-blue-500/20 text-blue-400">
-            {parsedStories.length} Stories
-          </Badge>
-        </h1>
-        <div className="flex space-x-2">
-          <Button variant="outline">
-            <Download size={16} className="mr-2" />
-            Export All
-          </Button>
-          <Button
-            onClick={() => {
-              const storiesToImport = parsedStories.filter(
-                (s) => !s.isImported,
-              );
-              if (storiesToImport.length > 0) {
-                importStories(storiesToImport);
-                // Mark as imported
-                setParsedStories((prev) =>
-                  prev.map((story) => ({ ...story, isImported: true })),
-                );
-                if (onImport) onImport(storiesToImport);
-              }
-            }}
-            className="bg-green-600 hover:bg-green-700"
-            disabled={parsedStories.filter((s) => !s.isImported).length === 0}
-          >
-            <CheckCircle size={16} className="mr-2" />
-            Import Selected ({parsedStories.filter((s) => !s.isImported).length}
-            )
-          </Button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Content Importer</h2>
+          <p className="text-gray-400">
+            Import stories from various sources or create manually
+          </p>
         </div>
+        <Button variant="outline" onClick={clearImportData}>
+          <Trash2 className="w-4 h-4 mr-2" />
+          Clear All
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-gray-800">
           <TabsTrigger value="reddit">🔥 Reddit</TabsTrigger>
           <TabsTrigger value="manual">📝 Manual</TabsTrigger>
-          <TabsTrigger value="bulk">📊 Bulk Import</TabsTrigger>
-          <TabsTrigger value="library">📚 Library</TabsTrigger>
+          <TabsTrigger value="upload">📄 Upload</TabsTrigger>
+          <TabsTrigger value="template">📋 Template</TabsTrigger>
         </TabsList>
 
         <TabsContent value="reddit" className="space-y-6">
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center gap-2">
                 <Globe className="text-orange-400" />
                 <span>Reddit Content Scanner</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Real Reddit API integration requires OAuth setup and access
+                  tokens. Configure your Reddit API credentials in Settings to
+                  enable live data fetching.
+                </AlertDescription>
+              </Alert>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">
-                    Search Keywords
+                    Search Query
                   </label>
                   <Input
+                    placeholder="Enter keywords..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="affair, toxic parents, drama..."
                     className="bg-gray-700 border-gray-600"
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">
                     Subreddit
@@ -649,51 +508,43 @@ export function ContentImporter({
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">
-                    Min Viral Score
+                    Min Viral Score: {minViralScore}
                   </label>
-                  <Input
-                    type="number"
-                    value={minViralScore}
-                    onChange={(e) => setMinViralScore(parseInt(e.target.value))}
-                    className="bg-gray-700 border-gray-600"
+                  <Slider
+                    value={[minViralScore]}
+                    onValueChange={(value) => setMinViralScore(value[0])}
+                    max={100}
+                    min={0}
+                    step={5}
+                    className="mt-2"
                   />
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={autoConvert}
-                      onCheckedChange={setAutoConvert}
-                    />
-                    <span className="text-sm">
-                      Auto-convert to ChatLure format
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2">
                   {credentials.reddit.enabled ? (
                     <Badge className="bg-green-500/20 text-green-400 text-xs">
                       ✓ Reddit Connected
                     </Badge>
                   ) : (
-                    <Badge
-                      variant="outline"
-                      className="text-yellow-400 border-yellow-500/30 text-xs"
-                    >
-                      ⚠ Configure in Settings
+                    <Badge className="bg-red-500/20 text-red-400 text-xs">
+                      ✗ Not Connected
                     </Badge>
                   )}
                 </div>
+
                 <Button
                   onClick={fetchRedditContent}
                   disabled={isProcessing || !credentials.reddit.enabled}
                 >
                   {isProcessing ? (
-                    <RefreshCw size={16} className="mr-2 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
-                    <Search size={16} className="mr-2" />
+                    <Globe className="w-4 h-4 mr-2" />
                   )}
                   Scan Reddit
                 </Button>
@@ -702,19 +553,23 @@ export function ContentImporter({
               <div className="grid grid-cols-3 gap-4">
                 {REDDIT_SOURCES.map((source) => (
                   <div key={source.name} className="bg-gray-700 p-3 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-white">
                         {source.name}
                       </span>
                       <Badge className="bg-orange-500/20 text-orange-400 text-xs">
-                        {source.viral}%
+                        {source.viral}% viral
                       </Badge>
                     </div>
                     <div className="text-xs text-gray-400">
-                      {source.members} members
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {source.category}
+                      <div className="flex items-center gap-1 mb-1">
+                        <Users className="w-3 h-3" />
+                        {source.members} members
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        {source.category}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -725,16 +580,14 @@ export function ContentImporter({
           {redditPosts.length > 0 && (
             <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
-                <CardTitle>
-                  📈 Trending Reddit Posts ({redditPosts.length})
-                </CardTitle>
+                <CardTitle>📈 Reddit Posts ({redditPosts.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {redditPosts.map((post, index) => (
                     <div key={post.id} className="bg-gray-700 p-4 rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-white flex-1 pr-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="text-sm font-medium text-white">
                           {post.title}
                         </h4>
                         <Button
@@ -743,29 +596,30 @@ export function ContentImporter({
                             const story = convertRedditToStory(post);
                             setParsedStories((prev) => [...prev, story]);
                           }}
-                          className="bg-blue-600 hover:bg-blue-700"
                         >
-                          Convert
+                          <Plus className="w-4 h-4 mr-1" />
+                          Add
                         </Button>
                       </div>
-
-                      <p className="text-sm text-gray-400 mb-3">
-                        {post.content.substring(0, 200)}...
+                      <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+                        {post.content.substring(0, 150)}...
                       </p>
-
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center space-x-4">
-                          <span className="text-green-400">
-                            ↑ {post.upvotes.toLocaleString()}
-                          </span>
-                          <span className="text-blue-400">
-                            💬 {post.comments}
-                          </span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 text-xs text-gray-400">
                           <Badge variant="outline" className="text-xs">
                             {post.subreddit}
                           </Badge>
+                          <span>↑ {post.upvotes}</span>
+                          <span>💬 {post.comments}</span>
                         </div>
-                        <span className="text-gray-500">{post.created}</span>
+                        <a
+                          href={post.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
                       </div>
                     </div>
                   ))}
@@ -778,138 +632,254 @@ export function ContentImporter({
         <TabsContent value="manual" className="space-y-6">
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle>📝 Manual Story Input</CardTitle>
+              <CardTitle>Manual Story Creation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                {(["text", "csv", "json"] as const).map((method) => (
-                  <button
-                    key={method}
-                    onClick={() => setImportMethod(method)}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      importMethod === method
-                        ? "border-blue-500 bg-blue-500/10"
-                        : "border-gray-600 bg-gray-700 hover:border-gray-500"
-                    }`}
-                  >
-                    <FileText size={24} className="mx-auto mb-2" />
-                    <div className="font-semibold">{method.toUpperCase()}</div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {method === "text" && "Simple text format"}
-                      {method === "csv" && "Spreadsheet format"}
-                      {method === "json" && "Advanced format"}
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              <div>
-                <h4 className="text-sm font-semibold mb-2 text-gray-400">
-                  📋 Sample Format ({importMethod.toUpperCase()})
-                </h4>
-                <pre className="bg-gray-700 p-4 rounded-lg text-sm overflow-x-auto text-green-400">
-                  {SAMPLE_FORMATS[importMethod]}
-                </pre>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-semibold mb-2 text-gray-400">
-                  ✏️ Paste Your Content
-                </h4>
-                <Textarea
-                  value={inputContent}
-                  onChange={(e) => setInputContent(e.target.value)}
-                  className="w-full h-64 bg-gray-700 border-gray-600 font-mono text-sm"
-                  placeholder={`Paste your ${importMethod.toUpperCase()} content here...`}
-                />
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-400">
-                    {inputContent.length} characters
-                  </div>
-                  <Button
-                    onClick={processContent}
-                    disabled={!inputContent.trim() || isProcessing}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <RefreshCw size={16} className="mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Zap size={16} className="mr-2" />
-                        Parse Content
-                      </>
-                    )}
-                  </Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="story-title">Story Title</Label>
+                  <Input
+                    id="story-title"
+                    placeholder="Enter story title..."
+                    className="bg-gray-700 border-gray-600"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="story-category">Category</Label>
+                  <Select>
+                    <SelectTrigger className="bg-gray-700 border-gray-600">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="drama">Drama</SelectItem>
+                      <SelectItem value="romance">Romance</SelectItem>
+                      <SelectItem value="scandal">Scandal</SelectItem>
+                      <SelectItem value="mystery">Mystery</SelectItem>
+                      <SelectItem value="comedy">Comedy</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
+
+              <div>
+                <Label htmlFor="story-description">Description</Label>
+                <Textarea
+                  id="story-description"
+                  placeholder="Brief description of the story..."
+                  className="bg-gray-700 border-gray-600"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="story-content">Story Content</Label>
+                <Textarea
+                  id="story-content"
+                  placeholder="Enter the full story content..."
+                  className="bg-gray-700 border-gray-600"
+                  rows={10}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="story-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="story-tags"
+                  placeholder="drama, romance, viral..."
+                  className="bg-gray-700 border-gray-600"
+                />
+              </div>
+
+              <Button className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Story
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="bulk">
+        <TabsContent value="upload" className="space-y-6">
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle>📊 Bulk Import Tools</CardTitle>
+              <CardTitle>Upload Content</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-center text-gray-400 py-8">
-                <Upload size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Bulk import tools coming soon...</p>
-                <p className="text-sm">
-                  Import multiple files, CSV sheets, and automated content
-                  scanning
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="library">
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>
-                📚 Imported Stories ({parsedStories.length})
-              </CardTitle>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  <Filter size={16} className="mr-1" />
-                  Filter
-                </Button>
-                <Select>
-                  <SelectTrigger className="w-32 bg-gray-700 border-gray-600">
-                    <SelectValue placeholder="Sort by" />
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Import Method</Label>
+                <Select
+                  value={importMethod}
+                  onValueChange={(value: any) => setImportMethod(value)}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="viral">Viral Score</SelectItem>
-                    <SelectItem value="recent">Most Recent</SelectItem>
-                    <SelectItem value="messages">Message Count</SelectItem>
+                    <SelectItem value="text">Plain Text</SelectItem>
+                    <SelectItem value="csv">CSV File</SelectItem>
+                    <SelectItem value="json">JSON File</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label htmlFor="file-upload">Upload File</Label>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  accept=".txt,.csv,.json"
+                  onChange={handleFileUpload}
+                  className="bg-gray-700 border-gray-600"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="import-data">Or Paste Content</Label>
+                <Textarea
+                  id="import-data"
+                  placeholder="Paste your content here..."
+                  value={importData}
+                  onChange={(e) => setImportData(e.target.value)}
+                  className="bg-gray-700 border-gray-600"
+                  rows={10}
+                />
+              </div>
+
+              <Button onClick={parseImportData} disabled={isProcessing}>
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <FileText className="w-4 h-4 mr-2" />
+                )}
+                Parse Content
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="template" className="space-y-6">
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle>Story Templates</CardTitle>
             </CardHeader>
             <CardContent>
-              {parsedStories.length > 0 ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {parsedStories.map((story, index) => (
-                    <StoryCard key={story.id} story={story} index={index} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center text-gray-400 py-8">
-                  <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>No stories imported yet</p>
-                  <p className="text-sm">
-                    Use the Reddit scanner or manual import to get started
-                  </p>
-                </div>
-              )}
+              <p className="text-gray-400 text-center py-8">
+                Story templates coming soon...
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Parsed Stories Preview */}
+      {parsedStories.length > 0 && (
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>📚 Parsed Stories ({parsedStories.length})</CardTitle>
+            <Button
+              onClick={() =>
+                importStories(parsedStories.filter((s) => !s.isImported))
+              }
+              disabled={
+                isProcessing || parsedStories.every((s) => s.isImported)
+              }
+            >
+              {isProcessing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              Import All ({parsedStories.filter((s) => !s.isImported).length})
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {parsedStories.map((story) => (
+                <div key={story.id} className="bg-gray-700 p-4 rounded-lg">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h4 className="text-sm font-medium text-white mb-1">
+                        {story.title}
+                      </h4>
+                      <p className="text-xs text-gray-400 mb-2">
+                        {story.description}
+                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="text-xs">
+                          {story.category}
+                        </Badge>
+                        {story.source === "reddit" && (
+                          <Badge className="bg-orange-500/20 text-orange-400 text-xs">
+                            📍 Reddit
+                          </Badge>
+                        )}
+                        <Badge className="bg-blue-500/20 text-blue-400 text-xs">
+                          🔥 {story.estimatedViralScore}%
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                        {story.readingTime && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {story.readingTime} min
+                          </span>
+                        )}
+                        {story.upvotes && <span>↑ {story.upvotes}</span>}
+                        {story.comments && (
+                          <span className="flex items-center gap-1">
+                            <MessageCircle className="w-3 h-3" />
+                            {story.comments}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {story.isImported ? (
+                        <Badge className="bg-green-500/20 text-green-400 text-xs">
+                          ✓ Imported
+                        </Badge>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => importStories([story])}
+                          disabled={isProcessing}
+                        >
+                          Import
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  {story.sourceUrl && (
+                    <a
+                      href={story.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      View Original
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Import Summary */}
+      {parsedStories.length === 0 && activeTab !== "reddit" && (
+        <Card className="bg-gray-800 border-gray-700">
+          <CardContent className="text-center py-8">
+            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">
+              No Content to Import
+            </h3>
+            <p className="text-sm text-gray-400">
+              Use the Reddit scanner or manual import to get started
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

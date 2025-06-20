@@ -1,432 +1,355 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  BarChart3,
-  Users,
-  BookOpen,
-  TrendingUp,
   Eye,
   Heart,
   MessageCircle,
-  Share,
-  ArrowUp,
-  ArrowDown,
-  Activity,
-  Calendar,
+  TrendingUp,
+  Users,
+  BookOpen,
+  Bell,
+  ArrowUpRight,
   Clock,
+  MapPin,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useDatabase } from "@/contexts/DatabaseContext";
 
-interface DashboardProps {
-  onNavigate: (section: string) => void;
+interface DashboardStats {
+  totalStories: number;
+  totalViews: number;
+  totalUsers: number;
+  activeStories: number;
+  trendingStories: any[];
+  recentActivity: any[];
 }
 
-export function Dashboard({ onNavigate }: DashboardProps) {
-  const {
-    getTrendingStories,
-    getMyStories,
-    notifications,
-    unreadCount,
-    currentUser,
-    isInitialized,
-  } = useDatabase();
+export default function Dashboard() {
+  const { getTrendingStories, notifications, currentUser, isInitialized } =
+    useDatabase();
 
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     totalStories: 0,
     totalViews: 0,
-    totalLikes: 0,
-    totalComments: 0,
-    trendingStories: [] as any[],
-    recentActivity: [] as any[],
+    totalUsers: 0,
+    activeStories: 0,
+    trendingStories: [],
+    recentActivity: [],
   });
-
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isInitialized) {
-      loadDashboardData();
-    }
+    if (!isInitialized) return;
+
+    loadDashboardStats();
   }, [isInitialized]);
 
-  const loadDashboardData = async () => {
-    setLoading(true);
+  const loadDashboardStats = async () => {
     try {
-      // Load stories data
-      const [trendingStories, myStories] = await Promise.all([
-        getTrendingStories(),
-        getMyStories(),
-      ]);
+      setIsLoading(true);
 
-      // Calculate stats
-      const totalViews = myStories.reduce(
-        (sum, story) => sum + story.stats.views,
-        0,
-      );
-      const totalLikes = myStories.reduce(
-        (sum, story) => sum + story.stats.likes,
-        0,
-      );
-      const totalComments = myStories.reduce(
-        (sum, story) => sum + story.stats.comments,
-        0,
-      );
+      // Get trending stories from database
+      const trendingStories = await getTrendingStories();
 
-      // Create recent activity from notifications
+      // Calculate stats from real data
+      const totalViews = trendingStories.reduce(
+        (sum, story) => sum + (story.stats?.views || 0),
+        0,
+      );
+      const activeStories = trendingStories.filter(
+        (story) => story.status === "published",
+      ).length;
+
+      // Get recent activity from notifications
       const recentActivity = notifications.slice(0, 5).map((notification) => ({
         id: notification.id,
         type: notification.type,
-        title: notification.title,
         message: notification.message,
-        time: new Date(notification.createdAt),
-        isRead: notification.isRead,
+        time: notification.createdAt,
+        user: currentUser?.username || "Unknown User",
       }));
 
       setStats({
-        totalStories: myStories.length,
+        totalStories: trendingStories.length,
         totalViews,
-        totalLikes,
-        totalComments,
-        trendingStories: trendingStories.slice(0, 3),
+        totalUsers: 1, // For now, just current user
+        activeStories,
+        trendingStories: trendingStories.slice(0, 5),
         recentActivity,
       });
     } catch (error) {
-      console.error("Failed to load dashboard data:", error);
-      // Fallback to demo data
-      setStats({
-        totalStories: 5,
-        totalViews: 12547,
-        totalLikes: 1834,
-        totalComments: 456,
-        trendingStories: [],
-        recentActivity: [],
-      });
+      console.error("Failed to load dashboard stats:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    trend,
-    trendValue,
-    color = "text-blue-400",
-    onClick,
-  }: {
-    title: string;
-    value: number | string;
-    icon: any;
-    trend?: "up" | "down";
-    trendValue?: string;
-    color?: string;
-    onClick?: () => void;
-  }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card
-        className="bg-gray-900 border-gray-700 cursor-pointer hover:border-gray-600 transition-colors"
-        onClick={onClick}
-      >
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm font-medium">{title}</p>
-              <p className={`text-2xl font-bold ${color}`}>
-                {typeof value === "number" ? value.toLocaleString() : value}
-              </p>
-              {trend && trendValue && (
-                <div
-                  className={`flex items-center mt-1 text-sm ${
-                    trend === "up" ? "text-green-400" : "text-red-400"
-                  }`}
-                >
-                  {trend === "up" ? (
-                    <ArrowUp className="w-3 h-3 mr-1" />
-                  ) : (
-                    <ArrowDown className="w-3 h-3 mr-1" />
-                  )}
-                  <span>{trendValue}</span>
-                </div>
-              )}
-            </div>
-            <Icon className={`w-8 h-8 ${color}`} />
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = (dateString: string | Date) => {
+    const date = new Date(dateString);
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
 
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    if (minutes > 0) return `${minutes}m ago`;
-    return "Just now";
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "story_update":
-        return <BookOpen className="w-4 h-4" />;
-      case "friend_request":
-        return <Users className="w-4 h-4" />;
-      case "like":
-        return <Heart className="w-4 h-4" />;
-      case "comment":
-        return <MessageCircle className="w-4 h-4" />;
-      default:
-        return <Activity className="w-4 h-4" />;
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="bg-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <div className="h-8 bg-gray-700 rounded mb-2"></div>
+                <div className="h-6 bg-gray-700 rounded w-16"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white">Dashboard</h2>
-          <p className="text-gray-400 mt-1">
-            Welcome back, {currentUser?.username || "Admin"}! Here's your story
-            overview.
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="border-green-600 text-green-400">
-            <Activity className="w-3 h-3 mr-1" />
-            Live
-          </Badge>
-          <Button
-            variant="outline"
-            onClick={() => loadDashboardData()}
-            className="border-gray-600"
-          >
-            <Clock className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
+      {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Stories"
-          value={stats.totalStories}
-          icon={BookOpen}
-          trend="up"
-          trendValue="+12%"
-          color="text-purple-400"
-          onClick={() => onNavigate("library")}
-        />
+        <Card className="bg-gray-800 border-gray-700">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400">
+                  Total Stories
+                </p>
+                <p className="text-2xl font-bold text-white">
+                  {stats.totalStories.toLocaleString()}
+                </p>
+              </div>
+              <BookOpen className="h-8 w-8 text-blue-400" />
+            </div>
+          </CardContent>
+        </Card>
 
-        <StatCard
-          title="Total Views"
-          value={stats.totalViews}
-          icon={Eye}
-          trend="up"
-          trendValue="+23%"
-          color="text-blue-400"
-        />
+        <Card className="bg-gray-800 border-gray-700">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400">Total Views</p>
+                <p className="text-2xl font-bold text-white">
+                  {stats.totalViews.toLocaleString()}
+                </p>
+              </div>
+              <Eye className="h-8 w-8 text-green-400" />
+            </div>
+          </CardContent>
+        </Card>
 
-        <StatCard
-          title="Total Likes"
-          value={stats.totalLikes}
-          icon={Heart}
-          trend="up"
-          trendValue="+8%"
-          color="text-red-400"
-        />
+        <Card className="bg-gray-800 border-gray-700">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400">
+                  Active Users
+                </p>
+                <p className="text-2xl font-bold text-white">
+                  {stats.totalUsers.toLocaleString()}
+                </p>
+              </div>
+              <Users className="h-8 w-8 text-purple-400" />
+            </div>
+          </CardContent>
+        </Card>
 
-        <StatCard
-          title="Comments"
-          value={stats.totalComments}
-          icon={MessageCircle}
-          trend="down"
-          trendValue="-3%"
-          color="text-green-400"
-        />
+        <Card className="bg-gray-800 border-gray-700">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400">
+                  Active Stories
+                </p>
+                <p className="text-2xl font-bold text-white">
+                  {stats.activeStories.toLocaleString()}
+                </p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-orange-400" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Trending Stories */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
-            <CardTitle className="text-white flex items-center space-x-2">
-              <TrendingUp className="w-5 h-5 text-orange-400" />
-              <span>Trending Stories</span>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-orange-400" />
+              Trending Stories
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {stats.trendingStories.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No trending stories yet</p>
-                <Button
-                  variant="outline"
-                  className="mt-2 border-gray-600"
-                  onClick={() => onNavigate("story")}
-                >
-                  Create Your First Story
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {stats.trendingStories.map((story, index) => (
-                  <motion.div
+            <div className="space-y-4">
+              {stats.trendingStories.length === 0 ? (
+                <p className="text-gray-400 text-center py-4">
+                  No trending stories yet
+                </p>
+              ) : (
+                stats.trendingStories.map((story) => (
+                  <div
                     key={story.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center space-x-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors cursor-pointer"
+                    className="flex items-start space-x-3 p-3 bg-gray-700 rounded-lg"
                   >
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        #{index + 1}
-                      </div>
-                    </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-white font-medium truncate">
+                      <h4 className="text-sm font-medium text-white truncate">
                         {story.title}
                       </h4>
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
-                        <span className="flex items-center">
-                          <Eye className="w-3 h-3 mr-1" />
-                          {story.stats.views}
-                        </span>
-                        <span className="flex items-center">
-                          <Heart className="w-3 h-3 mr-1" />
-                          {story.stats.likes}
-                        </span>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {story.category} • {formatTimeAgo(story.createdAt)}
+                      </p>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <div className="flex items-center space-x-1">
+                          <Eye className="h-3 w-3 text-gray-400" />
+                          <span className="text-xs text-gray-400">
+                            {story.stats?.views || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Heart className="h-3 w-3 text-gray-400" />
+                          <span className="text-xs text-gray-400">
+                            {story.stats?.likes || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <MessageCircle className="h-3 w-3 text-gray-400" />
+                          <span className="text-xs text-gray-400">
+                            {story.stats?.comments || 0}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+                    <Badge variant="outline" className="text-xs">
+                      {story.status}
+                    </Badge>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
 
         {/* Recent Activity */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
-            <CardTitle className="text-white flex items-center space-x-2">
-              <Activity className="w-5 h-5 text-green-400" />
-              <span>Recent Activity</span>
-              {unreadCount > 0 && (
-                <Badge variant="destructive" className="bg-red-500">
-                  {unreadCount}
-                </Badge>
-              )}
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-blue-400" />
+              Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {stats.recentActivity.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No recent activity</p>
-                <p className="text-sm">
-                  Activity will appear here as users interact with your stories
+            <div className="space-y-4">
+              {stats.recentActivity.length === 0 ? (
+                <p className="text-gray-400 text-center py-4">
+                  No recent activity
                 </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {stats.recentActivity.map((activity, index) => (
-                  <motion.div
-                    key={activity.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`flex items-start space-x-3 p-3 rounded-lg transition-colors ${
-                      activity.isRead
-                        ? "bg-gray-800"
-                        : "bg-blue-900/20 border border-blue-500/30"
-                    }`}
-                  >
-                    <div className="flex-shrink-0 mt-1">
-                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-gray-300">
-                        {getActivityIcon(activity.type)}
-                      </div>
-                    </div>
+              ) : (
+                stats.recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${activity.user}`}
+                      />
+                      <AvatarFallback>{activity.user.charAt(0)}</AvatarFallback>
+                    </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-white text-sm font-medium">
-                        {activity.title}
-                      </h4>
-                      <p className="text-gray-400 text-sm truncate">
-                        {activity.message}
-                      </p>
-                      <span className="text-xs text-gray-500">
+                      <p className="text-sm text-white">{activity.message}</p>
+                      <p className="text-xs text-gray-400 flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1" />
                         {formatTimeAgo(activity.time)}
-                      </span>
+                      </p>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${
+                        activity.type === "story_update"
+                          ? "text-green-400"
+                          : activity.type === "system"
+                            ? "text-blue-400"
+                            : "text-gray-400"
+                      }`}
+                    >
+                      {activity.type}
+                    </Badge>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Quick Actions */}
-      <Card className="bg-gray-900 border-gray-700">
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-white">Quick Actions</CardTitle>
+          <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
-              onClick={() => onNavigate("story")}
-              className="bg-purple-600 hover:bg-purple-700 h-12"
-            >
-              <BookOpen className="w-4 h-4 mr-2" />
-              Create New Story
-            </Button>
-
-            <Button
-              onClick={() => onNavigate("import")}
               variant="outline"
-              className="border-gray-600 h-12"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
             >
-              <Share className="w-4 h-4 mr-2" />
-              Import Content
+              <BookOpen className="h-6 w-6" />
+              <span>Create Story</span>
             </Button>
-
             <Button
-              onClick={() => onNavigate("library")}
               variant="outline"
-              className="border-gray-600 h-12"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
             >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              View Analytics
+              <TrendingUp className="h-6 w-6" />
+              <span>View Analytics</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+            >
+              <Users className="h-6 w-6" />
+              <span>Manage Users</span>
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Footer Stats */}
-      <div className="text-center text-sm text-gray-400">
-        <p>Last updated: {new Date().toLocaleString()}</p>
-      </div>
+      {/* System Status */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle>System Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Database</span>
+              <Badge className="bg-green-500/20 text-green-400">
+                {isInitialized ? "Connected" : "Disconnected"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Current User</span>
+              <Badge className="bg-blue-500/20 text-blue-400">
+                {currentUser?.username || "Not logged in"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Notifications</span>
+              <Badge className="bg-purple-500/20 text-purple-400">
+                {notifications.length} total
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
