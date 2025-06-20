@@ -685,6 +685,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deleteStory,
     addUser,
     updateCredentials,
+    updateAppConfig,
     addNotification,
     getStoryById,
     getStoriesByGenre,
