@@ -1,97 +1,12 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
+import {
+  APIClient,
+  type Story,
+  type User,
+  type ApiCredentials,
+} from "@/lib/api-client";
 
-// Types
-export interface Story {
-  id: string;
-  title: string;
-  genre: string;
-  description: string;
-  characters: Character[];
-  plotPoints: PlotPoint[];
-  tags: string[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  stats: StoryStats;
-  viralScore: number;
-  source: "original" | "reddit" | "imported";
-}
-
-export interface Character {
-  id: string;
-  name: string;
-  avatar: string;
-  role: "protagonist" | "antagonist" | "supporting";
-  personality: string;
-  secrets: string[];
-}
-
-export interface PlotPoint {
-  id: string;
-  trigger: "time" | "user_action" | "previous_message";
-  delay: number;
-  message: string;
-  sender: string;
-  emotions: string[];
-  cliffhanger: boolean;
-  viralMoment: boolean;
-  messageType: "text" | "image" | "audio" | "video" | "location" | "contact";
-  media?: any[];
-}
-
-export interface StoryStats {
-  views: number;
-  completions: number;
-  shares: number;
-  avgRating: number;
-  completionRate: number;
-}
-
-export interface AppCredentials {
-  reddit: {
-    clientId: string;
-    clientSecret: string;
-    userAgent: string;
-    enabled: boolean;
-  };
-  clerk: {
-    publishableKey: string;
-    secretKey: string;
-    webhookSecret: string;
-    enabled: boolean;
-  };
-  paypal: {
-    clientId: string;
-    clientSecret: string;
-    planId: string;
-    environment: "sandbox" | "production";
-    enabled: boolean;
-  };
-}
-
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  createdAt: string;
-  lastActive: string;
-  subscription: {
-    status: "free" | "premium" | "cancelled";
-    plan?: string;
-    expiresAt?: string;
-  };
-}
-
-interface AppState {
-  stories: Story[];
-  users: User[];
-  credentials: AppCredentials;
-  activeStory: Story | null;
-  isLoading: boolean;
-  notifications: Notification[];
-}
-
+// Notification types
 interface Notification {
   id: string;
   type: "success" | "error" | "warning" | "info";
@@ -101,18 +16,29 @@ interface Notification {
   isRead: boolean;
 }
 
+interface AppState {
+  stories: Story[];
+  users: User[];
+  credentials: ApiCredentials;
+  activeStory: Story | null;
+  isLoading: boolean;
+  notifications: Notification[];
+  error: string | null;
+}
+
 type AppAction =
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
   | { type: "SET_STORIES"; payload: Story[] }
   | { type: "ADD_STORY"; payload: Story }
   | { type: "UPDATE_STORY"; payload: Story }
   | { type: "DELETE_STORY"; payload: string }
   | { type: "SET_ACTIVE_STORY"; payload: Story | null }
   | { type: "SET_USERS"; payload: User[] }
-  | { type: "UPDATE_CREDENTIALS"; payload: AppCredentials }
-  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "ADD_USER"; payload: User }
+  | { type: "SET_CREDENTIALS"; payload: ApiCredentials }
   | { type: "ADD_NOTIFICATION"; payload: Notification }
-  | { type: "MARK_NOTIFICATION_READ"; payload: string }
-  | { type: "IMPORT_STORIES"; payload: Story[] };
+  | { type: "MARK_NOTIFICATION_READ"; payload: string };
 
 // Initial state
 const initialState: AppState = {
@@ -142,33 +68,37 @@ const initialState: AppState = {
   activeStory: null,
   isLoading: false,
   notifications: [],
+  error: null,
 };
 
 // Reducer
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case "SET_LOADING":
+      return { ...state, isLoading: action.payload };
+
+    case "SET_ERROR":
+      return { ...state, error: action.payload, isLoading: false };
+
     case "SET_STORIES":
       return { ...state, stories: action.payload };
 
     case "ADD_STORY":
-      const newStories = [...state.stories, action.payload];
-      // Save to localStorage
-      localStorage.setItem("chatlure_stories", JSON.stringify(newStories));
-      return { ...state, stories: newStories };
+      return { ...state, stories: [action.payload, ...state.stories] };
 
     case "UPDATE_STORY":
-      const updatedStories = state.stories.map((story) =>
-        story.id === action.payload.id ? action.payload : story,
-      );
-      localStorage.setItem("chatlure_stories", JSON.stringify(updatedStories));
-      return { ...state, stories: updatedStories };
+      return {
+        ...state,
+        stories: state.stories.map((story) =>
+          story.id === action.payload.id ? action.payload : story,
+        ),
+      };
 
     case "DELETE_STORY":
-      const filteredStories = state.stories.filter(
-        (story) => story.id !== action.payload,
-      );
-      localStorage.setItem("chatlure_stories", JSON.stringify(filteredStories));
-      return { ...state, stories: filteredStories };
+      return {
+        ...state,
+        stories: state.stories.filter((story) => story.id !== action.payload),
+      };
 
     case "SET_ACTIVE_STORY":
       return { ...state, activeStory: action.payload };
@@ -176,11 +106,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case "SET_USERS":
       return { ...state, users: action.payload };
 
-    case "UPDATE_CREDENTIALS":
-      return { ...state, credentials: action.payload };
+    case "ADD_USER":
+      return { ...state, users: [action.payload, ...state.users] };
 
-    case "SET_LOADING":
-      return { ...state, isLoading: action.payload };
+    case "SET_CREDENTIALS":
+      return { ...state, credentials: action.payload };
 
     case "ADD_NOTIFICATION":
       return {
@@ -196,11 +126,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
       };
 
-    case "IMPORT_STORIES":
-      const importedStories = [...state.stories, ...action.payload];
-      localStorage.setItem("chatlure_stories", JSON.stringify(importedStories));
-      return { ...state, stories: importedStories };
-
     default:
       return state;
   }
@@ -210,11 +135,24 @@ function appReducer(state: AppState, action: AppAction): AppState {
 const AppContext = createContext<{
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
-  // Helper functions
-  addStory: (story: Omit<Story, "id" | "createdAt" | "updatedAt">) => void;
-  updateStory: (story: Story) => void;
-  deleteStory: (id: string) => void;
-  importStories: (stories: any[]) => void;
+  // Data fetching functions
+  loadStories: () => Promise<void>;
+  loadUsers: () => Promise<void>;
+  loadCredentials: () => Promise<void>;
+  // Story operations
+  addStory: (
+    story: Omit<Story, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<void>;
+  updateStory: (id: string, story: Partial<Story>) => Promise<void>;
+  deleteStory: (id: string) => Promise<void>;
+  // User operations
+  addUser: (user: Omit<User, "createdAt" | "lastActive">) => Promise<void>;
+  // Credentials operations
+  updateCredentials: (
+    service: keyof ApiCredentials,
+    config: any,
+  ) => Promise<void>;
+  // Utility functions
   addNotification: (
     notification: Omit<Notification, "id" | "timestamp" | "isRead">,
   ) => void;
@@ -227,159 +165,396 @@ const AppContext = createContext<{
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const savedStories = localStorage.getItem("chatlure_stories");
-    if (savedStories) {
-      try {
-        const stories = JSON.parse(savedStories);
-        dispatch({ type: "SET_STORIES", payload: stories });
-      } catch (error) {
-        console.error("Failed to load stories from localStorage:", error);
-      }
+  // Data loading functions
+  const loadStories = async () => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
+
+      const stories = await APIClient.getStories();
+      dispatch({ type: "SET_STORIES", payload: stories });
+    } catch (error) {
+      console.error("Failed to load stories:", error);
+      // Initialize with demo data when API is not available
+      const demoStories = [
+        {
+          id: "demo_story_1",
+          title: "Welcome to ChatLure",
+          genre: "tutorial",
+          description:
+            "This is a demo story to showcase the platform features.",
+          isActive: true,
+          viralScore: 85,
+          source: "original" as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: ["demo", "tutorial"],
+          stats: {
+            views: 1250,
+            completions: 892,
+            shares: 145,
+            avgRating: 4.7,
+            completionRate: 71.4,
+          },
+          characters: [
+            {
+              id: "demo_char_1",
+              name: "Alex",
+              avatar: "👤",
+              role: "protagonist" as const,
+              personality: "Curious user",
+              secrets: ["New to ChatLure"],
+            },
+          ],
+          plotPoints: [
+            {
+              id: "demo_plot_1",
+              trigger: "time" as const,
+              delay: 0,
+              message: "Welcome to ChatLure! This is a demo.",
+              sender: "Alex",
+              emotions: ["excited"],
+              cliffhanger: false,
+              viralMoment: false,
+              messageType: "text" as const,
+              sortOrder: 0,
+            },
+          ],
+        },
+      ];
+      dispatch({ type: "SET_STORIES", payload: demoStories });
+      dispatch({
+        type: "SET_ERROR",
+        payload: "API not available - using demo mode.",
+      });
+      addNotification({
+        type: "warning",
+        title: "Demo Mode",
+        message: "API endpoints not available. Using local demo data.",
+      });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
     }
+  };
 
-    // Load credentials from localStorage
-    const credentials: AppCredentials = {
-      reddit: {
-        clientId: localStorage.getItem("reddit_client_id") || "",
-        clientSecret: localStorage.getItem("reddit_client_secret") || "",
-        userAgent: localStorage.getItem("reddit_user_agent") || "ChatLure:v1.0",
-        enabled: localStorage.getItem("reddit_enabled") === "true",
-      },
-      clerk: {
-        publishableKey: localStorage.getItem("clerk_publishable_key") || "",
-        secretKey: localStorage.getItem("clerk_secret_key") || "",
-        webhookSecret: localStorage.getItem("clerk_webhook_secret") || "",
-        enabled: localStorage.getItem("clerk_enabled") === "true",
-      },
-      paypal: {
-        clientId: localStorage.getItem("paypal_client_id") || "",
-        clientSecret: localStorage.getItem("paypal_client_secret") || "",
-        planId: localStorage.getItem("paypal_plan_id") || "",
-        environment:
-          (localStorage.getItem("paypal_environment") as
-            | "sandbox"
-            | "production") || "sandbox",
-        enabled: localStorage.getItem("paypal_enabled") === "true",
-      },
-    };
-    dispatch({ type: "UPDATE_CREDENTIALS", payload: credentials });
+  const loadUsers = async () => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
 
-    // Listen for credential updates
-    const handleCredentialsUpdate = (event: CustomEvent) => {
-      dispatch({ type: "UPDATE_CREDENTIALS", payload: event.detail });
-    };
+      const users = await APIClient.getUsers();
+      dispatch({ type: "SET_USERS", payload: users });
+    } catch (error) {
+      console.error("Failed to load users:", error);
+      // Initialize with demo data when API is not available
+      const demoUsers = [
+        {
+          id: "demo_user_1",
+          email: "demo@example.com",
+          firstName: "Demo",
+          lastName: "User",
+          createdAt: new Date().toISOString(),
+          lastActive: new Date().toISOString(),
+          subscription: { status: "premium" as const, plan: "Pro" },
+          engagement: {
+            storiesRead: 15,
+            avgTime: "18m",
+            favoriteGenre: "drama",
+          },
+        },
+        {
+          id: "demo_user_2",
+          email: "sarah@example.com",
+          firstName: "Sarah",
+          lastName: "Johnson",
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          lastActive: new Date(Date.now() - 3600000).toISOString(),
+          subscription: { status: "free" as const },
+          engagement: {
+            storiesRead: 8,
+            avgTime: "12m",
+            favoriteGenre: "family",
+          },
+        },
+      ];
+      dispatch({ type: "SET_USERS", payload: demoUsers });
+      dispatch({
+        type: "SET_ERROR",
+        payload: "API not available - using demo mode.",
+      });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
 
-    window.addEventListener(
-      "credentials-updated",
-      handleCredentialsUpdate as EventListener,
-    );
+  const loadCredentials = async () => {
+    try {
+      const credentials = await APIClient.getCredentials();
+      dispatch({ type: "SET_CREDENTIALS", payload: credentials });
+    } catch (error) {
+      console.error("Failed to load credentials:", error);
 
-    return () => {
-      window.removeEventListener(
-        "credentials-updated",
-        handleCredentialsUpdate as EventListener,
-      );
-    };
-  }, []);
+      // Fallback: Load from localStorage
+      const credentials: ApiCredentials = {
+        reddit: {
+          clientId: localStorage.getItem("reddit_clientId") || "",
+          clientSecret: localStorage.getItem("reddit_clientSecret") || "",
+          userAgent:
+            localStorage.getItem("reddit_userAgent") || "ChatLure:v1.0",
+          enabled: localStorage.getItem("reddit_enabled") === "true",
+        },
+        clerk: {
+          publishableKey: localStorage.getItem("clerk_publishableKey") || "",
+          secretKey: localStorage.getItem("clerk_secretKey") || "",
+          webhookSecret: localStorage.getItem("clerk_webhookSecret") || "",
+          enabled: localStorage.getItem("clerk_enabled") === "true",
+        },
+        paypal: {
+          clientId: localStorage.getItem("paypal_clientId") || "",
+          clientSecret: localStorage.getItem("paypal_clientSecret") || "",
+          planId: localStorage.getItem("paypal_planId") || "",
+          environment:
+            (localStorage.getItem("paypal_environment") as
+              | "sandbox"
+              | "production") || "sandbox",
+          enabled: localStorage.getItem("paypal_enabled") === "true",
+        },
+      };
 
-  // Helper functions
-  const addStory = (
+      dispatch({ type: "SET_CREDENTIALS", payload: credentials });
+    }
+  };
+
+  // Story operations
+  const addStory = async (
     storyData: Omit<Story, "id" | "createdAt" | "updatedAt">,
   ) => {
-    const now = new Date().toISOString();
-    const story: Story = {
-      ...storyData,
-      id: Date.now().toString(),
-      createdAt: now,
-      updatedAt: now,
-      stats: {
-        views: 0,
-        completions: 0,
-        shares: 0,
-        avgRating: 0,
-        completionRate: 0,
-      },
-    };
-    dispatch({ type: "ADD_STORY", payload: story });
-    addNotification({
-      type: "success",
-      title: "Story Created",
-      message: `"${story.title}" has been added to your library`,
-    });
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
+
+      let story: Story;
+
+      try {
+        story = await APIClient.createStory(storyData);
+      } catch (apiError) {
+        console.warn("API not available, creating story locally:", apiError);
+
+        // Fallback: Create story locally
+        const now = new Date().toISOString();
+        story = {
+          ...storyData,
+          id: `local_story_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+          createdAt: now,
+          updatedAt: now,
+        };
+      }
+
+      dispatch({ type: "ADD_STORY", payload: story });
+
+      addNotification({
+        type: "success",
+        title: "Story Created",
+        message: `"${story.title}" has been successfully created.`,
+      });
+
+      // Track analytics (ignore if API fails)
+      try {
+        await APIClient.trackMetric("stories_created", 1);
+      } catch (analyticsError) {
+        console.warn("Analytics tracking failed:", analyticsError);
+      }
+    } catch (error) {
+      console.error("Failed to create story:", error);
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Failed to create story. Please try again.",
+      });
+      addNotification({
+        type: "error",
+        title: "Creation Failed",
+        message: "Failed to create the story. Please try again.",
+      });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
   };
 
-  const updateStory = (story: Story) => {
-    const updatedStory = { ...story, updatedAt: new Date().toISOString() };
-    dispatch({ type: "UPDATE_STORY", payload: updatedStory });
-    addNotification({
-      type: "success",
-      title: "Story Updated",
-      message: `"${story.title}" has been updated`,
-    });
+  const updateStory = async (id: string, storyData: Partial<Story>) => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
+
+      let story: Story;
+
+      try {
+        story = await APIClient.updateStory(id, storyData);
+      } catch (apiError) {
+        console.warn("API not available, updating story locally:", apiError);
+
+        // Fallback: Update story locally
+        const existingStory = state.stories.find((s) => s.id === id);
+        if (!existingStory) {
+          throw new Error("Story not found");
+        }
+
+        story = {
+          ...existingStory,
+          ...storyData,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
+      dispatch({ type: "UPDATE_STORY", payload: story });
+
+      addNotification({
+        type: "success",
+        title: "Story Updated",
+        message: `"${story.title}" has been successfully updated.`,
+      });
+    } catch (error) {
+      console.error("Failed to update story:", error);
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Failed to update story. Please try again.",
+      });
+      addNotification({
+        type: "error",
+        title: "Update Failed",
+        message: "Failed to update the story. Please try again.",
+      });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
   };
 
-  const deleteStory = (id: string) => {
-    const story = state.stories.find((s) => s.id === id);
-    dispatch({ type: "DELETE_STORY", payload: id });
-    if (story) {
+  const deleteStory = async (id: string) => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
+
+      try {
+        await APIClient.deleteStory(id);
+      } catch (apiError) {
+        console.warn("API not available, deleting story locally:", apiError);
+        // Fallback: Just delete locally - no API call needed
+      }
+
+      dispatch({ type: "DELETE_STORY", payload: id });
+
       addNotification({
         type: "warning",
         title: "Story Deleted",
-        message: `"${story.title}" has been removed from your library`,
+        message: "The story has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error("Failed to delete story:", error);
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Failed to delete story. Please try again.",
+      });
+      addNotification({
+        type: "error",
+        title: "Deletion Failed",
+        message: "Failed to delete the story. Please try again.",
+      });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
+
+  // User operations
+  const addUser = async (userData: Omit<User, "createdAt" | "lastActive">) => {
+    try {
+      const user = await APIClient.createUser(userData);
+      dispatch({ type: "ADD_USER", payload: user });
+
+      addNotification({
+        type: "success",
+        title: "User Added",
+        message: `${user.firstName} ${user.lastName} has been added.`,
+      });
+
+      // Track analytics (ignore if API fails)
+      try {
+        await APIClient.trackMetric("users_registered", 1);
+      } catch (analyticsError) {
+        console.warn("Analytics tracking failed:", analyticsError);
+      }
+    } catch (error) {
+      console.error("Failed to add user:", error);
+      addNotification({
+        type: "error",
+        title: "User Creation Failed",
+        message: "Failed to add the user. Please try again.",
       });
     }
   };
 
-  const importStories = (importedStories: any[]) => {
-    const stories: Story[] = importedStories.map((story) => ({
-      id: story.id || Date.now().toString() + Math.random(),
-      title: story.title,
-      genre: story.genre || "drama",
-      description: story.description || "",
-      characters: story.characters || [],
-      plotPoints:
-        story.messages?.map((msg: any, index: number) => ({
-          id: `${story.id}-${index}`,
-          trigger: "time" as const,
-          delay: index * 180000, // 3 minutes apart
-          message: msg.message,
-          sender: msg.sender,
-          emotions: [msg.emotion || "neutral"],
-          cliffhanger: msg.isCliffhanger || false,
-          viralMoment: msg.viral || false,
-          messageType: msg.messageType || ("text" as const),
-        })) || [],
-      tags: story.tags || [],
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      stats: {
-        views: story.upvotes || 0,
-        completions: 0,
-        shares: 0,
-        avgRating: 0,
-        completionRate: 0,
-      },
-      viralScore: story.estimatedViralScore || 50,
-      source: story.source || ("imported" as const),
-    }));
+  // Credentials operations
+  const updateCredentials = async (
+    service: keyof ApiCredentials,
+    config: any,
+  ) => {
+    try {
+      console.log(`Updating ${service} credentials:`, config);
 
-    dispatch({ type: "IMPORT_STORIES", payload: stories });
-    addNotification({
-      type: "success",
-      title: "Stories Imported",
-      message: `${stories.length} stories have been imported successfully`,
-    });
+      // Try API first, but fall back to localStorage if it fails
+      try {
+        console.log(`Calling API for ${service}...`);
+        await APIClient.updateCredentials(service, config);
+        console.log(`API call successful for ${service}`);
+
+        const credentials = await APIClient.getCredentials();
+        dispatch({ type: "SET_CREDENTIALS", payload: credentials });
+        console.log(`Credentials updated in state for ${service}`);
+      } catch (apiError) {
+        console.warn(
+          `API not available for ${service}, using localStorage fallback:`,
+          apiError,
+        );
+
+        // Fallback: Save to localStorage
+        const currentCredentials = { ...state.credentials };
+        currentCredentials[service] = {
+          ...currentCredentials[service],
+          ...config,
+        };
+
+        // Save individual service settings to localStorage
+        Object.keys(config).forEach((key) => {
+          const value = config[key]?.toString() || "";
+          localStorage.setItem(`${service}_${key}`, value);
+          console.log(`Saved to localStorage: ${service}_${key} = ${value}`);
+        });
+
+        dispatch({ type: "SET_CREDENTIALS", payload: currentCredentials });
+        console.log(`Fallback successful for ${service}`);
+      }
+
+      addNotification({
+        type: "success",
+        title: "Credentials Updated",
+        message: `${service} credentials have been successfully saved.`,
+      });
+    } catch (error) {
+      console.error(`Failed to update ${service} credentials:`, error);
+      addNotification({
+        type: "error",
+        title: "Update Failed",
+        message: `Failed to save ${service} credentials. Please try again.`,
+      });
+      throw error; // Re-throw so Settings component can catch it
+    }
   };
 
+  // Utility functions
   const addNotification = (
     notificationData: Omit<Notification, "id" | "timestamp" | "isRead">,
   ) => {
     const notification: Notification = {
       ...notificationData,
-      id: Date.now().toString(),
+      id: `notif_${Date.now()}_${Math.random().toString(36).slice(2)}`,
       timestamp: new Date().toISOString(),
       isRead: false,
     };
@@ -398,13 +573,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return state.stories.filter((story) => story.isActive);
   };
 
+  // Load initial data on mount
+  useEffect(() => {
+    const initializeData = async () => {
+      await Promise.all([loadStories(), loadUsers(), loadCredentials()]);
+    };
+
+    initializeData();
+  }, []);
+
   const contextValue = {
     state,
     dispatch,
+    loadStories,
+    loadUsers,
+    loadCredentials,
     addStory,
     updateStory,
     deleteStory,
-    importStories,
+    addUser,
+    updateCredentials,
     addNotification,
     getStoryById,
     getStoriesByGenre,
@@ -439,4 +627,19 @@ export function useCredentials() {
 export function useNotifications() {
   const { state } = useApp();
   return state.notifications;
+}
+
+export function useUsers() {
+  const { state } = useApp();
+  return state.users;
+}
+
+export function useLoading() {
+  const { state } = useApp();
+  return state.isLoading;
+}
+
+export function useError() {
+  const { state } = useApp();
+  return state.error;
 }

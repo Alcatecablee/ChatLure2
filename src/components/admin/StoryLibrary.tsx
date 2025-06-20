@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useApp, useStories } from "@/contexts/AppContext";
+import { useApp, useStories, useLoading } from "@/contexts/AppContext";
 import {
   Search,
   Filter,
@@ -45,29 +45,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface Story {
-  id: string;
-  title: string;
-  genre: string;
-  description: string;
-  characters: Character[];
-  messageCount: number;
-  viralScore: number;
-  isActive: boolean;
-  isPublished: boolean;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  stats: StoryStats;
-  media: {
-    images: number;
-    audio: number;
-    video: number;
-  };
-  source: "original" | "reddit" | "imported";
-  difficulty: "easy" | "medium" | "hard";
-  estimatedDuration: string;
-}
+// Using Story from API types
+import type { Story } from "@/lib/api-client";
 
 interface Character {
   id: string;
@@ -87,108 +66,6 @@ interface StoryStats {
   comments: number;
 }
 
-const SAMPLE_STORIES: Story[] = [
-  {
-    id: "1",
-    title: "Mom Saw the Texts",
-    genre: "family",
-    description:
-      "Teenage daughter's secret relationship exposed when strict mother goes through her phone",
-    characters: [
-      { id: "1", name: "Lena", avatar: "👧", role: "protagonist" },
-      { id: "2", name: "Zoey", avatar: "👭", role: "supporting" },
-      { id: "3", name: "Mom", avatar: "👩‍💼", role: "antagonist" },
-    ],
-    messageCount: 24,
-    viralScore: 95,
-    isActive: true,
-    isPublished: true,
-    tags: ["family", "secrets", "teens", "strict-parents"],
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-15",
-    stats: {
-      views: 125000,
-      completions: 89000,
-      shares: 12500,
-      avgRating: 4.8,
-      completionRate: 71.2,
-      avgEngagementTime: 1280,
-      peakViewers: 5600,
-      comments: 3200,
-    },
-    media: { images: 8, audio: 2, video: 1 },
-    source: "original",
-    difficulty: "medium",
-    estimatedDuration: "25 minutes",
-  },
-  {
-    id: "2",
-    title: "The Affair Exposed",
-    genre: "scandal",
-    description:
-      "Wife discovers husband's 6-month affair through his Apple Watch notifications",
-    characters: [
-      { id: "1", name: "Sarah", avatar: "👩‍💼", role: "protagonist" },
-      { id: "2", name: "Marcus", avatar: "👨‍💼", role: "antagonist" },
-      { id: "3", name: "Jessica", avatar: "👩‍🎨", role: "antagonist" },
-    ],
-    messageCount: 31,
-    viralScore: 98,
-    isActive: true,
-    isPublished: true,
-    tags: ["affair", "marriage", "betrayal", "technology"],
-    createdAt: "2024-01-14",
-    updatedAt: "2024-01-16",
-    stats: {
-      views: 287000,
-      completions: 198000,
-      shares: 28000,
-      avgRating: 4.9,
-      completionRate: 69.0,
-      avgEngagementTime: 1450,
-      peakViewers: 8900,
-      comments: 7800,
-    },
-    media: { images: 12, audio: 5, video: 3 },
-    source: "reddit",
-    difficulty: "hard",
-    estimatedDuration: "32 minutes",
-  },
-  {
-    id: "3",
-    title: "Inheritance War",
-    genre: "money",
-    description:
-      "Family turns against each other when wealthy grandmother's will is read",
-    characters: [
-      { id: "1", name: "Emma", avatar: "👩‍⚖️", role: "protagonist" },
-      { id: "2", name: "Brother", avatar: "👨‍💼", role: "antagonist" },
-      { id: "3", name: "Cousin", avatar: "👩‍🎭", role: "supporting" },
-    ],
-    messageCount: 18,
-    viralScore: 88,
-    isActive: false,
-    isPublished: false,
-    tags: ["money", "family", "inheritance", "greed"],
-    createdAt: "2024-01-12",
-    updatedAt: "2024-01-13",
-    stats: {
-      views: 45000,
-      completions: 28000,
-      shares: 3200,
-      avgRating: 4.5,
-      completionRate: 62.2,
-      avgEngagementTime: 980,
-      peakViewers: 1200,
-      comments: 890,
-    },
-    media: { images: 3, audio: 0, video: 0 },
-    source: "imported",
-    difficulty: "easy",
-    estimatedDuration: "18 minutes",
-  },
-];
-
 const GENRE_COLORS = {
   family: "bg-blue-500/20 text-blue-400",
   scandal: "bg-red-500/20 text-red-400",
@@ -199,18 +76,9 @@ const GENRE_COLORS = {
 };
 
 export function StoryLibrary() {
-  const { updateStory, deleteStory, addNotification } = useApp();
-  const storiesFromContext = useStories();
-  const [stories, setStories] = useState<Story[]>(
-    storiesFromContext.length > 0 ? storiesFromContext : SAMPLE_STORIES,
-  );
-
-  // Update local state when global state changes
-  useEffect(() => {
-    if (storiesFromContext.length > 0) {
-      setStories(storiesFromContext);
-    }
-  }, [storiesFromContext]);
+  const { updateStory, deleteStory, addNotification, loadStories } = useApp();
+  const stories = useStories();
+  const isLoading = useLoading();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [sortBy, setSortBy] = useState("viral");
@@ -366,34 +234,51 @@ export function StoryLibrary() {
         <div className="flex items-center space-x-3">
           <span className="flex items-center space-x-1">
             <MessageSquare size={12} />
-            <span>{story.messageCount}</span>
+            <span>{story.plotPoints?.length || 0}</span>
           </span>
           <span className="flex items-center space-x-1">
             <Users size={12} />
-            <span>{story.characters.length}</span>
+            <span>{story.characters?.length || 0}</span>
           </span>
           <span className="flex items-center space-x-1">
             <Clock size={12} />
-            <span>{story.estimatedDuration}</span>
+            <span>
+              {Math.round((story.plotPoints?.length || 0) * 2.5)}m est.
+            </span>
           </span>
         </div>
         <div className="flex items-center space-x-1">
-          {story.media.images > 0 && (
+          {story.plotPoints?.some((p) => p.messageType === "image") && (
             <span className="flex items-center space-x-1">
               <Image size={12} />
-              <span>{story.media.images}</span>
+              <span>
+                {
+                  story.plotPoints.filter((p) => p.messageType === "image")
+                    .length
+                }
+              </span>
             </span>
           )}
-          {story.media.audio > 0 && (
+          {story.plotPoints?.some((p) => p.messageType === "audio") && (
             <span className="flex items-center space-x-1">
               <Mic size={12} />
-              <span>{story.media.audio}</span>
+              <span>
+                {
+                  story.plotPoints.filter((p) => p.messageType === "audio")
+                    .length
+                }
+              </span>
             </span>
           )}
-          {story.media.video > 0 && (
+          {story.plotPoints?.some((p) => p.messageType === "video") && (
             <span className="flex items-center space-x-1">
               <Video size={12} />
-              <span>{story.media.video}</span>
+              <span>
+                {
+                  story.plotPoints.filter((p) => p.messageType === "video")
+                    .length
+                }
+              </span>
             </span>
           )}
         </div>
@@ -505,6 +390,17 @@ export function StoryLibrary() {
       )}
     </motion.div>
   );
+
+  if (isLoading && stories.length === 0) {
+    return (
+      <div className="w-full max-w-7xl mx-auto p-6 bg-gray-900 text-white rounded-xl">
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+          <span className="ml-3 text-gray-400">Loading stories...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 bg-gray-900 text-white rounded-xl">

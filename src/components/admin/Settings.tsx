@@ -14,6 +14,7 @@ import {
   RefreshCw,
   TestTube,
 } from "lucide-react";
+import { useApp, useCredentials } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,30 +47,9 @@ interface ApiCredentials {
 }
 
 export function Settings() {
-  const [credentials, setCredentials] = useState<ApiCredentials>({
-    reddit: {
-      clientId: localStorage.getItem("reddit_client_id") || "",
-      clientSecret: localStorage.getItem("reddit_client_secret") || "",
-      userAgent: localStorage.getItem("reddit_user_agent") || "ChatLure:v1.0",
-      enabled: localStorage.getItem("reddit_enabled") === "true",
-    },
-    clerk: {
-      publishableKey: localStorage.getItem("clerk_publishable_key") || "",
-      secretKey: localStorage.getItem("clerk_secret_key") || "",
-      webhookSecret: localStorage.getItem("clerk_webhook_secret") || "",
-      enabled: localStorage.getItem("clerk_enabled") === "true",
-    },
-    paypal: {
-      clientId: localStorage.getItem("paypal_client_id") || "",
-      clientSecret: localStorage.getItem("paypal_client_secret") || "",
-      planId: localStorage.getItem("paypal_plan_id") || "",
-      environment:
-        (localStorage.getItem("paypal_environment") as
-          | "sandbox"
-          | "production") || "sandbox",
-      enabled: localStorage.getItem("paypal_enabled") === "true",
-    },
-  });
+  const { updateCredentials, addNotification } = useApp();
+  const globalCredentials = useCredentials();
+  const [credentials, setCredentials] = useState(globalCredentials);
 
   const [showSecrets, setShowSecrets] = useState({
     reddit: false,
@@ -91,81 +71,98 @@ export function Settings() {
 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  const saveCredentials = () => {
-    // Save to localStorage
-    localStorage.setItem("reddit_client_id", credentials.reddit.clientId);
-    localStorage.setItem(
-      "reddit_client_secret",
-      credentials.reddit.clientSecret,
-    );
-    localStorage.setItem("reddit_user_agent", credentials.reddit.userAgent);
-    localStorage.setItem(
-      "reddit_enabled",
-      credentials.reddit.enabled.toString(),
-    );
+  // Update local state when global credentials change
+  useEffect(() => {
+    setCredentials(globalCredentials);
+  }, [globalCredentials]);
 
-    localStorage.setItem(
-      "clerk_publishable_key",
-      credentials.clerk.publishableKey,
-    );
-    localStorage.setItem("clerk_secret_key", credentials.clerk.secretKey);
-    localStorage.setItem(
-      "clerk_webhook_secret",
-      credentials.clerk.webhookSecret,
-    );
-    localStorage.setItem("clerk_enabled", credentials.clerk.enabled.toString());
+  const saveCredentials = async () => {
+    try {
+      console.log("Starting to save credentials...");
+      console.log("Reddit credentials:", credentials.reddit);
 
-    localStorage.setItem("paypal_client_id", credentials.paypal.clientId);
-    localStorage.setItem(
-      "paypal_client_secret",
-      credentials.paypal.clientSecret,
-    );
-    localStorage.setItem("paypal_plan_id", credentials.paypal.planId);
-    localStorage.setItem("paypal_environment", credentials.paypal.environment);
-    localStorage.setItem(
-      "paypal_enabled",
-      credentials.paypal.enabled.toString(),
-    );
+      // Save each service's credentials
+      console.log("Saving Reddit credentials...");
+      await updateCredentials("reddit", credentials.reddit);
 
-    setLastSaved(new Date());
+      console.log("Saving Clerk credentials...");
+      await updateCredentials("clerk", credentials.clerk);
 
-    // Dispatch event for other components to listen to
-    window.dispatchEvent(
-      new CustomEvent("credentials-updated", { detail: credentials }),
-    );
+      console.log("Saving PayPal credentials...");
+      await updateCredentials("paypal", credentials.paypal);
+
+      setLastSaved(new Date());
+
+      addNotification({
+        type: "success",
+        title: "Settings Saved",
+        message: "All API credentials have been saved successfully.",
+      });
+
+      console.log("All credentials saved successfully!");
+    } catch (error) {
+      console.error("Failed to save credentials:", error);
+      addNotification({
+        type: "error",
+        title: "Save Failed",
+        message: `Failed to save credentials: ${error.message}`,
+      });
+    }
   };
 
   const testConnection = async (service: keyof typeof connectionStatus) => {
     setIsLoading((prev) => ({ ...prev, [service]: true }));
 
     try {
-      // Simulate API testing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Validate credentials before testing
+      if (service === "reddit") {
+        if (!credentials.reddit.clientId || !credentials.reddit.clientSecret) {
+          throw new Error("Client ID and Secret are required");
+        }
+        if (!credentials.reddit.userAgent) {
+          throw new Error("User Agent is required");
+        }
+      }
 
-      // Mock success for demo - in real app, make actual API calls
-      if (
-        service === "reddit" &&
-        credentials.reddit.clientId &&
-        credentials.reddit.clientSecret
-      ) {
-        setConnectionStatus((prev) => ({ ...prev, reddit: "connected" }));
-      } else if (
-        service === "clerk" &&
-        credentials.clerk.publishableKey &&
-        credentials.clerk.secretKey
-      ) {
-        setConnectionStatus((prev) => ({ ...prev, clerk: "connected" }));
-      } else if (
-        service === "paypal" &&
-        credentials.paypal.clientId &&
-        credentials.paypal.clientSecret
-      ) {
-        setConnectionStatus((prev) => ({ ...prev, paypal: "connected" }));
+      // Test actual API connections
+      const response = await fetch(`/api/test-connection/${service}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials[service]),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setConnectionStatus((prev) => ({ ...prev, [service]: "connected" }));
+        addNotification({
+          type: "success",
+          title: "Connection Successful",
+          message:
+            service === "reddit"
+              ? `Reddit API connected! Ready to scan viral content from ${result.availableSubreddits || "all"} subreddits.`
+              : `${service} API connection tested successfully.`,
+        });
       } else {
         setConnectionStatus((prev) => ({ ...prev, [service]: "error" }));
+        addNotification({
+          type: "error",
+          title: "Connection Failed",
+          message:
+            result.error ||
+            `Failed to connect to ${service} API. Check your credentials.`,
+        });
       }
     } catch (error) {
       setConnectionStatus((prev) => ({ ...prev, [service]: "error" }));
+      addNotification({
+        type: "error",
+        title: "Connection Error",
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      });
     } finally {
       setIsLoading((prev) => ({ ...prev, [service]: false }));
     }
@@ -369,23 +366,64 @@ export function Settings() {
                 <h4 className="font-medium text-blue-400 mb-2">
                   📋 Setup Instructions
                 </h4>
-                <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
                   <li>
                     Go to{" "}
                     <a
                       href="https://www.reddit.com/prefs/apps"
                       target="_blank"
-                      className="text-blue-400 underline"
+                      className="text-blue-400 underline hover:text-blue-300"
                     >
                       Reddit App Preferences
                     </a>
                   </li>
-                  <li>Click "Create App" and select "script" type</li>
                   <li>
-                    Set redirect URI to: http://localhost:8080/auth/reddit
+                    Click "Create App" and select <strong>"script"</strong> type
+                  </li>
+                  <li>
+                    Set redirect URI to:{" "}
+                    <code className="bg-gray-700 px-2 py-1 rounded text-green-400">
+                      http://localhost:8080/auth/reddit
+                    </code>
                   </li>
                   <li>Copy the client ID and secret to the fields above</li>
+                  <li>Test the connection to verify it's working</li>
                 </ol>
+
+                <div className="mt-4 pt-4 border-t border-blue-500/20">
+                  <h5 className="font-medium text-blue-300 mb-2">
+                    🔥 Content Sources
+                  </h5>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-blue-300">• r/insaneparents</span> -
+                      Family drama
+                    </div>
+                    <div>
+                      <span className="text-blue-300">
+                        • r/relationship_advice
+                      </span>{" "}
+                      - Romance drama
+                    </div>
+                    <div>
+                      <span className="text-blue-300">• r/AmItheAsshole</span> -
+                      Moral conflicts
+                    </div>
+                    <div>
+                      <span className="text-blue-300">• r/ChoosingBeggars</span>{" "}
+                      - Entitled behavior
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-blue-500/20">
+                  <h5 className="font-medium text-blue-300 mb-1">💡 Pro Tip</h5>
+                  <p className="text-xs text-gray-400">
+                    Reddit posts with 5K+ upvotes typically convert to viral
+                    ChatLure stories. The content scanner will automatically
+                    identify high-potential posts.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
