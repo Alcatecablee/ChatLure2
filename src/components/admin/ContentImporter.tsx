@@ -174,13 +174,15 @@ export function ContentImporter({
 
   // Reddit content with fallback system (CORS-safe approach)
   const fetchFromRedditAPI = async (subreddit: string, query: string) => {
-    const { clientId, clientSecret } = credentials.reddit;
-
     try {
       // Try using Reddit's public JSON endpoints (no authentication required, CORS-friendly)
       const subredditName =
-        subreddit === "all" ? "all" : subreddit.replace("r/", "");
+        subreddit === "all"
+          ? "relationship_advice"
+          : subreddit.replace("r/", "");
       const redditUrl = `https://www.reddit.com/r/${subredditName}/hot.json?limit=25`;
+
+      console.log("Fetching from Reddit:", redditUrl);
 
       // Use Reddit's public JSON API (works with CORS)
       const response = await fetch(redditUrl, {
@@ -190,21 +192,60 @@ export function ContentImporter({
       });
 
       if (!response.ok) {
+        console.log("Reddit API failed, using fallback");
         throw new Error(`Reddit fetch failed: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log("Reddit data received:", data.data.children.length, "posts");
+
+      // More lenient filtering - look for relationship/drama keywords
+      const dramaTriggers = [
+        "affair",
+        "cheating",
+        "betrayed",
+        "toxic",
+        "divorce",
+        "breakup",
+        "crazy",
+        "drama",
+        "fight",
+        "argument",
+        "relationship",
+        "boyfriend",
+        "girlfriend",
+        "husband",
+        "wife",
+        "family",
+        "parents",
+      ];
 
       const posts = data.data.children
         .filter((child: any) => {
-          // Filter by query if provided
-          if (query) {
-            const title = child.data.title.toLowerCase();
-            const content = (child.data.selftext || "").toLowerCase();
-            const searchTerms = query.toLowerCase();
-            return title.includes(searchTerms) || content.includes(searchTerms);
+          // More lenient filtering - look for drama-related content
+          const title = child.data.title.toLowerCase();
+          const content = (child.data.selftext || "").toLowerCase();
+
+          // Check if query is provided and matches
+          if (query && query.trim()) {
+            const searchTerms = query.toLowerCase().split(" ");
+            const hasQueryMatch = searchTerms.some(
+              (term) => title.includes(term) || content.includes(term),
+            );
+            if (hasQueryMatch) return true;
           }
-          return true;
+
+          // Check for drama triggers
+          const hasDramaTrigger = dramaTriggers.some(
+            (trigger) => title.includes(trigger) || content.includes(trigger),
+          );
+
+          // Include posts with decent engagement or drama content
+          return (
+            hasDramaTrigger ||
+            child.data.ups > 100 ||
+            child.data.num_comments > 20
+          );
         })
         .map((child: any) => ({
           id: child.data.id,
@@ -218,6 +259,14 @@ export function ContentImporter({
           author: child.data.author,
           flair: child.data.link_flair_text,
         }));
+
+      console.log("Filtered posts:", posts.length);
+
+      // If no posts from Reddit, use curated content
+      if (posts.length === 0) {
+        console.log("No Reddit posts found, using curated content");
+        return getCuratedContent(subreddit, query);
+      }
 
       return posts;
     } catch (error) {
