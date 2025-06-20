@@ -757,7 +757,7 @@ const Admin = () => {
         </div>
 
         {/* Content Area */}
-        <main className="flex-1 p-6 overflow-y-auto bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <main className="flex-1 p-6 overflow-y-auto bg-gradient-to-br from-background via-background to-card">
           <AnimatePresence mode="wait">
             <motion.div
               key={section}
