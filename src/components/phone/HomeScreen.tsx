@@ -64,15 +64,7 @@ function AppIcon({
         className={`w-16 h-16 rounded-app flex items-center justify-center text-white shadow-lg transform group-active:scale-95 transition-transform overflow-hidden`}
         style={{ backgroundColor: name === "ChatLure" ? "transparent" : color }}
       >
-        {name === "ChatLure" ? (
-          <img
-            src="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
-            alt="ChatLure"
-            className="w-full h-full object-cover rounded-app"
-          />
-        ) : (
-          icon
-        )}
+        {icon}
       </div>
       <span className="text-white text-xs text-center leading-none font-medium">
         {name}
