@@ -102,6 +102,55 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     return () => clearInterval(interval);
   }, [isLiveMode]);
 
+  // Fetch real dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const data = await APIClient.getDashboardMetrics();
+        setDashboardData(data);
+
+        // Create real performance metrics from API data
+        const realMetrics: PerformanceMetric[] = [
+          {
+            label: "Total Stories",
+            value: data.totalStories,
+            change: 0, // We don't have historical data yet
+            trend: "stable",
+            format: "number",
+          },
+          {
+            label: "Active Users",
+            value: data.totalUsers,
+            change: 0,
+            trend: "stable",
+            format: "number",
+          },
+          {
+            label: "Recent Views",
+            value: data.recentViews,
+            change: 0,
+            trend: "stable",
+            format: "number",
+          },
+          {
+            label: "Average Rating",
+            value: data.avgRating,
+            change: 0,
+            trend: "stable",
+            format: "rating",
+          },
+        ];
+
+        setPerformanceMetrics(realMetrics);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        // Keep using local stories data as fallback
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   const activeStories = stories.filter((story) => story.isActive);
   const totalViews = stories.reduce(
     (sum, story) => sum + (story.stats?.views || 0),
