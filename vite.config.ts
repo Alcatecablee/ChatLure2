@@ -11,7 +11,9 @@ const ultimateTooltipKiller = () => ({
     if (
       id.includes("tooltip") ||
       id.includes("Tooltip") ||
-      id.includes("@radix-ui/react-tooltip")
+      id.includes("@radix-ui/react-tooltip") ||
+      id === "@radix-ui/react-tooltip" ||
+      id.startsWith("@radix-ui/react-tooltip/")
     ) {
       console.log(`🚫 BLOCKED TOOLTIP IMPORT: ${id} from ${importer}`);
       return "\0virtual:empty-tooltip";
@@ -42,11 +44,18 @@ const ultimateTooltipKiller = () => ({
     config.optimizeDeps.exclude = config.optimizeDeps.exclude || [];
     config.optimizeDeps.exclude.push("@radix-ui/react-tooltip");
     config.optimizeDeps.exclude.push("@radix-ui/react-tooltip/dist");
+    // Prevent any pre-bundling
+    config.optimizeDeps.include = config.optimizeDeps.include || [];
   },
   buildStart() {
     console.log(
       "🔥 ULTIMATE TOOLTIP KILLER ACTIVATED - MAXIMUM DESTRUCTION MODE",
     );
+  },
+  config(config) {
+    // Prevent scanning for this dependency
+    config.optimizeDeps = config.optimizeDeps || {};
+    config.optimizeDeps.entries = config.optimizeDeps.entries || [];
   },
 });
 
