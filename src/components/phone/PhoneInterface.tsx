@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HomeScreen } from "./HomeScreen";
 import { StatusBar } from "./StatusBar";
 import { LockScreen } from "./LockScreen";
+import { LockScreenToggle } from "./LockScreenToggle";
 import { useLockScreen } from "@/contexts/LockScreenContext";
 import { useBattery } from "@/contexts/BatteryContext";
 
@@ -95,6 +96,9 @@ export function PhoneInterface() {
 
   return (
     <div className="w-full h-full bg-black flex flex-col relative">
+      {/* Lock Screen Toggle for testing */}
+      <LockScreenToggle />
+
       {/* Status Bar */}
       <StatusBar />
 
