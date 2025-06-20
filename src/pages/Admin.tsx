@@ -258,7 +258,7 @@ function UserManagement() {
                       className="w-12 h-12 rounded-full"
                     />
                   ) : (
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-foreground font-bold border border-border">
                       {user.firstName[0]}
                       {user.lastName[0]}
                     </div>
