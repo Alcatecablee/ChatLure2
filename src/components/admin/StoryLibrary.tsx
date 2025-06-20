@@ -30,6 +30,7 @@ import {
   Pause,
   BarChart3,
   AlertCircle,
+  Plus,
 } from "lucide-react";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { Story } from "@/lib/database";
