@@ -672,8 +672,6 @@ export function Settings() {
               </div>
             </div>
           </Card>
-        </CardContent>
-      </Card>
 
       {/* Actions */}
       <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
