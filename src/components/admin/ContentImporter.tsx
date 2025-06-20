@@ -77,7 +77,7 @@ const REDDIT_SOURCES = [
   { name: "r/confession", members: "1.1M", category: "secrets", viral: 94 },
 ];
 
-export default function ContentImporter() {
+export function ContentImporter() {
   const { createStory, createNotification } = useDatabase();
   const { state: appState, addNotification } = useApp();
   const credentials = appState.credentials;
