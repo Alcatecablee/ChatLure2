@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDatabase } from "@/contexts/DatabaseContext";
+import { redditAPI } from "@/utils/redditApi";
 
 export function Settings() {
   const { currentUser, updateUser } = useDatabase();
@@ -119,13 +120,49 @@ export function Settings() {
   const testConnection = async (service: string) => {
     setTestingConnection(service);
 
-    // Simulate API testing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      if (service === "reddit") {
+        const redditCreds = {
+          clientId: settings.redditClientId,
+          clientSecret: settings.redditClientSecret,
+          userAgent: "ChatLure:v1.0 (by /u/chatlure)",
+          enabled: true,
+        };
 
-    setTestingConnection(null);
+        if (!redditCreds.clientId || !redditCreds.clientSecret) {
+          alert("Please enter both Reddit Client ID and Client Secret first.");
+          setTestingConnection(null);
+          return false;
+        }
 
-    // In a real app, you'd test the actual API connection here
-    return Math.random() > 0.3; // 70% success rate for demo
+        const success = await redditAPI.testConnection(redditCreds);
+
+        if (success) {
+          alert(
+            "✅ Reddit API connection successful! You can now scan Reddit for viral content.",
+          );
+        } else {
+          alert(
+            "❌ Reddit API connection failed. Please check your credentials.",
+          );
+        }
+
+        setTestingConnection(null);
+        return success;
+      } else {
+        // For other services, simulate test for now
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        alert(`${service} connection testing is not yet implemented.`);
+        setTestingConnection(null);
+        return Math.random() > 0.3; // 70% success rate for demo
+      }
+    } catch (error) {
+      alert(
+        `Connection test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+      setTestingConnection(null);
+      return false;
+    }
   };
 
   const resetSettings = () => {
