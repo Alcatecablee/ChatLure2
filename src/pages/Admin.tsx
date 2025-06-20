@@ -625,8 +625,8 @@ const Admin = () => {
                     whileTap={{ scale: 0.98 }}
                     className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center space-x-3 group ${
                       isActive
-                        ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/25"
-                        : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/70 hover:text-white"
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                        : "bg-sidebar-accent text-sidebar-foreground hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
                     }`}
                     onClick={() => setSection(s.key)}
                   >
