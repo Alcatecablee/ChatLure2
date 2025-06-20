@@ -1,8 +1,26 @@
 import { StoryAPI } from "../src/lib/api-server.js";
 
+// Helper function for consistent responses
+function sendResponse(res, statusCode, data) {
+  res.statusCode = statusCode;
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  return res.end(JSON.stringify(data));
+}
+
 export default async function handler(req, res) {
   const { method } = req;
   const { id } = req.query;
+
+  // Handle CORS preflight
+  if (method === "OPTIONS") {
+    return sendResponse(res, 200, {});
+  }
 
   try {
     switch (method) {
@@ -11,21 +29,21 @@ export default async function handler(req, res) {
           // Get single story
           const story = await StoryAPI.getById(id);
           if (!story) {
-            return res.status(404).json({ error: "Story not found" });
+            return sendResponse(res, 404, { error: "Story not found" });
           }
-          return res.status(200).json(story);
+          return sendResponse(res, 200, story);
         } else {
           // Get all stories
           const stories = await StoryAPI.getAll();
-          return res.status(200).json(stories);
+          return sendResponse(res, 200, stories);
         }
 
       case "POST":
         // Create new story
         if (!req.body.title || !req.body.genre) {
-          return res
-            .status(400)
-            .json({ error: "Title and genre are required" });
+          return sendResponse(res, 400, {
+            error: "Title and genre are required",
+          });
         }
 
         const newStory = await StoryAPI.create({
@@ -47,40 +65,41 @@ export default async function handler(req, res) {
           plotPoints: req.body.plotPoints || [],
         });
 
-        return res.status(201).json(newStory);
+        return sendResponse(res, 201, newStory);
 
       case "PUT":
         // Update story
         if (!id) {
-          return res.status(400).json({ error: "Story ID is required" });
+          return sendResponse(res, 400, { error: "Story ID is required" });
         }
 
         const updatedStory = await StoryAPI.update(id, req.body);
         if (!updatedStory) {
-          return res.status(404).json({ error: "Story not found" });
+          return sendResponse(res, 404, { error: "Story not found" });
         }
 
-        return res.status(200).json(updatedStory);
+        return sendResponse(res, 200, updatedStory);
 
       case "DELETE":
         // Delete story
         if (!id) {
-          return res.status(400).json({ error: "Story ID is required" });
+          return sendResponse(res, 400, { error: "Story ID is required" });
         }
 
         const deleted = await StoryAPI.delete(id);
         if (!deleted) {
-          return res.status(404).json({ error: "Story not found" });
+          return sendResponse(res, 404, { error: "Story not found" });
         }
 
-        return res.status(200).json({ success: true });
+        return sendResponse(res, 200, { success: true });
 
       default:
-        res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
-        return res.status(405).json({ error: `Method ${method} not allowed` });
+        return sendResponse(res, 405, {
+          error: `Method ${method} not allowed`,
+        });
     }
   } catch (error) {
     console.error("Stories API error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return sendResponse(res, 500, { error: "Internal server error" });
   }
 }

@@ -116,10 +116,13 @@ export function Settings() {
     try {
       // Validate credentials before testing
       if (service === "reddit") {
-        if (!credentials.reddit.clientId || !credentials.reddit.clientSecret) {
+        if (
+          !credentials?.reddit?.clientId ||
+          !credentials?.reddit?.clientSecret
+        ) {
           throw new Error("Client ID and Secret are required");
         }
-        if (!credentials.reddit.userAgent) {
+        if (!credentials?.reddit?.userAgent) {
           throw new Error("User Agent is required");
         }
       }
@@ -278,7 +281,7 @@ export function Settings() {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
                 <Switch
-                  checked={credentials.reddit.enabled}
+                  checked={credentials?.reddit?.enabled || false}
                   onCheckedChange={(enabled) =>
                     setCredentials((prev) => ({
                       ...prev,
@@ -295,7 +298,7 @@ export function Settings() {
                   <Input
                     id="reddit-client-id"
                     type={showSecrets.reddit ? "text" : "password"}
-                    value={credentials.reddit.clientId}
+                    value={credentials?.reddit?.clientId || ""}
                     onChange={(e) =>
                       setCredentials((prev) => ({
                         ...prev,
@@ -312,7 +315,7 @@ export function Settings() {
                     <Input
                       id="reddit-client-secret"
                       type={showSecrets.reddit ? "text" : "password"}
-                      value={credentials.reddit.clientSecret}
+                      value={credentials?.reddit?.clientSecret || ""}
                       onChange={(e) =>
                         setCredentials((prev) => ({
                           ...prev,
@@ -350,7 +353,7 @@ export function Settings() {
                 <Label htmlFor="reddit-user-agent">User Agent</Label>
                 <Input
                   id="reddit-user-agent"
-                  value={credentials.reddit.userAgent}
+                  value={credentials?.reddit?.userAgent || ""}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
@@ -458,7 +461,7 @@ export function Settings() {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
                 <Switch
-                  checked={credentials.clerk.enabled}
+                  checked={credentials?.clerk?.enabled || false}
                   onCheckedChange={(enabled) =>
                     setCredentials((prev) => ({
                       ...prev,
@@ -473,7 +476,7 @@ export function Settings() {
                 <Label htmlFor="clerk-publishable">Publishable Key</Label>
                 <Input
                   id="clerk-publishable"
-                  value={credentials.clerk.publishableKey}
+                  value={credentials?.clerk?.publishableKey || ""}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
@@ -491,7 +494,7 @@ export function Settings() {
                   <Input
                     id="clerk-secret"
                     type={showSecrets.clerk ? "text" : "password"}
-                    value={credentials.clerk.secretKey}
+                    value={credentials?.clerk?.secretKey || ""}
                     onChange={(e) =>
                       setCredentials((prev) => ({
                         ...prev,
@@ -526,7 +529,7 @@ export function Settings() {
                 <Input
                   id="clerk-webhook"
                   type={showSecrets.clerk ? "text" : "password"}
-                  value={credentials.clerk.webhookSecret}
+                  value={credentials?.clerk?.webhookSecret || ""}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
@@ -591,7 +594,7 @@ export function Settings() {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
                 <Switch
-                  checked={credentials.paypal.enabled}
+                  checked={credentials?.paypal?.enabled || false}
                   onCheckedChange={(enabled) =>
                     setCredentials((prev) => ({
                       ...prev,
@@ -607,7 +610,7 @@ export function Settings() {
                   <Label htmlFor="paypal-client-id">Client ID</Label>
                   <Input
                     id="paypal-client-id"
-                    value={credentials.paypal.clientId}
+                    value={credentials?.paypal?.clientId || ""}
                     onChange={(e) =>
                       setCredentials((prev) => ({
                         ...prev,
@@ -624,7 +627,7 @@ export function Settings() {
                     <Input
                       id="paypal-client-secret"
                       type={showSecrets.paypal ? "text" : "password"}
-                      value={credentials.paypal.clientSecret}
+                      value={credentials?.paypal?.clientSecret || ""}
                       onChange={(e) =>
                         setCredentials((prev) => ({
                           ...prev,
@@ -662,7 +665,7 @@ export function Settings() {
                 <Label htmlFor="paypal-plan-id">Subscription Plan ID</Label>
                 <Input
                   id="paypal-plan-id"
-                  value={credentials.paypal.planId}
+                  value={credentials?.paypal?.planId || ""}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
@@ -680,7 +683,7 @@ export function Settings() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      checked={credentials.paypal.environment === "sandbox"}
+                      checked={credentials?.paypal?.environment === "sandbox"}
                       onChange={() =>
                         setCredentials((prev) => ({
                           ...prev,
@@ -694,7 +697,9 @@ export function Settings() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      checked={credentials.paypal.environment === "production"}
+                      checked={
+                        credentials?.paypal?.environment === "production"
+                      }
                       onChange={() =>
                         setCredentials((prev) => ({
                           ...prev,

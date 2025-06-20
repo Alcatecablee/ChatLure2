@@ -16,6 +16,25 @@ interface Notification {
   isRead: boolean;
 }
 
+// App Configuration types
+interface AppConfig {
+  appName: string;
+  tagline: string;
+  logo: string;
+  favicon: string;
+  phoneIcons: {
+    [key: string]: string;
+  };
+  sponsoredApps: {
+    [key: string]: string;
+  };
+  theme: {
+    primaryColor: string;
+    backgroundColor: string;
+    cardColor: string;
+  };
+}
+
 interface AppState {
   stories: Story[];
   users: User[];
@@ -24,6 +43,7 @@ interface AppState {
   isLoading: boolean;
   notifications: Notification[];
   error: string | null;
+  appConfig: AppConfig;
 }
 
 type AppAction =
@@ -38,7 +58,8 @@ type AppAction =
   | { type: "ADD_USER"; payload: User }
   | { type: "SET_CREDENTIALS"; payload: ApiCredentials }
   | { type: "ADD_NOTIFICATION"; payload: Notification }
-  | { type: "MARK_NOTIFICATION_READ"; payload: string };
+  | { type: "MARK_NOTIFICATION_READ"; payload: string }
+  | { type: "UPDATE_APP_CONFIG"; payload: Partial<AppConfig> };
 
 // Initial state
 const initialState: AppState = {
@@ -69,6 +90,43 @@ const initialState: AppState = {
   isLoading: false,
   notifications: [],
   error: null,
+  appConfig: {
+    appName: "ChatLure",
+    tagline: "Real-time insights into your viral story empire",
+    logo: "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+    favicon:
+      "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+    phoneIcons: {
+      phone: "📞",
+      chatLure:
+        "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+      camera: "📷",
+      photos: "🌸",
+      settings: "⚙️",
+      calculator: "🔢",
+      mail: "✉️",
+      clock: "🕒",
+      maps: "🗺️",
+      music: "🎵",
+      safari: "🧭",
+      calendar: "📅",
+    },
+    sponsoredApps: {
+      spotify: "🎵",
+      netflix: "N",
+      uber: "🚗",
+      airbnb: "🏠",
+      instagram: "📸",
+      tiktok: "🎬",
+      doordash: "🍕",
+      youtube: "▶️",
+    },
+    theme: {
+      primaryColor: "#9333EA",
+      backgroundColor: "#141414",
+      cardColor: "#1A1A1A",
+    },
+  },
 };
 
 // Reducer
@@ -126,6 +184,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
       };
 
+    case "UPDATE_APP_CONFIG":
+      return {
+        ...state,
+        appConfig: { ...state.appConfig, ...action.payload },
+      };
+
     default:
       return state;
   }
@@ -152,6 +216,8 @@ const AppContext = createContext<{
     service: keyof ApiCredentials,
     config: any,
   ) => Promise<void>;
+  // App configuration
+  updateAppConfig: (config: Partial<AppConfig>) => Promise<void>;
   // Utility functions
   addNotification: (
     notification: Omit<Notification, "id" | "timestamp" | "isRead">,
@@ -548,6 +614,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // App configuration
+  const updateAppConfig = async (config: Partial<AppConfig>) => {
+    try {
+      // Update local state immediately for real-time UI updates
+      dispatch({ type: "UPDATE_APP_CONFIG", payload: config });
+
+      // Save to localStorage for persistence
+      const updatedConfig = { ...state.appConfig, ...config };
+      localStorage.setItem("appConfig", JSON.stringify(updatedConfig));
+
+      addNotification({
+        type: "success",
+        title: "App Settings Updated",
+        message: "Your app configuration has been saved successfully.",
+      });
+    } catch (error) {
+      console.error("Failed to update app config:", error);
+      addNotification({
+        type: "error",
+        title: "Update Failed",
+        message: "Failed to save app configuration. Please try again.",
+      });
+      throw error;
+    }
+  };
+
   // Utility functions
   const addNotification = (
     notificationData: Omit<Notification, "id" | "timestamp" | "isRead">,
@@ -576,6 +668,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Load initial data on mount
   useEffect(() => {
     const initializeData = async () => {
+      // Load app config from localStorage
+      try {
+        const savedConfig = localStorage.getItem("appConfig");
+        if (savedConfig) {
+          const config = JSON.parse(savedConfig);
+          dispatch({ type: "UPDATE_APP_CONFIG", payload: config });
+        }
+      } catch (error) {
+        console.warn("Failed to load app config from localStorage:", error);
+      }
+
       await Promise.all([loadStories(), loadUsers(), loadCredentials()]);
     };
 
@@ -593,6 +696,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deleteStory,
     addUser,
     updateCredentials,
+    updateAppConfig,
     addNotification,
     getStoryById,
     getStoriesByGenre,
@@ -627,6 +731,11 @@ export function useCredentials() {
 export function useNotifications() {
   const { state } = useApp();
   return state.notifications;
+}
+
+export function useAppConfig() {
+  const { state } = useApp();
+  return state.appConfig;
 }
 
 export function useUsers() {

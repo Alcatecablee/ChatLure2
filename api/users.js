@@ -1,8 +1,26 @@
 import { UserAPI } from "../src/lib/api-server.js";
 
+// Helper function for consistent responses
+function sendResponse(res, statusCode, data) {
+  res.statusCode = statusCode;
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  return res.end(JSON.stringify(data));
+}
+
 export default async function handler(req, res) {
   const { method } = req;
   const { id } = req.query;
+
+  // Handle CORS preflight
+  if (method === "OPTIONS") {
+    return sendResponse(res, 200, {});
+  }
 
   try {
     switch (method) {
@@ -11,19 +29,21 @@ export default async function handler(req, res) {
           // Get single user
           const user = await UserAPI.getById(id);
           if (!user) {
-            return res.status(404).json({ error: "User not found" });
+            return sendResponse(res, 404, { error: "User not found" });
           }
-          return res.status(200).json(user);
+          return sendResponse(res, 200, user);
         } else {
           // Get all users
           const users = await UserAPI.getAll();
-          return res.status(200).json(users);
+          return sendResponse(res, 200, users);
         }
 
       case "POST":
         // Create new user
         if (!req.body.id || !req.body.email) {
-          return res.status(400).json({ error: "ID and email are required" });
+          return sendResponse(res, 400, {
+            error: "ID and email are required",
+          });
         }
 
         const newUser = await UserAPI.create({
@@ -40,25 +60,26 @@ export default async function handler(req, res) {
           },
         });
 
-        return res.status(201).json(newUser);
+        return sendResponse(res, 201, newUser);
 
       case "PUT":
         // Update user activity
         if (!id) {
-          return res.status(400).json({ error: "User ID is required" });
+          return sendResponse(res, 400, { error: "User ID is required" });
         }
 
         await UserAPI.updateActivity(id);
         const updatedUser = await UserAPI.getById(id);
 
-        return res.status(200).json(updatedUser);
+        return sendResponse(res, 200, updatedUser);
 
       default:
-        res.setHeader("Allow", ["GET", "POST", "PUT"]);
-        return res.status(405).json({ error: `Method ${method} not allowed` });
+        return sendResponse(res, 405, {
+          error: `Method ${method} not allowed`,
+        });
     }
   } catch (error) {
     console.error("Users API error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return sendResponse(res, 500, { error: "Internal server error" });
   }
 }

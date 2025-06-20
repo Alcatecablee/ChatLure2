@@ -451,7 +451,7 @@ export function ContentImporter({
     setIsProcessing(true);
 
     // Check if Reddit credentials are configured
-    if (!credentials.reddit.enabled || !credentials.reddit.clientId) {
+    if (!credentials?.reddit?.enabled || !credentials?.reddit?.clientId) {
       addNotification({
         type: "error",
         title: "Reddit Not Configured",
@@ -817,7 +817,7 @@ export function ContentImporter({
                       Auto-convert to ChatLure format
                     </span>
                   </div>
-                  {credentials.reddit.enabled ? (
+                  {credentials?.reddit?.enabled ? (
                     <Badge className="bg-green-500/20 text-green-400 text-xs">
                       ✓ Reddit Connected
                     </Badge>
@@ -832,7 +832,7 @@ export function ContentImporter({
                 </div>
                 <Button
                   onClick={fetchRedditContent}
-                  disabled={isProcessing || !credentials.reddit.enabled}
+                  disabled={isProcessing || !credentials?.reddit?.enabled}
                 >
                   {isProcessing ? (
                     <RefreshCw size={16} className="mr-2 animate-spin" />

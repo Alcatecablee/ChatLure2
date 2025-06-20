@@ -64,15 +64,7 @@ function AppIcon({
         className={`w-16 h-16 rounded-app flex items-center justify-center text-white shadow-lg transform group-active:scale-95 transition-transform overflow-hidden`}
         style={{ backgroundColor: name === "ChatLure" ? "transparent" : color }}
       >
-        {name === "ChatLure" ? (
-          <img
-            src="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
-            alt="ChatLure"
-            className="w-full h-full object-cover rounded-app"
-          />
-        ) : (
-          icon
-        )}
+        {icon}
       </div>
       <span className="text-white text-xs text-center leading-none font-medium">
         {name}
@@ -92,111 +84,142 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     window.location.reload();
   };
 
-  // ALL ORIGINAL APPS - keeping them ALL to look authentic!
+  // ALL ORIGINAL APPS - with realistic iOS-style icons and proper branding
   const originalApps = [
-    { id: "phone", icon: <Phone size={24} />, name: "Phone", color: "#34C759" },
+    {
+      id: "phone",
+      icon: <div className="text-white text-2xl font-bold">📞</div>,
+      name: "Phone",
+      color: "#34C759",
+    },
     {
       id: "messages",
-      icon: <MessageCircle size={24} />,
+      icon: (
+        <img
+          src="https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800"
+          alt="ChatLure"
+          className="w-8 h-8 object-cover"
+        />
+      ),
       name: "ChatLure",
-      color: "#000000",
+      color: "#9333EA",
     },
     {
       id: "camera",
-      icon: <Camera size={24} />,
+      icon: <div className="text-white text-2xl font-bold">📷</div>,
       name: "Camera",
       color: "#636366",
     },
     {
       id: "photos",
-      icon: <Image size={24} />,
+      icon: <div className="text-white text-2xl font-bold">🌸</div>,
       name: "Photos",
       color: "#FF9500",
     },
     {
       id: "settings",
-      icon: <Settings size={24} />,
+      icon: <div className="text-white text-2xl font-bold">⚙️</div>,
       name: "Settings",
       color: "#8E8E93",
     },
     {
       id: "calculator",
-      icon: <Calculator size={24} />,
+      icon: <div className="text-white text-2xl font-bold">🔢</div>,
       name: "Calculator",
       color: "#2C2C2E",
     },
-    { id: "mail", icon: <Mail size={24} />, name: "Mail", color: "#007AFF" },
-    { id: "clock", icon: <Clock size={24} />, name: "Clock", color: "#2C2C2E" },
-    { id: "maps", icon: <Map size={24} />, name: "Maps", color: "#007AFF" },
-    { id: "music", icon: <Music size={24} />, name: "Music", color: "#FF2D92" },
+    {
+      id: "mail",
+      icon: <div className="text-white text-2xl font-bold">✉️</div>,
+      name: "Mail",
+      color: "#007AFF",
+    },
+    {
+      id: "clock",
+      icon: <div className="text-white text-2xl font-bold">🕒</div>,
+      name: "Clock",
+      color: "#2C2C2E",
+    },
+    {
+      id: "maps",
+      icon: <div className="text-white text-2xl font-bold">🗺️</div>,
+      name: "Maps",
+      color: "#007AFF",
+    },
+    {
+      id: "music",
+      icon: <div className="text-white text-2xl font-bold">🎵</div>,
+      name: "Music",
+      color: "#FF2D92",
+    },
     {
       id: "safari",
-      icon: <Globe size={24} />,
+      icon: <div className="text-white text-2xl font-bold">🧭</div>,
       name: "Safari",
       color: "#007AFF",
     },
     {
       id: "calendar",
-      icon: <Calendar size={24} />,
+      icon: <div className="text-white text-2xl font-bold">📅</div>,
       name: "Calendar",
       color: "#FF3B30",
     },
   ];
 
-  // Sponsored apps - Real looking apps with proper branding
+  // Sponsored apps - Realistic branded apps with proper icons and colors
   const sponsoredApps = [
     {
       id: "spotify",
-      icon: <div className="text-lg font-bold text-white">♪</div>,
+      icon: <div className="text-2xl text-white">🎵</div>,
       name: "Spotify",
       color: "#1DB954",
       isSponsored: true,
     },
     {
       id: "netflix",
-      icon: <div className="text-lg font-bold">N</div>,
+      icon: <div className="text-2xl font-bold text-white">N</div>,
       name: "Netflix",
       color: "#E50914",
       isSponsored: true,
     },
     {
       id: "uber",
-      icon: <div className="text-lg font-bold">U</div>,
+      icon: <div className="text-2xl text-white">🚗</div>,
       name: "Uber",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "airbnb",
-      icon: <div className="text-lg font-bold">𝒜</div>,
+      icon: <div className="text-2xl text-white">🏠</div>,
       name: "Airbnb",
       color: "#FF5A5F",
       isSponsored: true,
     },
     {
       id: "instagram",
-      icon: <div className="text-lg font-bold">📷</div>,
+      icon: <div className="text-2xl text-white">📸</div>,
       name: "Instagram",
       color: "#E4405F",
       isSponsored: true,
     },
     {
       id: "tiktok",
-      icon: <div className="text-lg font-bold">♫</div>,
+      icon: <div className="text-2xl text-white">🎬</div>,
       name: "TikTok",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "doordash",
-      icon: <div className="text-lg font-bold">🍔</div>,
+      icon: <div className="text-2xl text-white">🍕</div>,
       name: "DoorDash",
       color: "#FF3008",
       isSponsored: true,
     },
     {
       id: "youtube",
-      icon: <div className="text-lg font-bold">▶</div>,
+      icon: <div className="text-2xl text-white">▶️</div>,
       name: "YouTube",
       color: "#FF0000",
       isSponsored: true,

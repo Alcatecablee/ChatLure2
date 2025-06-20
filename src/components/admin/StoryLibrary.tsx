@@ -87,6 +87,13 @@ export function StoryLibrary() {
   const [expandedStory, setExpandedStory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  // Ensure stories are loaded from API
+  useEffect(() => {
+    if (stories.length === 0 && !isLoading) {
+      loadStories();
+    }
+  }, [stories.length, isLoading, loadStories]);
+
   const filteredStories = stories.filter((story) => {
     const matchesSearch =
       story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Wifi, Battery, Signal, Zap, BatteryLow } from "lucide-react";
 import { useBatteryContext } from "@/contexts/BatteryContext";
 
 export function StatusBar() {
@@ -47,28 +46,25 @@ export function StatusBar() {
     return "text-white";
   };
 
-  const getBatteryIcon = () => {
-    if (battery.isCharging)
-      return <Zap size={16} className={getBatteryColor()} />;
-    if (battery.level <= 15)
-      return <BatteryLow size={16} className={getBatteryColor()} />;
-    return <Battery size={16} className={getBatteryColor()} />;
-  };
-
   return (
     <div className="absolute top-0 left-0 right-0 h-statusbar bg-transparent z-40 flex items-center justify-between px-6 pt-4">
       {/* Left side - Time */}
       <div className="text-white text-sm font-semibold">{formatTime(time)}</div>
 
       {/* Right side - Status icons */}
-      <div className="flex items-center space-x-1">
-        <Signal size={16} className="text-white" />
-        <Wifi size={16} className="text-white" />
+      <div className="flex items-center space-x-2">
+        <span className="text-white text-sm">📶</span>
+        <span className="text-white text-sm">📶</span>
+        <span className="text-white text-sm">📶</span>
+        <span className="text-white text-sm">📞</span>
+        <span className="text-white text-sm">📡</span>
         <div className="flex items-center space-x-1">
           <span className={`text-xs ${getBatteryColor()}`}>
             {Math.floor(battery.level)}%
           </span>
-          {getBatteryIcon()}
+          <span className={`text-sm ${getBatteryColor()}`}>
+            {battery.isCharging ? "🔋" : battery.level <= 15 ? "🪫" : "🔋"}
+          </span>
           {battery.isPremium && (
             <span className="text-yellow-400 text-xs">⚡</span>
           )}
