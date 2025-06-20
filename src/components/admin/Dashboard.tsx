@@ -338,7 +338,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   };
 
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const users = useUsers();
 
   // Simulate some dynamic behavior for demo purposes
   useEffect(() => {
