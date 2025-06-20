@@ -632,18 +632,18 @@ const Admin = () => {
                   >
                     <IconComponent
                       size={18}
-                      className={isActive ? "text-white" : s.color}
+                      className={isActive ? "text-primary-foreground" : s.color}
                     />
                     <div className="flex-1">
                       <div className="font-medium">{s.label}</div>
-                      <div className="text-xs text-gray-400 group-hover:text-gray-300">
+                      <div className="text-xs text-muted-foreground group-hover:text-sidebar-foreground">
                         {s.description}
                       </div>
                     </div>
                     {isActive && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="w-2 h-2 bg-white rounded-full"
+                        className="w-2 h-2 bg-primary-foreground rounded-full"
                       />
                     )}
                   </motion.button>
