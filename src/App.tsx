@@ -25,23 +25,27 @@ const App = () => {
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <DatabaseProvider>
-          <LockScreenProvider>
-            <AppProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/emulator" element={<Index />} />
-                  <Route path="/admin" element={<Admin />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </AppProvider>
-          </LockScreenProvider>
-        </DatabaseProvider>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <ErrorBoundary>
+            <DatabaseProvider>
+              <LockScreenProvider>
+                <AppProvider>
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/emulator" element={<Index />} />
+                      <Route path="/admin" element={<Admin />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </BrowserRouter>
+                </AppProvider>
+              </LockScreenProvider>
+            </DatabaseProvider>
+          </ErrorBoundary>
+        </QueryClientProvider>
+      </ErrorBoundary>
     </ErrorBoundary>
   );
 };
