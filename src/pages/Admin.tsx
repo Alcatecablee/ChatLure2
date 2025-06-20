@@ -7,15 +7,18 @@ import { Settings } from "@/components/admin/Settings";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { NotificationCenter } from "@/components/ui/notification-center";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { useCredentials } from "@/contexts/AppContext";
+import {
+  useCredentials,
+  useUsers,
+  useApp,
+  useLoading,
+} from "@/contexts/AppContext";
 import {
   BarChart3,
   Users,
   CreditCard,
   Bell,
   Settings as SettingsIcon,
-  Database,
-  Shield,
   AlertTriangle,
   BookOpen,
   Upload,
@@ -23,20 +26,16 @@ import {
   TrendingUp,
   Menu,
   X,
-  Home,
-  Zap,
-  Globe,
   Sparkles,
-  Target,
-  Clock,
-  Activity,
-  ChevronDown,
   Search,
+  Activity,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { APIClient } from "@/lib/api";
 
 const sections = [
   {
@@ -111,49 +110,66 @@ const sections = [
   },
 ];
 
-// Mock User List Component
-function ClerkUserList() {
-  const [users] = useState([
-    {
-      id: "1",
-      firstName: "Sarah",
-      lastName: "Johnson",
-      email: "sarah.j@example.com",
-      imageUrl: "/avatars/user1.jpg",
-      createdAt: "2024-01-10T10:30:00Z",
-      lastActive: "2024-01-20T14:25:00Z",
-      subscription: { status: "premium", plan: "Pro", expiresAt: "2024-02-10" },
-      engagement: { storiesRead: 23, avgTime: "18m", favoriteGenre: "drama" },
-    },
-    {
-      id: "2",
-      firstName: "Mike",
-      lastName: "Chen",
-      email: "mike.chen@example.com",
-      imageUrl: "/avatars/user2.jpg",
-      createdAt: "2024-01-08T15:45:00Z",
-      lastActive: "2024-01-20T09:15:00Z",
-      subscription: { status: "free" },
-      engagement: { storiesRead: 8, avgTime: "12m", favoriteGenre: "mystery" },
-    },
-    {
-      id: "3",
-      firstName: "Emma",
-      lastName: "Davis",
-      email: "emma.davis@example.com",
-      imageUrl: "/avatars/user3.jpg",
-      createdAt: "2024-01-05T09:20:00Z",
-      lastActive: "2024-01-19T16:30:00Z",
-      subscription: {
-        status: "premium",
-        plan: "Premium",
-        expiresAt: "2024-03-05",
-      },
-      engagement: { storiesRead: 45, avgTime: "24m", favoriteGenre: "family" },
-    },
-  ]);
-  const [loading] = useState(false);
-  const [error] = useState<string | null>(null);
+// Real User Management Component
+function UserManagement() {
+  const users = useUsers();
+  const { loadUsers, addNotification } = useApp();
+  const isLoading = useLoading();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await loadUsers();
+      addNotification({
+        type: "success",
+        title: "Users Refreshed",
+        message: "User data has been refreshed successfully.",
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Refresh Failed",
+        message: "Failed to refresh user data.",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const premiumUsers = users.filter(
+    (user) => user.subscription.status === "premium",
+  );
+  const activeToday = users.filter(
+    (user) =>
+      new Date(user.lastActive).getTime() > Date.now() - 24 * 60 * 60 * 1000,
+  );
+  const avgStoriesRead = users.length
+    ? Math.round(
+        users.reduce((acc, u) => acc + (u.engagement?.storiesRead || 0), 0) /
+          users.length,
+      )
+    : 0;
+
+  if (isLoading && users.length === 0) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold">👥 User Management</h2>
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+          <span className="ml-3 text-gray-400">Loading users...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -166,12 +182,23 @@ function ClerkUserList() {
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
             />
             <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search users..."
               className="pl-9 bg-gray-800 border-gray-600"
             />
           </div>
-          <Button variant="outline" className="border-gray-600">
-            Export Users
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            className="border-gray-600"
+            disabled={isRefreshing}
+          >
+            <RefreshCw
+              size={16}
+              className={`mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
           </Button>
         </div>
       </div>
@@ -189,7 +216,7 @@ function ClerkUserList() {
         <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-green-400">
-              {users.filter((u) => u.subscription.status === "premium").length}
+              {premiumUsers.length}
             </div>
             <div className="text-sm text-gray-400">Premium Users</div>
           </CardContent>
@@ -197,12 +224,7 @@ function ClerkUserList() {
         <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-purple-400">
-              {Math.round(
-                users.reduce(
-                  (acc, u) => acc + (u.engagement?.storiesRead || 0),
-                  0,
-                ) / users.length,
-              )}
+              {avgStoriesRead}
             </div>
             <div className="text-sm text-gray-400">Avg Stories Read</div>
           </CardContent>
@@ -210,38 +232,21 @@ function ClerkUserList() {
         <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-orange-400">
-              {
-                users.filter(
-                  (u) =>
-                    new Date(u.lastActive).getTime() >
-                    Date.now() - 24 * 60 * 60 * 1000,
-                ).length
-              }
+              {activeToday.length}
             </div>
             <div className="text-sm text-gray-400">Active Today</div>
           </CardContent>
         </Card>
       </div>
 
-      {loading && (
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-900/30 border border-red-500/30 p-4 rounded-xl text-red-300">
-          {error}
-        </div>
-      )}
-
-      {users.length > 0 && (
+      {filteredUsers.length > 0 ? (
         <div className="grid gap-4">
-          {users.map((user) => (
+          {filteredUsers.map((user, index) => (
             <motion.div
               key={user.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
               className="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-colors"
             >
               <div className="flex items-start justify-between">
@@ -249,7 +254,7 @@ function ClerkUserList() {
                   {user.imageUrl ? (
                     <img
                       src={user.imageUrl}
-                      alt={user.firstName}
+                      alt={`${user.firstName} ${user.lastName}`}
                       className="w-12 h-12 rounded-full"
                     />
                   ) : (
@@ -267,7 +272,7 @@ function ClerkUserList() {
                       <Badge
                         className={
                           user.subscription.status === "premium"
-                            ? "bg-gold-500/20 text-yellow-400"
+                            ? "bg-yellow-500/20 text-yellow-400"
                             : "bg-gray-600/20 text-gray-400"
                         }
                       >
@@ -305,19 +310,19 @@ function ClerkUserList() {
                 <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t border-gray-700">
                   <div className="text-center">
                     <div className="text-lg font-semibold text-blue-400">
-                      {user.engagement.storiesRead}
+                      {user.engagement.storiesRead || 0}
                     </div>
                     <div className="text-xs text-gray-400">Stories Read</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-semibold text-green-400">
-                      {user.engagement.avgTime}
+                      {user.engagement.avgTime || "0m"}
                     </div>
                     <div className="text-xs text-gray-400">Avg Time</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-semibold text-purple-400 capitalize">
-                      {user.engagement.favoriteGenre}
+                      {user.engagement.favoriteGenre || "unknown"}
                     </div>
                     <div className="text-xs text-gray-400">Favorite Genre</div>
                   </div>
@@ -326,25 +331,61 @@ function ClerkUserList() {
             </motion.div>
           ))}
         </div>
-      )}
-
-      {!loading && !error && users.length === 0 && (
+      ) : (
         <div className="text-gray-400 text-center p-8">
           <Users size={48} className="mx-auto mb-4 opacity-50" />
-          <p>No users found</p>
+          <p>
+            {searchQuery
+              ? "No users found matching your search"
+              : "No users found"}
+          </p>
+          {searchQuery && (
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => setSearchQuery("")}
+            >
+              Clear Search
+            </Button>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// PayPal Billing Component
+// Real PayPal Billing Component
 function PayPalBilling() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("inactive");
+  const [metrics, setMetrics] = useState({
+    totalRevenue: 0,
+    activeSubscribers: 0,
+    churnRate: 0,
+    avgRevenue: 0,
+  });
   const credentials = useCredentials();
+  const { addNotification } = useApp();
 
   const isPayPalConfigured =
     credentials.paypal.enabled && credentials.paypal.clientId !== "";
+
+  useEffect(() => {
+    const loadMetrics = async () => {
+      try {
+        const dashboardMetrics = await APIClient.getDashboardMetrics();
+        setMetrics({
+          totalRevenue: dashboardMetrics.totalRevenue || 0,
+          activeSubscribers: dashboardMetrics.activeSubscribers || 0,
+          churnRate: dashboardMetrics.churnRate || 0,
+          avgRevenue: dashboardMetrics.avgRevenue || 0,
+        });
+      } catch (error) {
+        console.error("Failed to load billing metrics:", error);
+      }
+    };
+
+    loadMetrics();
+  }, []);
 
   const createSubscription = (data: any, actions: any) => {
     return actions.subscription.create({
@@ -352,9 +393,16 @@ function PayPalBilling() {
     });
   };
 
-  const onApprove = (data: any) => {
+  const onApprove = async (data: any) => {
     setSubscriptionStatus("active");
-    console.log("Subscription approved:", data);
+    addNotification({
+      type: "success",
+      title: "Subscription Created",
+      message: "PayPal subscription has been created successfully.",
+    });
+
+    // Track the subscription
+    await APIClient.trackMetric("subscriptions_created", 1);
   };
 
   if (!isPayPalConfigured) {
@@ -397,29 +445,37 @@ function PayPalBilling() {
       <div className="space-y-6">
         <h2 className="text-2xl font-bold">💳 Billing & Subscriptions</h2>
 
-        {/* Billing Stats */}
+        {/* Real Billing Stats */}
         <div className="grid grid-cols-4 gap-4">
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-400">$12,847</div>
-              <div className="text-sm text-gray-400">Monthly Revenue</div>
+              <div className="text-2xl font-bold text-green-400">
+                ${metrics.totalRevenue.toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-400">Total Revenue</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400">1,247</div>
+              <div className="text-2xl font-bold text-blue-400">
+                {metrics.activeSubscribers.toLocaleString()}
+              </div>
               <div className="text-sm text-gray-400">Active Subscribers</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-400">8.7%</div>
+              <div className="text-2xl font-bold text-purple-400">
+                {metrics.churnRate.toFixed(1)}%
+              </div>
               <div className="text-sm text-gray-400">Churn Rate</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-400">$10.30</div>
+              <div className="text-2xl font-bold text-orange-400">
+                ${metrics.avgRevenue.toFixed(2)}
+              </div>
               <div className="text-sm text-gray-400">Avg Revenue/User</div>
             </CardContent>
           </Card>
@@ -462,7 +518,7 @@ function PayPalBilling() {
               </div>
 
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-4">Current Status</h4>
+                <h4 className="font-medium mb-4">Test Subscription</h4>
                 <div
                   className={`inline-flex items-center px-3 py-1 rounded-full text-sm mb-4 ${
                     subscriptionStatus === "active"
@@ -491,6 +547,7 @@ const Admin = () => {
   const [section, setSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { state } = useApp();
 
   // Filter sections based on search
   const filteredSections = sections.filter(
@@ -596,24 +653,44 @@ const Admin = () => {
                 <CardContent className="p-4">
                   <h3 className="text-sm font-semibold text-purple-400 mb-3 flex items-center">
                     <Activity size={14} className="mr-2" />
-                    Quick Stats
+                    Live Stats
                   </h3>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Active Stories:</span>
-                      <span className="text-green-400 font-bold">23</span>
+                      <span className="text-gray-400">Stories:</span>
+                      <span className="text-green-400 font-bold">
+                        {state.stories.length}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Total Views:</span>
-                      <span className="text-blue-400 font-bold">1.2M</span>
+                      <span className="text-gray-400">Users:</span>
+                      <span className="text-blue-400 font-bold">
+                        {state.users.length}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Viral Score:</span>
-                      <span className="text-orange-400 font-bold">87%</span>
+                      <span className="text-gray-400">Active:</span>
+                      <span className="text-orange-400 font-bold">
+                        {state.stories.filter((s) => s.isActive).length}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Revenue:</span>
-                      <span className="text-purple-400 font-bold">$12.8k</span>
+                      <span className="text-gray-400">Status:</span>
+                      <span
+                        className={`font-bold ${
+                          state.isLoading
+                            ? "text-yellow-400"
+                            : state.error
+                              ? "text-red-400"
+                              : "text-green-400"
+                        }`}
+                      >
+                        {state.isLoading
+                          ? "Loading"
+                          : state.error
+                            ? "Error"
+                            : "Online"}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -655,8 +732,22 @@ const Admin = () => {
 
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span>System Online</span>
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  state.isLoading
+                    ? "bg-yellow-400 animate-pulse"
+                    : state.error
+                      ? "bg-red-400"
+                      : "bg-green-400 animate-pulse"
+                }`}
+              />
+              <span>
+                {state.isLoading
+                  ? "Loading..."
+                  : state.error
+                    ? "Error"
+                    : "System Online"}
+              </span>
             </div>
           </div>
         </div>
@@ -688,7 +779,7 @@ const Admin = () => {
                 />
               )}
               {section === "settings" && <Settings />}
-              {section === "users" && <ClerkUserList />}
+              {section === "users" && <UserManagement />}
               {section === "billing" && <PayPalBilling />}
               {section === "notifications" && (
                 <div className="space-y-6">
