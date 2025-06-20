@@ -216,6 +216,8 @@ const AppContext = createContext<{
     service: keyof ApiCredentials,
     config: any,
   ) => Promise<void>;
+  // App configuration
+  updateAppConfig: (config: Partial<AppConfig>) => Promise<void>;
   // Utility functions
   addNotification: (
     notification: Omit<Notification, "id" | "timestamp" | "isRead">,
