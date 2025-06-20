@@ -589,7 +589,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <BookOpen className="text-primary" />
+                <BookOpen className="text-muted-foreground" />
                 <span>Story Overview</span>
               </CardTitle>
             </CardHeader>
