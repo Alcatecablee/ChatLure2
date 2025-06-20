@@ -58,7 +58,8 @@ type AppAction =
   | { type: "ADD_USER"; payload: User }
   | { type: "SET_CREDENTIALS"; payload: ApiCredentials }
   | { type: "ADD_NOTIFICATION"; payload: Notification }
-  | { type: "MARK_NOTIFICATION_READ"; payload: string };
+  | { type: "MARK_NOTIFICATION_READ"; payload: string }
+  | { type: "UPDATE_APP_CONFIG"; payload: Partial<AppConfig> };
 
 // Initial state
 const initialState: AppState = {
