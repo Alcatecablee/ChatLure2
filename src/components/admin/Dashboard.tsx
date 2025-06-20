@@ -71,6 +71,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const { addNotification } = useApp();
   const stories = useStories();
   const credentials = useCredentials();
+  const users = useUsers();
 
   const [timeRange, setTimeRange] = useState("7d");
   const [selectedMetric, setSelectedMetric] = useState("views");
