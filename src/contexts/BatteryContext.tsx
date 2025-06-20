@@ -32,8 +32,11 @@ export function BatteryProvider({
 
 export function useBatteryContext() {
   const context = useContext(BatteryContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useBatteryContext must be used within a BatteryProvider");
   }
   return context;
 }
+
+// Also export the hook directly for convenience
+export { useBattery } from "@/hooks/useBattery";
