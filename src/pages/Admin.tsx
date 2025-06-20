@@ -490,10 +490,7 @@ function AppSettings() {
                     <Input
                       value={appConfig.logo}
                       onChange={(e) =>
-                        setAppConfig((prev) => ({
-                          ...prev,
-                          logo: e.target.value,
-                        }))
+                        updateAppConfig({ logo: e.target.value })
                       }
                       className="bg-input border-border"
                       placeholder="https://example.com/logo.png"
