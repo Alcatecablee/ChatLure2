@@ -2,21 +2,38 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// Custom plugin to block @radix-ui/react-tooltip completely
-const blockTooltipPlugin = () => ({
-  name: "block-tooltip",
-  resolveId(id: string) {
-    if (id === "@radix-ui/react-tooltip" || id.includes("react-tooltip")) {
-      return path.resolve(__dirname, "./src/components/ui/tooltip.tsx");
+// ULTIMATE NUCLEAR TOOLTIP BLOCKING PLUGIN
+const ultimateTooltipKiller = () => ({
+  name: "ultimate-tooltip-killer",
+  enforce: "pre" as const,
+  resolveId(id: string, importer?: string) {
+    // Kill ANY tooltip-related imports
+    if (id.includes("tooltip") || id.includes("Tooltip")) {
+      console.log(`🚫 BLOCKED TOOLTIP IMPORT: ${id} from ${importer}`);
+      return "\0virtual:empty-tooltip";
     }
     return null;
   },
   load(id: string) {
-    if (id.includes("react-tooltip")) {
-      // Return empty module to prevent any loading
-      return "export const TooltipProvider = ({ children }) => children; export const Tooltip = ({ children }) => children; export const TooltipTrigger = ({ children }) => children; export const TooltipContent = () => null; export default {};";
+    if (id === "\0virtual:empty-tooltip") {
+      return `
+        export const TooltipProvider = ({ children }) => children;
+        export const Tooltip = ({ children }) => children;
+        export const TooltipTrigger = ({ children }) => children;
+        export const TooltipContent = () => null;
+        export default {};
+      `;
     }
     return null;
+  },
+  configResolved(config) {
+    // Force exclude from optimization
+    config.optimizeDeps = config.optimizeDeps || {};
+    config.optimizeDeps.exclude = config.optimizeDeps.exclude || [];
+    config.optimizeDeps.exclude.push("@radix-ui/react-tooltip");
+  },
+  buildStart() {
+    console.log("🔥 ULTIMATE TOOLTIP KILLER ACTIVATED");
   },
 });
 
@@ -26,7 +43,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  plugins: [react(), blockTooltipPlugin()],
+  plugins: [ultimateTooltipKiller(), react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
