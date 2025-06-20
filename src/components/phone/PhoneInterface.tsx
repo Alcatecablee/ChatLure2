@@ -6,8 +6,8 @@ import { LockScreen } from "./LockScreen";
 import { useLockScreen } from "@/contexts/LockScreenContext";
 import { useBattery } from "@/contexts/BatteryContext";
 
-// App imports
-import { ChatLure } from "../apps/ChatLure";
+// App imports - only existing apps
+import { ChatLureApp as ChatLure } from "../apps/ChatLure";
 import { ChatLurePremium } from "../apps/ChatLurePremium";
 import { Inbox } from "../apps/Inbox";
 import { StoryTimer } from "../apps/StoryTimer";
@@ -16,14 +16,9 @@ import { Soundtrack } from "../apps/Soundtrack";
 import { Browse } from "../apps/Browse";
 import { Schedule } from "../apps/Schedule";
 import { Gallery } from "../apps/Gallery";
-import { Settings } from "../apps/Settings";
-import { Calculator } from "../apps/Calculator";
-import { Camera } from "../apps/Camera";
-import { Maps } from "../apps/Maps";
-import { Music } from "../apps/Music";
-import { Safari } from "../apps/Safari";
-import { Calendar } from "../apps/Calendar";
-import { Photos } from "../apps/Photos";
+import { SettingsApp as Settings } from "../apps/Settings";
+import { CalculatorApp as Calculator } from "../apps/Calculator";
+import { CameraApp as Camera } from "../apps/Camera";
 
 export function PhoneInterface() {
   const [currentApp, setCurrentApp] = useState<string | null>(null);
@@ -79,16 +74,6 @@ export function PhoneInterface() {
         return <Calculator {...appProps} />;
       case "camera":
         return <Camera {...appProps} />;
-      case "maps":
-        return <Maps {...appProps} />;
-      case "music":
-        return <Music {...appProps} />;
-      case "safari":
-        return <Safari {...appProps} />;
-      case "calendar":
-        return <Calendar {...appProps} />;
-      case "photos":
-        return <Photos {...appProps} />;
       default:
         return null;
     }
