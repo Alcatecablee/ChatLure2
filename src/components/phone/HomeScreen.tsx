@@ -94,7 +94,13 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     },
     {
       id: "messages",
-      icon: <div className="text-white text-2xl font-bold">💬</div>,
+      icon: (
+        <img
+          src="https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800"
+          alt="ChatLure"
+          className="w-8 h-8 object-cover"
+        />
+      ),
       name: "ChatLure",
       color: "#9333EA",
     },
