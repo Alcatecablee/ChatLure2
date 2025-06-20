@@ -333,7 +333,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_LOADING", payload: true });
       dispatch({ type: "SET_ERROR", payload: null });
 
-      const story = await APIClient.createStory(storyData);
+      let story: Story;
+
+      try {
+        story = await APIClient.createStory(storyData);
+      } catch (apiError) {
+        console.warn("API not available, creating story locally:", apiError);
+
+        // Fallback: Create story locally
+        const now = new Date().toISOString();
+        story = {
+          ...storyData,
+          id: `local_story_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+          createdAt: now,
+          updatedAt: now,
+        };
+      }
+
       dispatch({ type: "ADD_STORY", payload: story });
 
       addNotification({
