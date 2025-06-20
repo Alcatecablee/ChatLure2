@@ -385,7 +385,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_LOADING", payload: true });
       dispatch({ type: "SET_ERROR", payload: null });
 
-      const story = await APIClient.updateStory(id, storyData);
+      let story: Story;
+
+      try {
+        story = await APIClient.updateStory(id, storyData);
+      } catch (apiError) {
+        console.warn("API not available, updating story locally:", apiError);
+
+        // Fallback: Update story locally
+        const existingStory = state.stories.find((s) => s.id === id);
+        if (!existingStory) {
+          throw new Error("Story not found");
+        }
+
+        story = {
+          ...existingStory,
+          ...storyData,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
       dispatch({ type: "UPDATE_STORY", payload: story });
 
       addNotification({
@@ -414,7 +433,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_LOADING", payload: true });
       dispatch({ type: "SET_ERROR", payload: null });
 
-      await APIClient.deleteStory(id);
+      try {
+        await APIClient.deleteStory(id);
+      } catch (apiError) {
+        console.warn("API not available, deleting story locally:", apiError);
+        // Fallback: Just delete locally - no API call needed
+      }
+
       dispatch({ type: "DELETE_STORY", payload: id });
 
       addNotification({
