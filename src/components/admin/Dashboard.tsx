@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useApp, useStories, useCredentials } from "@/contexts/AppContext";
+import {
+  useApp,
+  useStories,
+  useCredentials,
+  useUsers,
+} from "@/contexts/AppContext";
+import { APIClient } from "@/lib/api-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -196,6 +202,180 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   };
 
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const users = useUsers();
+
+  // Load real analytics data
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        // Load performance metrics from API
+        const metrics = await APIClient.getDashboardMetrics();
+
+        setPerformanceMetrics([
+          {
+            label: "Total Revenue",
+            value: metrics.totalRevenue || 0,
+            change: metrics.revenueChange || 0,
+            trend:
+              (metrics.revenueChange || 0) > 0
+                ? "up"
+                : (metrics.revenueChange || 0) < 0
+                  ? "down"
+                  : "stable",
+            format: "currency",
+          },
+          {
+            label: "Active Subscribers",
+            value: metrics.activeSubscribers || 0,
+            change: metrics.subscriberChange || 0,
+            trend:
+              (metrics.subscriberChange || 0) > 0
+                ? "up"
+                : (metrics.subscriberChange || 0) < 0
+                  ? "down"
+                  : "stable",
+            format: "number",
+          },
+          {
+            label: "Avg. Engagement Time",
+            value: metrics.avgEngagementTime || 0,
+            change: metrics.engagementChange || 0,
+            trend:
+              (metrics.engagementChange || 0) > 0
+                ? "up"
+                : (metrics.engagementChange || 0) < 0
+                  ? "down"
+                  : "stable",
+            format: "time",
+          },
+          {
+            label: "Story Completion Rate",
+            value: avgCompletionRate,
+            change: metrics.completionChange || 0,
+            trend:
+              (metrics.completionChange || 0) > 0
+                ? "up"
+                : (metrics.completionChange || 0) < 0
+                  ? "down"
+                  : "stable",
+            format: "percentage",
+          },
+        ]);
+
+        // Calculate real-time data from actual users and stories
+        const activeUsersCount = users.filter(
+          (user) =>
+            new Date(user.lastActive).getTime() >
+            Date.now() - 24 * 60 * 60 * 1000,
+        ).length;
+
+        const activeStoriesCount = stories.filter(
+          (story) => story.isActive,
+        ).length;
+        const totalViews = stories.reduce(
+          (sum, story) => sum + (story.stats?.views || 0),
+          0,
+        );
+        const avgEngagement =
+          totalViews > 0 ? Math.min(100, totalViews / stories.length / 100) : 0;
+        const premiumUsers = users.filter(
+          (user) => user.subscription.status === "premium",
+        ).length;
+
+        setRealtimeData({
+          activeUsers: activeUsersCount,
+          storiesBeingRead: Math.floor(activeUsersCount * 0.3), // Estimate 30% reading
+          engagementRate: avgEngagement,
+          newSubscriptions: premiumUsers,
+        });
+
+        // Generate recent activity from real data
+        const activities = [];
+
+        // Recent stories
+        const recentStories = stories
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )
+          .slice(0, 2);
+
+        recentStories.forEach((story, index) => {
+          const timeDiff = Date.now() - new Date(story.createdAt).getTime();
+          const timeAgo =
+            timeDiff < 3600000
+              ? `${Math.floor(timeDiff / 60000)}m ago`
+              : timeDiff < 86400000
+                ? `${Math.floor(timeDiff / 3600000)}h ago`
+                : `${Math.floor(timeDiff / 86400000)}d ago`;
+
+          activities.push({
+            id: `story_${story.id}`,
+            type: "story_created",
+            title: `New story created: "${story.title}"`,
+            time: timeAgo,
+            icon: BookOpen,
+            color: "text-green-400",
+          });
+        });
+
+        // High-performing stories
+        const viralStories = stories.filter(
+          (story) => (story.stats?.views || 0) > 1000,
+        );
+        if (viralStories.length > 0) {
+          const topViralStory = viralStories[0];
+          activities.push({
+            id: `viral_${topViralStory.id}`,
+            type: "viral_alert",
+            title: `Story trending: "${topViralStory.title}" - ${(topViralStory.stats?.views || 0).toLocaleString()}+ views!`,
+            time: "Recently",
+            icon: Flame,
+            color: "text-orange-400",
+          });
+        }
+
+        // User milestones
+        if (users.length >= 10) {
+          activities.push({
+            id: "user_milestone",
+            type: "user_milestone",
+            title: `${users.length} total users milestone reached`,
+            time: "Today",
+            icon: Users,
+            color: "text-blue-400",
+          });
+        }
+
+        // Recent premium subscriptions
+        const premiumUsersRecent = users.filter(
+          (user) => user.subscription.status === "premium",
+        );
+        if (premiumUsersRecent.length > 0) {
+          const recentPremium = premiumUsersRecent[0];
+          activities.push({
+            id: `sub_${recentPremium.id}`,
+            type: "subscription",
+            title: `New premium subscription: ${recentPremium.firstName} ${recentPremium.lastName}`,
+            time: "Recently",
+            icon: CreditCard,
+            color: "text-purple-400",
+          });
+        }
+
+        setRecentActivity(activities.slice(0, 5));
+      } catch (error) {
+        console.error("Failed to load dashboard data:", error);
+        addNotification({
+          type: "error",
+          title: "Dashboard Load Error",
+          message: "Failed to load dashboard metrics. Using default values.",
+        });
+      }
+    };
+
+    loadDashboardData();
+  }, [stories, users, avgCompletionRate, addNotification]);
 
   return (
     <div className="space-y-6">
