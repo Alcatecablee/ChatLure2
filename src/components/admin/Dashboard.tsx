@@ -752,7 +752,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between p-2 bg-accent/50 rounded">
                 <div className="flex items-center space-x-2">
-                  <Globe className="text-primary" size={16} />
+                  <Globe className="text-muted-foreground" size={16} />
                   <span className="text-sm">Reddit API</span>
                 </div>
                 {connectionStatus.connections.reddit ? (
