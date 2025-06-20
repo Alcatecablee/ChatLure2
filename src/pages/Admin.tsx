@@ -414,17 +414,17 @@ function PayPalBilling() {
       <div className="space-y-6">
         <h2 className="text-2xl font-bold">💳 Billing & Subscriptions</h2>
 
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border-border">
           <CardContent className="p-6">
             <div className="text-center py-8">
               <CreditCard
                 size={48}
-                className="mx-auto mb-4 text-gray-400 opacity-50"
+                className="mx-auto mb-4 text-muted-foreground opacity-50"
               />
-              <h3 className="text-xl font-semibold mb-2">
+              <h3 className="text-xl font-semibold mb-2 text-foreground">
                 PayPal Configuration Required
               </h3>
-              <p className="text-gray-400 mb-4">
+              <p className="text-muted-foreground mb-4">
                 Configure your PayPal credentials to enable subscription
                 management and billing features.
               </p>
