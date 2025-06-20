@@ -42,11 +42,11 @@ export function LockScreenProvider({
       : defaultSettings;
   });
 
-  const [isLocked, setIsLocked] = useState(false);
-  const [lastActivity, setLastActivity] = useState(Date.now());
+  const [isLocked, setIsLocked] = React.useState(false);
+  const [lastActivity, setLastActivity] = React.useState(Date.now());
 
   // Save settings to localStorage when they change
-  useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem(
       "chatlure-lockscreen-settings",
       JSON.stringify(settings),
