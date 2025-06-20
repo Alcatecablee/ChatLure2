@@ -237,20 +237,9 @@ const AppContext = createContext<{
   getActiveStories: () => Story[];
 }>(defaultContextValue);
 
-// Provider component with error handling
+// Provider component
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Safe useReducer with error handling
-  let state: AppState;
-  let dispatch: React.Dispatch<AppAction>;
-
-  try {
-    [state, dispatch] = useReducer(appReducer, initialState);
-  } catch (error) {
-    console.error("AppProvider useReducer error:", error);
-    // Fallback to default state if useReducer fails
-    state = initialState;
-    dispatch = () => {};
-  }
+  const [state, dispatch] = useReducer(appReducer, initialState);
 
   // Load data from localStorage on mount
   useEffect(() => {
