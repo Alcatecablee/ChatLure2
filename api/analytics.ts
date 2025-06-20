@@ -1,4 +1,4 @@
-import { AnalyticsAPI } from "../src/lib/api";
+import { AnalyticsAPI } from "../src/lib/api-server";
 
 export default async function handler(req: any, res: any) {
   const { method } = req;

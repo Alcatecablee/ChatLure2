@@ -1,4 +1,5 @@
-import { UserAPI, type User } from "../src/lib/api";
+import { UserAPI } from "../src/lib/api-server";
+import type { User } from "../src/lib/api-client";
 
 export default async function handler(req: any, res: any) {
   const { method } = req;

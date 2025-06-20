@@ -1,4 +1,5 @@
-import { StoryAPI, type Story } from "../src/lib/api";
+import { StoryAPI } from "../src/lib/api-server";
+import type { Story } from "../src/lib/api-client";
 
 export default async function handler(req: any, res: any) {
   const { method } = req;
