@@ -773,7 +773,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
               <div className="flex items-center justify-between p-2 bg-accent/50 rounded">
                 <div className="flex items-center space-x-2">
-                  <Shield className="text-primary" size={16} />
+                  <Shield className="text-muted-foreground" size={16} />
                   <span className="text-sm">Clerk Auth</span>
                 </div>
                 {connectionStatus.connections.clerk ? (
