@@ -184,6 +184,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
       };
 
+    case "UPDATE_APP_CONFIG":
+      return {
+        ...state,
+        appConfig: { ...state.appConfig, ...action.payload },
+      };
+
     default:
       return state;
   }
