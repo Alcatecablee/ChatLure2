@@ -1407,6 +1407,234 @@ export function ContentImporter({
           )}
         </TabsContent>
 
+        <TabsContent value="whatsapp" className="space-y-6">
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <MessageSquare className="text-green-400" />
+                <span>WhatsApp Chat Importer</span>
+              </CardTitle>
+              <p className="text-sm text-gray-400">
+                Transform your real WhatsApp conversations into viral ChatLure
+                stories with intelligent parsing and anonymization.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Settings */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={anonymizeChats}
+                    onCheckedChange={setAnonymizeChats}
+                  />
+                  <Label>Anonymize Names</Label>
+                  <Badge variant="secondary" className="text-xs">
+                    Recommended
+                  </Badge>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={detectDrama}
+                    onCheckedChange={setDetectDrama}
+                  />
+                  <Label>Auto-Detect Drama Moments</Label>
+                  <Badge className="bg-purple-500/20 text-purple-400 text-xs">
+                    AI
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Chat Input */}
+              <div>
+                <Label
+                  htmlFor="whatsapp-chat"
+                  className="text-lg font-medium mb-3 block"
+                >
+                  Paste Your WhatsApp Chat Export
+                </Label>
+                <Textarea
+                  id="whatsapp-chat"
+                  value={whatsappChatText}
+                  onChange={(e) => setWhatsappChatText(e.target.value)}
+                  placeholder="Paste your WhatsApp chat export here...
+
+Example format:
+[15/01/2024, 14:30:25] Sarah: OMG you won't believe what just happened
+[15/01/2024, 14:30:48] Taylor: What?? Tell me everything!
+[15/01/2024, 14:31:15] Sarah: I caught him texting his ex... 😭"
+                  className="bg-gray-700 border-gray-600 min-h-[300px] font-mono text-sm"
+                />
+              </div>
+
+              {/* Process Button */}
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-400">
+                  Supports all WhatsApp export formats • Intelligent drama
+                  detection • Privacy-first
+                </div>
+                <Button
+                  onClick={processWhatsAppImport}
+                  disabled={isProcessing || !whatsappChatText.trim()}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {isProcessing ? (
+                    <RefreshCw size={16} className="mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles size={16} className="mr-2" />
+                  )}
+                  Convert to ChatLure
+                </Button>
+              </div>
+
+              {/* Instructions */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-lg">
+                  <h4 className="font-medium text-green-400 mb-2">
+                    📱 How to Export WhatsApp Chat
+                  </h4>
+                  <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                    <li>Open WhatsApp chat</li>
+                    <li>Tap on contact/group name</li>
+                    <li>Select "Export Chat"</li>
+                    <li>Choose "Without Media"</li>
+                    <li>Copy the text and paste here</li>
+                  </ol>
+                </div>
+
+                <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-400 mb-2">
+                    🤖 AI Features
+                  </h4>
+                  <ul className="text-sm text-gray-300 space-y-1">
+                    <li>• Auto-detects dramatic moments</li>
+                    <li>• Identifies cliffhangers</li>
+                    <li>• Analyzes emotions</li>
+                    <li>• Generates story titles</li>
+                    <li>• Calculates viral potential</li>
+                    <li>• Protects privacy with anonymization</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Privacy Notice */}
+              <div className="bg-purple-900/20 border border-purple-500/30 p-4 rounded-lg">
+                <h4 className="font-medium text-purple-400 mb-2 flex items-center">
+                  🔒 Privacy & Security
+                </h4>
+                <p className="text-sm text-gray-300">
+                  <strong>Your privacy matters:</strong> All processing happens
+                  locally in your browser. No chat data is sent to external
+                  servers. Enable "Anonymize Names" to automatically replace
+                  real names with fictional ones for extra protection.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* WhatsApp Stories Preview */}
+          {whatsappStories.length > 0 && (
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle>
+                  💬 Converted WhatsApp Stories ({whatsappStories.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {whatsappStories.map((story, index) => (
+                    <div key={story.id} className="bg-gray-700 p-4 rounded-lg">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-white mb-2">
+                            {story.title}
+                          </h4>
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Badge variant="outline" className="text-xs">
+                              {story.genre}
+                            </Badge>
+                            <Badge className="bg-green-500/20 text-green-400 text-xs">
+                              💬 WhatsApp
+                            </Badge>
+                            <div
+                              className={`flex items-center space-x-1 ${
+                                story.estimatedViralScore >= 80
+                                  ? "text-green-400"
+                                  : story.estimatedViralScore >= 60
+                                    ? "text-yellow-400"
+                                    : "text-red-400"
+                              }`}
+                            >
+                              <TrendingUp size={12} />
+                              <span className="text-xs font-bold">
+                                {story.estimatedViralScore}% viral
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-400 mb-2">
+                            {story.messages.length} messages •{" "}
+                            {story.characters.length} participants
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {story.tags.join(", ")}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              // Add to main stories list
+                              setParsedStories((prev) =>
+                                prev.some((s) => s.id === story.id)
+                                  ? prev
+                                  : [...prev, story],
+                              );
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Add to Stories
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Message Preview */}
+                      <div className="bg-gray-800 p-3 rounded border-l-4 border-green-400">
+                        <h5 className="text-xs font-medium text-green-400 mb-2">
+                          MESSAGE PREVIEW
+                        </h5>
+                        <div className="space-y-1">
+                          {story.messages.slice(0, 3).map((msg, i) => (
+                            <div key={i} className="text-xs">
+                              <span className="text-blue-300">
+                                {msg.sender}:
+                              </span>
+                              <span className="text-gray-300 ml-2">
+                                {msg.message}
+                              </span>
+                              {msg.emotion !== "neutral" && (
+                                <Badge
+                                  variant="outline"
+                                  className="ml-2 text-xs"
+                                >
+                                  {msg.emotion}
+                                </Badge>
+                              )}
+                            </div>
+                          ))}
+                          {story.messages.length > 3 && (
+                            <div className="text-xs text-gray-500">
+                              ... and {story.messages.length - 3} more messages
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
         <TabsContent value="manual" className="space-y-6">
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
