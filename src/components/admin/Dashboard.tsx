@@ -109,6 +109,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         const data = await APIClient.getDashboardMetrics();
         setDashboardData(data);
 
+        // Update realtime data with real values
+        setRealtimeData({
+          activeUsers: data.totalUsers,
+          storiesBeingRead: data.activeStories,
+          engagementRate: data.avgRating * 20, // Convert 5-point scale to percentage
+          newSubscriptions: Math.floor(data.totalUsers * 0.1), // Estimate based on total users
+        });
+
         // Create real performance metrics from API data
         const realMetrics: PerformanceMetric[] = [
           {
