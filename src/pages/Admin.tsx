@@ -569,7 +569,7 @@ const Admin = () => {
             className="w-72 bg-sidebar border-r border-sidebar-border flex flex-col min-h-screen shadow-xl"
           >
             {/* Header */}
-            <div className="p-6 border-b border-gray-700">
+            <div className="p-6 border-b border-sidebar-border">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
