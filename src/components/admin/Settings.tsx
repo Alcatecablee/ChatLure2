@@ -78,47 +78,72 @@ export function Settings() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   const saveCredentials = () => {
-    // Save to localStorage
-    localStorage.setItem("reddit_client_id", credentials.reddit.clientId);
-    localStorage.setItem(
-      "reddit_client_secret",
-      credentials.reddit.clientSecret,
-    );
-    localStorage.setItem("reddit_user_agent", credentials.reddit.userAgent);
-    localStorage.setItem(
-      "reddit_enabled",
-      credentials.reddit.enabled.toString(),
-    );
+    try {
+      // Save to localStorage first
+      localStorage.setItem("reddit_client_id", credentials.reddit.clientId);
+      localStorage.setItem(
+        "reddit_client_secret",
+        credentials.reddit.clientSecret,
+      );
+      localStorage.setItem("reddit_user_agent", credentials.reddit.userAgent);
+      localStorage.setItem(
+        "reddit_enabled",
+        credentials.reddit.enabled.toString(),
+      );
 
-    localStorage.setItem(
-      "clerk_publishable_key",
-      credentials.clerk.publishableKey,
-    );
-    localStorage.setItem("clerk_secret_key", credentials.clerk.secretKey);
-    localStorage.setItem(
-      "clerk_webhook_secret",
-      credentials.clerk.webhookSecret,
-    );
-    localStorage.setItem("clerk_enabled", credentials.clerk.enabled.toString());
+      localStorage.setItem(
+        "clerk_publishable_key",
+        credentials.clerk.publishableKey,
+      );
+      localStorage.setItem("clerk_secret_key", credentials.clerk.secretKey);
+      localStorage.setItem(
+        "clerk_webhook_secret",
+        credentials.clerk.webhookSecret,
+      );
+      localStorage.setItem(
+        "clerk_enabled",
+        credentials.clerk.enabled.toString(),
+      );
 
-    localStorage.setItem("paypal_client_id", credentials.paypal.clientId);
-    localStorage.setItem(
-      "paypal_client_secret",
-      credentials.paypal.clientSecret,
-    );
-    localStorage.setItem("paypal_plan_id", credentials.paypal.planId);
-    localStorage.setItem("paypal_environment", credentials.paypal.environment);
-    localStorage.setItem(
-      "paypal_enabled",
-      credentials.paypal.enabled.toString(),
-    );
+      localStorage.setItem("paypal_client_id", credentials.paypal.clientId);
+      localStorage.setItem(
+        "paypal_client_secret",
+        credentials.paypal.clientSecret,
+      );
+      localStorage.setItem("paypal_plan_id", credentials.paypal.planId);
+      localStorage.setItem(
+        "paypal_environment",
+        credentials.paypal.environment,
+      );
+      localStorage.setItem(
+        "paypal_enabled",
+        credentials.paypal.enabled.toString(),
+      );
 
-    setLastSaved(new Date());
+      // Update AppContext
+      dispatch({ type: "UPDATE_CREDENTIALS", payload: credentials });
 
-    // Dispatch event for other components to listen to
-    window.dispatchEvent(
-      new CustomEvent("credentials-updated", { detail: credentials }),
-    );
+      setLastSaved(new Date());
+
+      // Show success notification
+      addNotification({
+        type: "success",
+        title: "Settings Saved",
+        message: "API credentials have been saved successfully!",
+      });
+
+      // Dispatch event for other components to listen to
+      window.dispatchEvent(
+        new CustomEvent("credentials-updated", { detail: credentials }),
+      );
+    } catch (error) {
+      console.error("Failed to save credentials:", error);
+      addNotification({
+        type: "error",
+        title: "Save Failed",
+        message: "Failed to save API credentials. Please try again.",
+      });
+    }
   };
 
   const testConnection = async (service: keyof typeof connectionStatus) => {
