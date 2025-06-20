@@ -12,6 +12,11 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Force any @radix-ui/react-tooltip imports to use our safe fallback
+      "@radix-ui/react-tooltip": path.resolve(
+        __dirname,
+        "./src/components/ui/tooltip.tsx",
+      ),
     },
   },
 }));
