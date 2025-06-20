@@ -90,6 +90,43 @@ const initialState: AppState = {
   isLoading: false,
   notifications: [],
   error: null,
+  appConfig: {
+    appName: "ChatLure",
+    tagline: "Real-time insights into your viral story empire",
+    logo: "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+    favicon:
+      "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+    phoneIcons: {
+      phone: "📞",
+      chatLure:
+        "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+      camera: "📷",
+      photos: "🌸",
+      settings: "⚙️",
+      calculator: "🔢",
+      mail: "✉️",
+      clock: "🕒",
+      maps: "🗺️",
+      music: "🎵",
+      safari: "🧭",
+      calendar: "📅",
+    },
+    sponsoredApps: {
+      spotify: "🎵",
+      netflix: "N",
+      uber: "🚗",
+      airbnb: "🏠",
+      instagram: "📸",
+      tiktok: "🎬",
+      doordash: "🍕",
+      youtube: "▶️",
+    },
+    theme: {
+      primaryColor: "#9333EA",
+      backgroundColor: "#141414",
+      cardColor: "#1A1A1A",
+    },
+  },
 };
 
 // Reducer
