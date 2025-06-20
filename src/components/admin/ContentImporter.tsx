@@ -766,30 +766,46 @@ export function ContentImporter({
                       Auto-convert to ChatLure format
                     </span>
                   </div>
-                  {credentials.reddit.enabled ? (
-                    <Badge className="bg-green-500/20 text-green-400 text-xs">
-                      ✓ Reddit Connected
-                    </Badge>
-                  ) : (
-                    <Badge
-                      variant="outline"
-                      className="text-yellow-400 border-yellow-500/30 text-xs"
-                    >
-                      ⚠ Configure in Settings
-                    </Badge>
-                  )}
+                  <Badge className="bg-blue-500/20 text-blue-400 text-xs">
+                    🌐 CORS-Safe Mode
+                  </Badge>
                 </div>
-                <Button
-                  onClick={fetchRedditContent}
-                  disabled={isProcessing || !credentials.reddit.enabled}
-                >
+                <Button onClick={fetchRedditContent} disabled={isProcessing}>
                   {isProcessing ? (
                     <RefreshCw size={16} className="mr-2 animate-spin" />
                   ) : (
                     <Search size={16} className="mr-2" />
                   )}
-                  Scan Reddit
+                  Scan Content
                 </Button>
+              </div>
+
+              <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
+                <h4 className="font-medium text-blue-400 mb-2 flex items-center">
+                  ℹ️ Reddit Integration Status
+                </h4>
+                <div className="text-sm text-gray-300 space-y-2">
+                  <p>
+                    <strong>Current Mode:</strong> Public Reddit API + Curated
+                    Fallback
+                  </p>
+                  <p>
+                    <strong>Why:</strong> Browser CORS policy prevents direct
+                    Reddit OAuth API calls from frontend applications.
+                  </p>
+                  <p>
+                    <strong>Solution:</strong> The scanner uses Reddit's public
+                    JSON endpoints when possible, with high-quality curated
+                    content as fallback.
+                  </p>
+                  <div className="mt-3 p-3 bg-gray-800/50 rounded border-l-4 border-blue-400">
+                    <p className="text-xs text-blue-300">
+                      <strong>💡 For Production:</strong> Set up a backend API
+                      proxy to handle Reddit OAuth authentication and bypass
+                      CORS limitations.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
