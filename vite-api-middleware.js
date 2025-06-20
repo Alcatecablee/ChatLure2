@@ -27,6 +27,8 @@ export function apiMiddleware() {
             return handleApiResponse(res, "analytics", req);
           } else if (apiPath === "/test-connection") {
             return handleApiResponse(res, "test", req);
+          } else if (apiPath.startsWith("/reddit/")) {
+            return handleApiResponse(res, "reddit", req);
           }
 
           // If no API handler found, return 404
