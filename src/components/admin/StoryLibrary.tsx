@@ -46,7 +46,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Using Story from API types
-import type { Story } from "@/lib/api";
+import type { Story } from "@/lib/api-client";
 
 interface Character {
   id: string;
