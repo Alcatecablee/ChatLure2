@@ -601,13 +601,13 @@ const Admin = () => {
               <div className="relative">
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search sections..."
-                  className="pl-9 bg-gray-800 border-gray-600 text-sm"
+                  className="pl-9 bg-sidebar-accent border-sidebar-border text-sm text-sidebar-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </div>
