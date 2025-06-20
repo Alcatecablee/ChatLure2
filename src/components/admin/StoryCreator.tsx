@@ -472,7 +472,7 @@ export function StoryCreator({
                 });
               }
             }}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 flex items-center space-x-2"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center space-x-2"
           >
             <Save size={16} />
             <span>Save Story</span>
