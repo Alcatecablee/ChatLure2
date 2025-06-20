@@ -655,31 +655,31 @@ const Admin = () => {
             <div className="p-4 border-t border-sidebar-border">
               <Card className="bg-sidebar-accent/50 border-sidebar-border">
                 <CardContent className="p-4">
-                  <h3 className="text-sm font-semibold text-purple-400 mb-3 flex items-center">
+                  <h3 className="text-sm font-semibold text-primary mb-3 flex items-center">
                     <Activity size={14} className="mr-2" />
                     Live Stats
                   </h3>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Stories:</span>
+                      <span className="text-muted-foreground">Stories:</span>
                       <span className="text-green-400 font-bold">
                         {state.stories.length}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Users:</span>
+                      <span className="text-muted-foreground">Users:</span>
                       <span className="text-blue-400 font-bold">
                         {state.users.length}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Active:</span>
+                      <span className="text-muted-foreground">Active:</span>
                       <span className="text-orange-400 font-bold">
                         {state.stories.filter((s) => s.isActive).length}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Status:</span>
+                      <span className="text-muted-foreground">Status:</span>
                       <span
                         className={`font-bold ${
                           state.isLoading
