@@ -61,14 +61,19 @@ export function StatusBar() {
       <div className="text-white text-sm font-semibold">{formatTime(time)}</div>
 
       {/* Right side - Status icons */}
-      <div className="flex items-center space-x-1">
-        <Signal size={16} className="text-white" />
-        <Wifi size={16} className="text-white" />
+      <div className="flex items-center space-x-2">
+        <span className="text-white text-sm">📶</span>
+        <span className="text-white text-sm">📶</span>
+        <span className="text-white text-sm">📶</span>
+        <span className="text-white text-sm">📞</span>
+        <span className="text-white text-sm">📡</span>
         <div className="flex items-center space-x-1">
           <span className={`text-xs ${getBatteryColor()}`}>
             {Math.floor(battery.level)}%
           </span>
-          {getBatteryIcon()}
+          <span className={`text-sm ${getBatteryColor()}`}>
+            {battery.isCharging ? "🔋" : battery.level <= 15 ? "🪫" : "🔋"}
+          </span>
           {battery.isPremium && (
             <span className="text-yellow-400 text-xs">⚡</span>
           )}
