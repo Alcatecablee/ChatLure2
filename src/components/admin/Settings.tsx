@@ -591,7 +591,7 @@ export function Settings() {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2 mb-4">
                 <Switch
-                  checked={credentials.paypal.enabled}
+                  checked={credentials?.paypal?.enabled || false}
                   onCheckedChange={(enabled) =>
                     setCredentials((prev) => ({
                       ...prev,
