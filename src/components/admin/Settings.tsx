@@ -491,7 +491,7 @@ export function Settings() {
                   <Input
                     id="clerk-secret"
                     type={showSecrets.clerk ? "text" : "password"}
-                    value={credentials.clerk.secretKey}
+                    value={credentials?.clerk?.secretKey || ""}
                     onChange={(e) =>
                       setCredentials((prev) => ({
                         ...prev,
