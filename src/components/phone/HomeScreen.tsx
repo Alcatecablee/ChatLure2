@@ -14,6 +14,7 @@ import {
   Calendar,
   Power,
 } from "lucide-react";
+import { useAppConfig } from "@/contexts/AppContext";
 
 interface AppIconProps {
   icon: React.ReactNode;
@@ -78,148 +79,165 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onAppSelect }: HomeScreenProps) {
+  const appConfig = useAppConfig();
+
   const handlePowerOff = () => {
     // Clear all stored data and restart app
     localStorage.clear();
     window.location.reload();
   };
 
-  // ALL ORIGINAL APPS - with realistic iOS-style icons and proper branding
+  // Helper function to render app icon (emoji or image URL)
+  const renderIcon = (iconValue: string, appName: string) => {
+    // Check if it's an image URL
+    if (iconValue.startsWith("http")) {
+      return (
+        <img
+          src={iconValue}
+          alt={appName}
+          className="w-8 h-8 object-cover rounded-lg"
+          onError={(e) => {
+            // Fallback to a default emoji if image fails to load
+            (e.target as HTMLElement).outerHTML =
+              '<div class="text-white text-2xl font-bold">📱</div>';
+          }}
+        />
+      );
+    }
+    // Render as emoji
+    return <div className="text-white text-2xl font-bold">{iconValue}</div>;
+  };
+
+  // ALL ORIGINAL APPS - using configurable icons from app settings
   const originalApps = [
     {
       id: "phone",
-      icon: <div className="text-white text-2xl font-bold">📞</div>,
+      icon: renderIcon(appConfig.phoneIcons.phone, "Phone"),
       name: "Phone",
       color: "#34C759",
     },
     {
       id: "messages",
-      icon: (
-        <img
-          src="https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800"
-          alt="ChatLure"
-          className="w-8 h-8 object-cover"
-        />
-      ),
+      icon: renderIcon(appConfig.phoneIcons.chatLure, "ChatLure"),
       name: "ChatLure",
       color: "#9333EA",
     },
     {
       id: "camera",
-      icon: <div className="text-white text-2xl font-bold">📷</div>,
+      icon: renderIcon(appConfig.phoneIcons.camera, "Camera"),
       name: "Camera",
       color: "#636366",
     },
     {
       id: "photos",
-      icon: <div className="text-white text-2xl font-bold">🌸</div>,
+      icon: renderIcon(appConfig.phoneIcons.photos, "Photos"),
       name: "Photos",
       color: "#FF9500",
     },
     {
       id: "settings",
-      icon: <div className="text-white text-2xl font-bold">⚙️</div>,
+      icon: renderIcon(appConfig.phoneIcons.settings, "Settings"),
       name: "Settings",
       color: "#8E8E93",
     },
     {
       id: "calculator",
-      icon: <div className="text-white text-2xl font-bold">🔢</div>,
+      icon: renderIcon(appConfig.phoneIcons.calculator, "Calculator"),
       name: "Calculator",
       color: "#2C2C2E",
     },
     {
       id: "mail",
-      icon: <div className="text-white text-2xl font-bold">✉️</div>,
+      icon: renderIcon(appConfig.phoneIcons.mail, "Mail"),
       name: "Mail",
       color: "#007AFF",
     },
     {
       id: "clock",
-      icon: <div className="text-white text-2xl font-bold">🕒</div>,
+      icon: renderIcon(appConfig.phoneIcons.clock, "Clock"),
       name: "Clock",
       color: "#2C2C2E",
     },
     {
       id: "maps",
-      icon: <div className="text-white text-2xl font-bold">🗺️</div>,
+      icon: renderIcon(appConfig.phoneIcons.maps, "Maps"),
       name: "Maps",
       color: "#007AFF",
     },
     {
       id: "music",
-      icon: <div className="text-white text-2xl font-bold">🎵</div>,
+      icon: renderIcon(appConfig.phoneIcons.music, "Music"),
       name: "Music",
       color: "#FF2D92",
     },
     {
       id: "safari",
-      icon: <div className="text-white text-2xl font-bold">🧭</div>,
+      icon: renderIcon(appConfig.phoneIcons.safari, "Safari"),
       name: "Safari",
       color: "#007AFF",
     },
     {
       id: "calendar",
-      icon: <div className="text-white text-2xl font-bold">📅</div>,
+      icon: renderIcon(appConfig.phoneIcons.calendar, "Calendar"),
       name: "Calendar",
       color: "#FF3B30",
     },
   ];
 
-  // Sponsored apps - Realistic branded apps with proper icons and colors
+  // Sponsored apps - using configurable icons from app settings
   const sponsoredApps = [
     {
       id: "spotify",
-      icon: <div className="text-2xl text-white">🎵</div>,
+      icon: renderIcon(appConfig.sponsoredApps.spotify, "Spotify"),
       name: "Spotify",
       color: "#1DB954",
       isSponsored: true,
     },
     {
       id: "netflix",
-      icon: <div className="text-2xl font-bold text-white">N</div>,
+      icon: renderIcon(appConfig.sponsoredApps.netflix, "Netflix"),
       name: "Netflix",
       color: "#E50914",
       isSponsored: true,
     },
     {
       id: "uber",
-      icon: <div className="text-2xl text-white">🚗</div>,
+      icon: renderIcon(appConfig.sponsoredApps.uber, "Uber"),
       name: "Uber",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "airbnb",
-      icon: <div className="text-2xl text-white">🏠</div>,
+      icon: renderIcon(appConfig.sponsoredApps.airbnb, "Airbnb"),
       name: "Airbnb",
       color: "#FF5A5F",
       isSponsored: true,
     },
     {
       id: "instagram",
-      icon: <div className="text-2xl text-white">📸</div>,
+      icon: renderIcon(appConfig.sponsoredApps.instagram, "Instagram"),
       name: "Instagram",
       color: "#E4405F",
       isSponsored: true,
     },
     {
       id: "tiktok",
-      icon: <div className="text-2xl text-white">🎬</div>,
+      icon: renderIcon(appConfig.sponsoredApps.tiktok, "TikTok"),
       name: "TikTok",
       color: "#000000",
       isSponsored: true,
     },
     {
       id: "doordash",
-      icon: <div className="text-2xl text-white">🍕</div>,
+      icon: renderIcon(appConfig.sponsoredApps.doordash, "DoorDash"),
       name: "DoorDash",
       color: "#FF3008",
       isSponsored: true,
     },
     {
       id: "youtube",
-      icon: <div className="text-2xl text-white">▶️</div>,
+      icon: renderIcon(appConfig.sponsoredApps.youtube, "YouTube"),
       name: "YouTube",
       color: "#FF0000",
       isSponsored: true,
