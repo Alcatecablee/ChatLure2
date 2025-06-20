@@ -69,10 +69,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [timeRange, setTimeRange] = useState("7d");
   const [selectedMetric, setSelectedMetric] = useState("views");
   const [realtimeData, setRealtimeData] = useState<RealtimeData>({
-    activeUsers: 1247,
-    storiesBeingRead: 89,
-    engagementRate: 73.2,
-    newSubscriptions: 23,
+    activeUsers: 0,
+    storiesBeingRead: 0,
+    engagementRate: 0,
+    newSubscriptions: 0,
   });
   const [isLiveMode, setIsLiveMode] = useState(false);
 
@@ -138,36 +138,38 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const connectionStatus = getConnectionStatus();
 
-  const performanceMetrics: PerformanceMetric[] = [
+  const [performanceMetrics, setPerformanceMetrics] = useState<
+    PerformanceMetric[]
+  >([
     {
       label: "Total Revenue",
-      value: 24847,
-      change: 12.3,
-      trend: "up",
+      value: 0,
+      change: 0,
+      trend: "stable",
       format: "currency",
     },
     {
       label: "Active Subscribers",
-      value: 1847,
-      change: 8.7,
-      trend: "up",
+      value: 0,
+      change: 0,
+      trend: "stable",
       format: "number",
     },
     {
       label: "Avg. Engagement Time",
-      value: 18.4,
-      change: -2.1,
-      trend: "down",
+      value: 0,
+      change: 0,
+      trend: "stable",
       format: "time",
     },
     {
       label: "Story Completion Rate",
       value: avgCompletionRate,
-      change: 5.2,
-      trend: "up",
+      change: 0,
+      trend: "stable",
       format: "percentage",
     },
-  ];
+  ]);
 
   const formatMetricValue = (value: number, format: string) => {
     switch (format) {
@@ -193,48 +195,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "story_created",
-      title: "New story created: 'The Wedding Disaster'",
-      time: "2 minutes ago",
-      icon: BookOpen,
-      color: "text-green-400",
-    },
-    {
-      id: 2,
-      type: "viral_alert",
-      title: "Story went viral: 'Mom Saw the Texts' - 10k+ views!",
-      time: "15 minutes ago",
-      icon: Flame,
-      color: "text-orange-400",
-    },
-    {
-      id: 3,
-      type: "user_milestone",
-      title: "1000 active users milestone reached",
-      time: "1 hour ago",
-      icon: Users,
-      color: "text-blue-400",
-    },
-    {
-      id: 4,
-      type: "subscription",
-      title: "New premium subscription: Sarah Johnson",
-      time: "2 hours ago",
-      icon: CreditCard,
-      color: "text-purple-400",
-    },
-    {
-      id: 5,
-      type: "content_imported",
-      title: "5 stories imported from r/relationship_advice",
-      time: "4 hours ago",
-      icon: Globe,
-      color: "text-cyan-400",
-    },
-  ];
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
   return (
     <div className="space-y-6">
