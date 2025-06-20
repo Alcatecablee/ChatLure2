@@ -74,6 +74,13 @@ const sections = [
     description: "Configure integrations",
   },
   {
+    key: "app-settings",
+    label: "App Settings",
+    icon: Sparkles,
+    color: "text-purple-400",
+    description: "Branding, icons & configuration",
+  },
+  {
     key: "users",
     label: "User Management",
     icon: Users,
