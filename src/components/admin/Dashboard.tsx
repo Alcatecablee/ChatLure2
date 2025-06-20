@@ -472,78 +472,86 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             exit={{ opacity: 0, y: -20 }}
             className="grid grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border-blue-500/30">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-blue-300">Active Users</p>
+                    <p className="text-sm text-muted-foreground">
+                      Active Users
+                    </p>
                     <motion.p
                       key={realtimeData.activeUsers}
                       initial={{ scale: 1.1 }}
                       animate={{ scale: 1 }}
-                      className="text-2xl font-bold text-blue-400"
+                      className="text-2xl font-bold text-foreground"
                     >
                       {realtimeData.activeUsers.toLocaleString()}
                     </motion.p>
                   </div>
-                  <Activity className="text-blue-400" size={20} />
+                  <Activity className="text-muted-foreground" size={20} />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-900/30 to-green-800/20 border-green-500/30">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-green-300">Reading Stories</p>
+                    <p className="text-sm text-muted-foreground">
+                      Reading Stories
+                    </p>
                     <motion.p
                       key={realtimeData.storiesBeingRead}
                       initial={{ scale: 1.1 }}
                       animate={{ scale: 1 }}
-                      className="text-2xl font-bold text-green-400"
+                      className="text-2xl font-bold text-foreground"
                     >
                       {realtimeData.storiesBeingRead}
                     </motion.p>
                   </div>
-                  <BookOpen className="text-green-400" size={20} />
+                  <BookOpen className="text-muted-foreground" size={20} />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 border-purple-500/30">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-purple-300">Engagement Rate</p>
+                    <p className="text-sm text-muted-foreground">
+                      Engagement Rate
+                    </p>
                     <motion.p
                       key={Math.round(realtimeData.engagementRate)}
                       initial={{ scale: 1.1 }}
                       animate={{ scale: 1 }}
-                      className="text-2xl font-bold text-purple-400"
+                      className="text-2xl font-bold text-foreground"
                     >
                       {realtimeData.engagementRate.toFixed(1)}%
                     </motion.p>
                   </div>
-                  <Target className="text-purple-400" size={20} />
+                  <Target className="text-muted-foreground" size={20} />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-orange-900/30 to-orange-800/20 border-orange-500/30">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-orange-300">New Subscriptions</p>
+                    <p className="text-sm text-muted-foreground">
+                      New Subscriptions
+                    </p>
                     <motion.p
                       key={realtimeData.newSubscriptions}
                       initial={{ scale: 1.1 }}
                       animate={{ scale: 1 }}
-                      className="text-2xl font-bold text-orange-400"
+                      className="text-2xl font-bold text-foreground"
                     >
                       +{realtimeData.newSubscriptions}
                     </motion.p>
                   </div>
-                  <CreditCard className="text-orange-400" size={20} />
+                  <CreditCard className="text-muted-foreground" size={20} />
                 </div>
               </CardContent>
             </Card>
