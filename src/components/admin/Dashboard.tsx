@@ -165,6 +165,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     fetchDashboardData();
   }, []);
 
+  // Ensure fresh stories data
+  useEffect(() => {
+    const { loadStories } = useApp();
+    loadStories();
+  }, []);
+
   // Generate real activity data from stories and users
   useEffect(() => {
     if (stories.length > 0 || users.length > 0) {
