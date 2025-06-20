@@ -68,7 +68,7 @@ interface RealtimeData {
 }
 
 export function Dashboard({ onNavigate }: DashboardProps) {
-  const { addNotification } = useApp();
+  const { addNotification, loadStories } = useApp();
   const stories = useStories();
   const credentials = useCredentials();
   const users = useUsers();
