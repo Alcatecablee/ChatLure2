@@ -79,89 +79,106 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onAppSelect }: HomeScreenProps) {
+  const appConfig = useAppConfig();
+
   const handlePowerOff = () => {
     // Clear all stored data and restart app
     localStorage.clear();
     window.location.reload();
   };
 
-  // ALL ORIGINAL APPS - with realistic iOS-style icons and proper branding
+  // Helper function to render app icon (emoji or image URL)
+  const renderIcon = (iconValue: string, appName: string) => {
+    // Check if it's an image URL
+    if (iconValue.startsWith("http")) {
+      return (
+        <img
+          src={iconValue}
+          alt={appName}
+          className="w-8 h-8 object-cover rounded-lg"
+          onError={(e) => {
+            // Fallback to a default emoji if image fails to load
+            (e.target as HTMLElement).outerHTML =
+              '<div class="text-white text-2xl font-bold">📱</div>';
+          }}
+        />
+      );
+    }
+    // Render as emoji
+    return <div className="text-white text-2xl font-bold">{iconValue}</div>;
+  };
+
+  // ALL ORIGINAL APPS - using configurable icons from app settings
   const originalApps = [
     {
       id: "phone",
-      icon: <div className="text-white text-2xl font-bold">📞</div>,
+      icon: renderIcon(appConfig.phoneIcons.phone, "Phone"),
       name: "Phone",
       color: "#34C759",
     },
     {
       id: "messages",
-      icon: (
-        <img
-          src="https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800"
-          alt="ChatLure"
-          className="w-8 h-8 object-cover"
-        />
-      ),
+      icon: renderIcon(appConfig.phoneIcons.chatLure, "ChatLure"),
       name: "ChatLure",
       color: "#9333EA",
     },
     {
       id: "camera",
-      icon: <div className="text-white text-2xl font-bold">📷</div>,
+      icon: renderIcon(appConfig.phoneIcons.camera, "Camera"),
       name: "Camera",
       color: "#636366",
     },
     {
       id: "photos",
-      icon: <div className="text-white text-2xl font-bold">🌸</div>,
+      icon: renderIcon(appConfig.phoneIcons.photos, "Photos"),
       name: "Photos",
       color: "#FF9500",
     },
     {
       id: "settings",
-      icon: <div className="text-white text-2xl font-bold">⚙️</div>,
+      icon: renderIcon(appConfig.phoneIcons.settings, "Settings"),
       name: "Settings",
       color: "#8E8E93",
     },
     {
       id: "calculator",
-      icon: <div className="text-white text-2xl font-bold">🔢</div>,
+      icon: renderIcon(appConfig.phoneIcons.calculator, "Calculator"),
       name: "Calculator",
       color: "#2C2C2E",
     },
     {
       id: "mail",
-      icon: <div className="text-white text-2xl font-bold">✉️</div>,
+      icon: renderIcon(appConfig.phoneIcons.mail, "Mail"),
       name: "Mail",
       color: "#007AFF",
     },
     {
       id: "clock",
-      icon: <div className="text-white text-2xl font-bold">🕒</div>,
+      icon: renderIcon(appConfig.phoneIcons.clock, "Clock"),
       name: "Clock",
       color: "#2C2C2E",
     },
     {
       id: "maps",
-      icon: <div className="text-white text-2xl font-bold">🗺️</div>,
+      icon: renderIcon(appConfig.phoneIcons.maps, "Maps"),
       name: "Maps",
       color: "#007AFF",
     },
     {
       id: "music",
-      icon: <div className="text-white text-2xl font-bold">🎵</div>,
+      icon: renderIcon(appConfig.phoneIcons.music, "Music"),
       name: "Music",
       color: "#FF2D92",
     },
     {
       id: "safari",
-      icon: <div className="text-white text-2xl font-bold">🧭</div>,
+      icon: renderIcon(appConfig.phoneIcons.safari, "Safari"),
       name: "Safari",
       color: "#007AFF",
     },
     {
       id: "calendar",
-      icon: <div className="text-white text-2xl font-bold">📅</div>,
+      icon: renderIcon(appConfig.phoneIcons.calendar, "Calendar"),
       name: "Calendar",
       color: "#FF3B30",
     },
