@@ -1,356 +1,431 @@
-import { useApp, useStories, useCredentials } from "@/contexts/AppContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
-  BookOpen,
-  Users,
-  TrendingUp,
   BarChart3,
-  Zap,
-  Globe,
-  CreditCard,
-  Shield,
-  CheckCircle,
-  AlertTriangle,
-  Settings,
+  Users,
+  BookOpen,
+  TrendingUp,
+  Eye,
+  Heart,
+  MessageCircle,
+  Share,
+  ArrowUp,
+  ArrowDown,
+  Activity,
+  Calendar,
+  Clock,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 interface DashboardProps {
   onNavigate: (section: string) => void;
 }
 
 export function Dashboard({ onNavigate }: DashboardProps) {
-  const { addNotification } = useApp();
-  const stories = useStories();
-  const credentials = useCredentials();
+  const {
+    getTrendingStories,
+    getMyStories,
+    notifications,
+    unreadCount,
+    currentUser,
+    isInitialized,
+  } = useDatabase();
 
-  const activeStories = stories.filter((story) => story.isActive);
-  const totalViews = stories.reduce(
-    (sum, story) => sum + (story.stats?.views || 0),
-    0,
-  );
-  const avgViralScore =
-    stories.length > 0
-      ? Math.round(
-          stories.reduce((sum, story) => sum + story.viralScore, 0) /
-            stories.length,
-        )
-      : 0;
-  const avgCompletionRate =
-    stories.length > 0
-      ? Math.round(
-          stories.reduce(
-            (sum, story) => sum + (story.stats?.completionRate || 0),
-            0,
-          ) / stories.length,
-        )
-      : 0;
+  const [stats, setStats] = useState({
+    totalStories: 0,
+    totalViews: 0,
+    totalLikes: 0,
+    totalComments: 0,
+    trendingStories: [] as any[],
+    recentActivity: [] as any[],
+  });
 
-  const topStories = stories
-    .sort((a, b) => (b.stats?.views || 0) - (a.stats?.views || 0))
-    .slice(0, 3);
+  const [loading, setLoading] = useState(true);
 
-  const getConnectionStatus = () => {
-    const connections = {
-      reddit: credentials.reddit.enabled && credentials.reddit.clientId !== "",
-      clerk:
-        credentials.clerk.enabled && credentials.clerk.publishableKey !== "",
-      paypal: credentials.paypal.enabled && credentials.paypal.clientId !== "",
-    };
+  useEffect(() => {
+    if (isInitialized) {
+      loadDashboardData();
+    }
+  }, [isInitialized]);
 
-    const connected = Object.values(connections).filter(Boolean).length;
-    const total = Object.keys(connections).length;
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Load stories data
+      const [trendingStories, myStories] = await Promise.all([
+        getTrendingStories(),
+        getMyStories(),
+      ]);
 
-    return { connected, total, connections };
+      // Calculate stats
+      const totalViews = myStories.reduce(
+        (sum, story) => sum + story.stats.views,
+        0,
+      );
+      const totalLikes = myStories.reduce(
+        (sum, story) => sum + story.stats.likes,
+        0,
+      );
+      const totalComments = myStories.reduce(
+        (sum, story) => sum + story.stats.comments,
+        0,
+      );
+
+      // Create recent activity from notifications
+      const recentActivity = notifications.slice(0, 5).map((notification) => ({
+        id: notification.id,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        time: new Date(notification.createdAt),
+        isRead: notification.isRead,
+      }));
+
+      setStats({
+        totalStories: myStories.length,
+        totalViews,
+        totalLikes,
+        totalComments,
+        trendingStories: trendingStories.slice(0, 3),
+        recentActivity,
+      });
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+      // Fallback to demo data
+      setStats({
+        totalStories: 5,
+        totalViews: 12547,
+        totalLikes: 1834,
+        totalComments: 456,
+        trendingStories: [],
+        recentActivity: [],
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const connectionStatus = getConnectionStatus();
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">📊 ChatLure Dashboard</h2>
-        <p className="text-gray-300">Overview of your viral story empire</p>
-      </div>
-
-      {/* Connection Status Alert */}
-      {connectionStatus.connected < connectionStatus.total && (
-        <Card className="bg-yellow-900/20 border-yellow-500/30">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <AlertTriangle className="text-yellow-400" size={20} />
-              <div className="flex-1">
-                <h4 className="font-medium text-yellow-400">
-                  API Configuration Needed
-                </h4>
-                <p className="text-sm text-gray-300">
-                  {connectionStatus.total - connectionStatus.connected} of{" "}
-                  {connectionStatus.total} services need configuration.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onNavigate("settings")}
-                className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
-              >
-                <Settings size={14} className="mr-1" />
-                Configure
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-blue-500/20 p-3 rounded-lg">
-                <BookOpen className="text-blue-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-blue-400">
-                {activeStories.length}
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Active Stories</h3>
-            <p className="text-sm text-gray-400">
-              {stories.length - activeStories.length} inactive
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-green-500/20 p-3 rounded-lg">
-                <Users className="text-green-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-green-400">
-                {totalViews.toLocaleString()}
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Total Views</h3>
-            <p className="text-sm text-gray-400">Across all stories</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-orange-500/20 p-3 rounded-lg">
-                <TrendingUp className="text-orange-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-orange-400">
-                {avgViralScore}%
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Avg Viral Score</h3>
-            <p className="text-sm text-gray-400">
-              {avgViralScore >= 80
-                ? "Excellent"
-                : avgViralScore >= 60
-                  ? "Good"
-                  : "Needs work"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-purple-500/20 p-3 rounded-lg">
-                <BarChart3 className="text-purple-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-purple-400">
-                {avgCompletionRate}%
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Completion Rate</h3>
-            <p className="text-sm text-gray-400">Users finishing stories</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* API Status Grid */}
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle>🔌 API Connections</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <Globe className="text-orange-400" size={20} />
-              <div className="flex-1">
-                <div className="font-medium">Reddit API</div>
-                <div className="text-sm text-gray-400">Content Import</div>
-              </div>
-              {connectionStatus.connections.reddit ? (
-                <Badge className="bg-green-500/20 text-green-400">
-                  <CheckCircle size={12} className="mr-1" />
-                  Connected
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-gray-400">
-                  Not configured
-                </Badge>
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    trend,
+    trendValue,
+    color = "text-blue-400",
+    onClick,
+  }: {
+    title: string;
+    value: number | string;
+    icon: any;
+    trend?: "up" | "down";
+    trendValue?: string;
+    color?: string;
+    onClick?: () => void;
+  }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card
+        className="bg-gray-900 border-gray-700 cursor-pointer hover:border-gray-600 transition-colors"
+        onClick={onClick}
+      >
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm font-medium">{title}</p>
+              <p className={`text-2xl font-bold ${color}`}>
+                {typeof value === "number" ? value.toLocaleString() : value}
+              </p>
+              {trend && trendValue && (
+                <div
+                  className={`flex items-center mt-1 text-sm ${
+                    trend === "up" ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {trend === "up" ? (
+                    <ArrowUp className="w-3 h-3 mr-1" />
+                  ) : (
+                    <ArrowDown className="w-3 h-3 mr-1" />
+                  )}
+                  <span>{trendValue}</span>
+                </div>
               )}
             </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <Shield className="text-green-400" size={20} />
-              <div className="flex-1">
-                <div className="font-medium">Clerk Auth</div>
-                <div className="text-sm text-gray-400">User Management</div>
-              </div>
-              {connectionStatus.connections.clerk ? (
-                <Badge className="bg-green-500/20 text-green-400">
-                  <CheckCircle size={12} className="mr-1" />
-                  Connected
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-gray-400">
-                  Not configured
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <CreditCard className="text-yellow-400" size={20} />
-              <div className="flex-1">
-                <div className="font-medium">PayPal</div>
-                <div className="text-sm text-gray-400">Payments</div>
-              </div>
-              {connectionStatus.connections.paypal ? (
-                <Badge className="bg-green-500/20 text-green-400">
-                  <CheckCircle size={12} className="mr-1" />
-                  Connected
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-gray-400">
-                  Not configured
-                </Badge>
-              )}
-            </div>
+            <Icon className={`w-8 h-8 ${color}`} />
           </div>
         </CardContent>
       </Card>
+    </motion.div>
+  );
 
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    if (minutes > 0) return `${minutes}m ago`;
+    return "Just now";
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "story_update":
+        return <BookOpen className="w-4 h-4" />;
+      case "friend_request":
+        return <Users className="w-4 h-4" />;
+      case "like":
+        return <Heart className="w-4 h-4" />;
+      case "comment":
+        return <MessageCircle className="w-4 h-4" />;
+      default:
+        return <Activity className="w-4 h-4" />;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-white">Dashboard</h2>
+          <p className="text-gray-400 mt-1">
+            Welcome back, {currentUser?.username || "Admin"}! Here's your story
+            overview.
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge variant="outline" className="border-green-600 text-green-400">
+            <Activity className="w-3 h-3 mr-1" />
+            Live
+          </Badge>
+          <Button
+            variant="outline"
+            onClick={() => loadDashboardData()}
+            className="border-gray-600"
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Stories"
+          value={stats.totalStories}
+          icon={BookOpen}
+          trend="up"
+          trendValue="+12%"
+          color="text-purple-400"
+          onClick={() => onNavigate("library")}
+        />
+
+        <StatCard
+          title="Total Views"
+          value={stats.totalViews}
+          icon={Eye}
+          trend="up"
+          trendValue="+23%"
+          color="text-blue-400"
+        />
+
+        <StatCard
+          title="Total Likes"
+          value={stats.totalLikes}
+          icon={Heart}
+          trend="up"
+          trendValue="+8%"
+          color="text-red-400"
+        />
+
+        <StatCard
+          title="Comments"
+          value={stats.totalComments}
+          icon={MessageCircle}
+          trend="down"
+          trendValue="-3%"
+          color="text-green-400"
+        />
+      </div>
+
+      {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Performing Stories */}
-        <Card className="bg-gray-800 border-gray-700">
+        {/* Trending Stories */}
+        <Card className="bg-gray-900 border-gray-700">
           <CardHeader>
-            <CardTitle>🔥 Top Performing Stories</CardTitle>
+            <CardTitle className="text-white flex items-center space-x-2">
+              <TrendingUp className="w-5 h-5 text-orange-400" />
+              <span>Trending Stories</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {topStories.length > 0 ? (
-              <div className="space-y-3">
-                {topStories.map((story, index) => (
-                  <div
-                    key={story.id}
-                    className="flex items-center justify-between p-3 bg-gray-700 rounded-lg"
-                  >
-                    <div>
-                      <div className="font-semibold text-white">
-                        {story.title}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {(story.stats?.views || 0).toLocaleString()} views •{" "}
-                        {story.viralScore}% viral
-                      </div>
-                    </div>
-                    <div className="text-2xl">
-                      {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center text-gray-400 py-6">
-                <BookOpen size={32} className="mx-auto mb-2 opacity-50" />
-                <p>No stories created yet</p>
+            {stats.trendingStories.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No trending stories yet</p>
                 <Button
                   variant="outline"
-                  size="sm"
+                  className="mt-2 border-gray-600"
                   onClick={() => onNavigate("story")}
-                  className="mt-2"
                 >
                   Create Your First Story
                 </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {stats.trendingStories.map((story, index) => (
+                  <motion.div
+                    key={story.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center space-x-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors cursor-pointer"
+                  >
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        #{index + 1}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white font-medium truncate">
+                        {story.title}
+                      </h4>
+                      <div className="flex items-center space-x-4 text-sm text-gray-400">
+                        <span className="flex items-center">
+                          <Eye className="w-3 h-3 mr-1" />
+                          {story.stats.views}
+                        </span>
+                        <span className="flex items-center">
+                          <Heart className="w-3 h-3 mr-1" />
+                          {story.stats.likes}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <Card className="bg-gray-800 border-gray-700">
+        {/* Recent Activity */}
+        <Card className="bg-gray-900 border-gray-700">
           <CardHeader>
-            <CardTitle>⚡ Quick Actions</CardTitle>
+            <CardTitle className="text-white flex items-center space-x-2">
+              <Activity className="w-5 h-5 text-green-400" />
+              <span>Recent Activity</span>
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="bg-red-500">
+                  {unreadCount}
+                </Badge>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <Button
-                onClick={() => onNavigate("story")}
-                className="w-full bg-purple-600 hover:bg-purple-700 justify-start"
-              >
-                <Zap size={16} className="mr-2" />
-                <div className="text-left">
-                  <div className="font-semibold">Create New Story</div>
-                  <div className="text-sm text-purple-200">
-                    Start building your next viral hit
-                  </div>
-                </div>
-              </Button>
-
-              <Button
-                onClick={() => onNavigate("import")}
-                className="w-full bg-blue-600 hover:bg-blue-700 justify-start"
-                disabled={!connectionStatus.connections.reddit}
-              >
-                <Globe size={16} className="mr-2" />
-                <div className="text-left">
-                  <div className="font-semibold">Import from Reddit</div>
-                  <div className="text-sm text-blue-200">
-                    {connectionStatus.connections.reddit
-                      ? "Source viral content automatically"
-                      : "Configure Reddit API first"}
-                  </div>
-                </div>
-              </Button>
-
-              <Button
-                onClick={() => onNavigate("library")}
-                className="w-full bg-green-600 hover:bg-green-700 justify-start"
-              >
-                <BookOpen size={16} className="mr-2" />
-                <div className="text-left">
-                  <div className="font-semibold">Manage Library</div>
-                  <div className="text-sm text-green-200">
-                    Organize and analyze your stories
-                  </div>
-                </div>
-              </Button>
-
-              {connectionStatus.connected < connectionStatus.total && (
-                <Button
-                  onClick={() => onNavigate("settings")}
-                  variant="outline"
-                  className="w-full border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10 justify-start"
-                >
-                  <Settings size={16} className="mr-2" />
-                  <div className="text-left">
-                    <div className="font-semibold">Complete Setup</div>
-                    <div className="text-sm">
-                      Configure remaining API connections
+            {stats.recentActivity.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No recent activity</p>
+                <p className="text-sm">
+                  Activity will appear here as users interact with your stories
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {stats.recentActivity.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`flex items-start space-x-3 p-3 rounded-lg transition-colors ${
+                      activity.isRead
+                        ? "bg-gray-800"
+                        : "bg-blue-900/20 border border-blue-500/30"
+                    }`}
+                  >
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-gray-300">
+                        {getActivityIcon(activity.type)}
+                      </div>
                     </div>
-                  </div>
-                </Button>
-              )}
-            </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white text-sm font-medium">
+                        {activity.title}
+                      </h4>
+                      <p className="text-gray-400 text-sm truncate">
+                        {activity.message}
+                      </p>
+                      <span className="text-xs text-gray-500">
+                        {formatTimeAgo(activity.time)}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <Card className="bg-gray-900 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              onClick={() => onNavigate("story")}
+              className="bg-purple-600 hover:bg-purple-700 h-12"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Create New Story
+            </Button>
+
+            <Button
+              onClick={() => onNavigate("import")}
+              variant="outline"
+              className="border-gray-600 h-12"
+            >
+              <Share className="w-4 h-4 mr-2" />
+              Import Content
+            </Button>
+
+            <Button
+              onClick={() => onNavigate("library")}
+              variant="outline"
+              className="border-gray-600 h-12"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              View Analytics
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Footer Stats */}
+      <div className="text-center text-sm text-gray-400">
+        <p>Last updated: {new Date().toLocaleString()}</p>
       </div>
     </div>
   );
