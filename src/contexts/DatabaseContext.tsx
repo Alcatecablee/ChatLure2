@@ -392,8 +392,10 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
 
 export function useDatabase() {
   const context = useContext(DatabaseContext);
-  if (context === defaultContextValue) {
-    throw new Error("useDatabase must be used within a DatabaseProvider");
+  if (!context || context === defaultContextValue) {
+    throw new Error(
+      "useDatabase must be used within a DatabaseProvider. Make sure your component is wrapped with <DatabaseProvider>.",
+    );
   }
   return context;
 }
