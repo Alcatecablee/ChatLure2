@@ -576,8 +576,12 @@ const Admin = () => {
                     <Sparkles size={18} className="text-white" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-white">ChatLure</h1>
-                    <p className="text-xs text-gray-400">Admin Console</p>
+                    <h1 className="text-xl font-bold text-sidebar-foreground">
+                      ChatLure
+                    </h1>
+                    <p className="text-xs text-muted-foreground">
+                      Admin Console
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-1">
