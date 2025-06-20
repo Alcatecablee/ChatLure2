@@ -86,6 +86,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [performanceMetrics, setPerformanceMetrics] = useState<
     PerformanceMetric[]
   >([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
   // Update realtime data
   useEffect(() => {
