@@ -333,12 +333,38 @@ export function ContentImporter({
         created: "2024-01-12",
         author: "heartbroken_friend",
       },
+      {
+        id: "curated_5",
+        title: "My roommate is stealing my food and lying about it",
+        content:
+          "I've been marking my food with invisible ink and caught her red-handed. She's been gaslighting me for months saying I'm 'forgetting' I ate it...",
+        upvotes: 8900,
+        comments: 567,
+        subreddit: "r/roommates",
+        url: "https://reddit.com/r/roommates/example5",
+        created: "2024-01-11",
+        author: "frustrated_tenant",
+      },
+      {
+        id: "curated_6",
+        title:
+          "Boss made me work on my wedding day, then fired me for being 'unreliable'",
+        content:
+          "I told my boss 6 months ago about my wedding date. Yesterday he scheduled a 'mandatory meeting' and when I couldn't attend, he fired me via text...",
+        upvotes: 14200,
+        comments: 892,
+        subreddit: "r/antiwork",
+        url: "https://reddit.com/r/antiwork/example6",
+        created: "2024-01-10",
+        author: "newlywed_employee",
+      },
     ];
 
-    // Filter by subreddit and query
-    return curatedPosts.filter((post) => {
+    // More lenient filtering - return more results
+    const filtered = curatedPosts.filter((post) => {
       const matchesSubreddit =
-        subreddit === "all" || post.subreddit === subreddit;
+        subreddit === "all" ||
+        post.subreddit.includes(subreddit.replace("r/", ""));
       const matchesQuery =
         !query ||
         post.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -346,6 +372,9 @@ export function ContentImporter({
 
       return matchesSubreddit && matchesQuery;
     });
+
+    // If no matches, return all posts to ensure user gets content
+    return filtered.length > 0 ? filtered : curatedPosts;
   };
 
   const calculateViralScore = (messages: ImportedMessage[]): number => {
