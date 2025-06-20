@@ -104,8 +104,15 @@ export function Settings() {
     setIsLoading((prev) => ({ ...prev, [service]: true }));
 
     try {
-      // Simulate API testing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Validate credentials before testing
+      if (service === "reddit") {
+        if (!credentials.reddit.clientId || !credentials.reddit.clientSecret) {
+          throw new Error("Client ID and Secret are required");
+        }
+        if (!credentials.reddit.userAgent) {
+          throw new Error("User Agent is required");
+        }
+      }
 
       // Test actual API connections
       const response = await fetch(`/api/test-connection/${service}`, {
@@ -116,23 +123,36 @@ export function Settings() {
         body: JSON.stringify(credentials[service]),
       });
 
+      const result = await response.json();
+
       if (response.ok) {
         setConnectionStatus((prev) => ({ ...prev, [service]: "connected" }));
         addNotification({
           type: "success",
           title: "Connection Successful",
-          message: `${service} API connection tested successfully.`,
+          message:
+            service === "reddit"
+              ? `Reddit API connected! Ready to scan viral content from ${result.availableSubreddits || "all"} subreddits.`
+              : `${service} API connection tested successfully.`,
         });
       } else {
         setConnectionStatus((prev) => ({ ...prev, [service]: "error" }));
         addNotification({
           type: "error",
           title: "Connection Failed",
-          message: `Failed to connect to ${service} API. Check your credentials.`,
+          message:
+            result.error ||
+            `Failed to connect to ${service} API. Check your credentials.`,
         });
       }
     } catch (error) {
       setConnectionStatus((prev) => ({ ...prev, [service]: "error" }));
+      addNotification({
+        type: "error",
+        title: "Connection Error",
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      });
     } finally {
       setIsLoading((prev) => ({ ...prev, [service]: false }));
     }
