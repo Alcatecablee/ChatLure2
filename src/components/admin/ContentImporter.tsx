@@ -832,7 +832,7 @@ export function ContentImporter({
                 </div>
                 <Button
                   onClick={fetchRedditContent}
-                  disabled={isProcessing || !credentials.reddit.enabled}
+                  disabled={isProcessing || !credentials?.reddit?.enabled}
                 >
                   {isProcessing ? (
                     <RefreshCw size={16} className="mr-2 animate-spin" />
