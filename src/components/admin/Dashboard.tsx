@@ -26,7 +26,7 @@ interface DashboardStats {
   recentActivity: any[];
 }
 
-export default function Dashboard() {
+export function Dashboard() {
   const { getTrendingStories, notifications, currentUser, isInitialized } =
     useDatabase();
 

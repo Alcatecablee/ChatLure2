@@ -43,7 +43,7 @@ type SortOption =
   | "alphabetical";
 type FilterStatus = "all" | "published" | "draft" | "archived";
 
-export default function StoryLibrary() {
+export function StoryLibrary() {
   const {
     getTrendingStories,
     getMyStories,
