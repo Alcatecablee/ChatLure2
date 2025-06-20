@@ -12,6 +12,7 @@ import {
   useUsers,
   useApp,
   useLoading,
+  useAppConfig,
 } from "@/contexts/AppContext";
 import {
   BarChart3,
