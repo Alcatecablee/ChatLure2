@@ -1,7 +1,18 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useApp, useStories, useCredentials } from "@/contexts/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   BookOpen,
   Users,
@@ -14,16 +25,76 @@ import {
   CheckCircle,
   AlertTriangle,
   Settings,
+  Eye,
+  Share2,
+  MessageSquare,
+  Clock,
+  Activity,
+  Target,
+  Flame,
+  Calendar,
+  Filter,
+  ArrowUp,
+  ArrowDown,
+  RefreshCw,
+  Download,
+  Play,
+  Pause,
 } from "lucide-react";
 
 interface DashboardProps {
   onNavigate: (section: string) => void;
 }
 
+interface PerformanceMetric {
+  label: string;
+  value: number;
+  change: number;
+  trend: "up" | "down" | "stable";
+  format: "number" | "percentage" | "currency" | "time";
+}
+
+interface RealtimeData {
+  activeUsers: number;
+  storiesBeingRead: number;
+  engagementRate: number;
+  newSubscriptions: number;
+}
+
 export function Dashboard({ onNavigate }: DashboardProps) {
   const { addNotification } = useApp();
   const stories = useStories();
   const credentials = useCredentials();
+
+  const [timeRange, setTimeRange] = useState("7d");
+  const [selectedMetric, setSelectedMetric] = useState("views");
+  const [realtimeData, setRealtimeData] = useState<RealtimeData>({
+    activeUsers: 1247,
+    storiesBeingRead: 89,
+    engagementRate: 73.2,
+    newSubscriptions: 23,
+  });
+  const [isLiveMode, setIsLiveMode] = useState(false);
+
+  // Update realtime data
+  useEffect(() => {
+    if (!isLiveMode) return;
+
+    const interval = setInterval(() => {
+      setRealtimeData((prev) => ({
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 10) - 5,
+        storiesBeingRead:
+          prev.storiesBeingRead + Math.floor(Math.random() * 4) - 2,
+        engagementRate: Math.max(
+          0,
+          Math.min(100, prev.engagementRate + (Math.random() - 0.5) * 2),
+        ),
+        newSubscriptions: prev.newSubscriptions + (Math.random() > 0.8 ? 1 : 0),
+      }));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isLiveMode]);
 
   const activeStories = stories.filter((story) => story.isActive);
   const totalViews = stories.reduce(
@@ -49,7 +120,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const topStories = stories
     .sort((a, b) => (b.stats?.views || 0) - (a.stats?.views || 0))
-    .slice(0, 3);
+    .slice(0, 5);
 
   const getConnectionStatus = () => {
     const connections = {
@@ -67,11 +138,157 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const connectionStatus = getConnectionStatus();
 
+  const performanceMetrics: PerformanceMetric[] = [
+    {
+      label: "Total Revenue",
+      value: 24847,
+      change: 12.3,
+      trend: "up",
+      format: "currency",
+    },
+    {
+      label: "Active Subscribers",
+      value: 1847,
+      change: 8.7,
+      trend: "up",
+      format: "number",
+    },
+    {
+      label: "Avg. Engagement Time",
+      value: 18.4,
+      change: -2.1,
+      trend: "down",
+      format: "time",
+    },
+    {
+      label: "Story Completion Rate",
+      value: avgCompletionRate,
+      change: 5.2,
+      trend: "up",
+      format: "percentage",
+    },
+  ];
+
+  const formatMetricValue = (value: number, format: string) => {
+    switch (format) {
+      case "currency":
+        return `$${value.toLocaleString()}`;
+      case "percentage":
+        return `${value}%`;
+      case "time":
+        return `${value}m`;
+      default:
+        return value.toLocaleString();
+    }
+  };
+
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case "up":
+        return <ArrowUp size={12} className="text-green-400" />;
+      case "down":
+        return <ArrowDown size={12} className="text-red-400" />;
+      default:
+        return <div className="w-3 h-3 bg-gray-400 rounded-full" />;
+    }
+  };
+
+  const recentActivity = [
+    {
+      id: 1,
+      type: "story_created",
+      title: "New story created: 'The Wedding Disaster'",
+      time: "2 minutes ago",
+      icon: BookOpen,
+      color: "text-green-400",
+    },
+    {
+      id: 2,
+      type: "viral_alert",
+      title: "Story went viral: 'Mom Saw the Texts' - 10k+ views!",
+      time: "15 minutes ago",
+      icon: Flame,
+      color: "text-orange-400",
+    },
+    {
+      id: 3,
+      type: "user_milestone",
+      title: "1000 active users milestone reached",
+      time: "1 hour ago",
+      icon: Users,
+      color: "text-blue-400",
+    },
+    {
+      id: 4,
+      type: "subscription",
+      title: "New premium subscription: Sarah Johnson",
+      time: "2 hours ago",
+      icon: CreditCard,
+      color: "text-purple-400",
+    },
+    {
+      id: 5,
+      type: "content_imported",
+      title: "5 stories imported from r/relationship_advice",
+      time: "4 hours ago",
+      icon: Globe,
+      color: "text-cyan-400",
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">📊 ChatLure Dashboard</h2>
-        <p className="text-gray-300">Overview of your viral story empire</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">📊 ChatLure Dashboard</h2>
+          <p className="text-gray-300">
+            Real-time insights into your viral story empire
+          </p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <div
+              className={`w-2 h-2 rounded-full ${isLiveMode ? "bg-green-400 animate-pulse" : "bg-gray-400"}`}
+            />
+            <span className="text-sm text-gray-400">
+              {isLiveMode ? "Live" : "Static"}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsLiveMode(!isLiveMode)}
+            className="border-gray-600"
+          >
+            {isLiveMode ? (
+              <>
+                <Pause size={14} className="mr-1" />
+                Pause Live
+              </>
+            ) : (
+              <>
+                <Play size={14} className="mr-1" />
+                Go Live
+              </>
+            )}
+          </Button>
+          <Button variant="outline" size="sm" className="border-gray-600">
+            <Download size={14} className="mr-1" />
+            Export
+          </Button>
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-24 bg-gray-800 border-gray-600">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1d">1D</SelectItem>
+              <SelectItem value="7d">7D</SelectItem>
+              <SelectItem value="30d">30D</SelectItem>
+              <SelectItem value="90d">90D</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Connection Status Alert */}
@@ -86,7 +303,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 </h4>
                 <p className="text-sm text-gray-300">
                   {connectionStatus.total - connectionStatus.connected} of{" "}
-                  {connectionStatus.total} services need configuration.
+                  {connectionStatus.total} services need configuration to unlock
+                  full potential.
                 </p>
               </div>
               <Button
@@ -103,210 +321,382 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </Card>
       )}
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-blue-500/20 p-3 rounded-lg">
-                <BookOpen className="text-blue-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-blue-400">
-                {activeStories.length}
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Active Stories</h3>
-            <p className="text-sm text-gray-400">
-              {stories.length - activeStories.length} inactive
-            </p>
-          </CardContent>
-        </Card>
+      {/* Real-time Metrics */}
+      <AnimatePresence>
+        {isLiveMode && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border-blue-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-blue-300">Active Users</p>
+                    <motion.p
+                      key={realtimeData.activeUsers}
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      className="text-2xl font-bold text-blue-400"
+                    >
+                      {realtimeData.activeUsers.toLocaleString()}
+                    </motion.p>
+                  </div>
+                  <Activity className="text-blue-400" size={20} />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-green-500/20 p-3 rounded-lg">
-                <Users className="text-green-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-green-400">
-                {totalViews.toLocaleString()}
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Total Views</h3>
-            <p className="text-sm text-gray-400">Across all stories</p>
-          </CardContent>
-        </Card>
+            <Card className="bg-gradient-to-br from-green-900/30 to-green-800/20 border-green-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-green-300">Reading Stories</p>
+                    <motion.p
+                      key={realtimeData.storiesBeingRead}
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      className="text-2xl font-bold text-green-400"
+                    >
+                      {realtimeData.storiesBeingRead}
+                    </motion.p>
+                  </div>
+                  <BookOpen className="text-green-400" size={20} />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-orange-500/20 p-3 rounded-lg">
-                <TrendingUp className="text-orange-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-orange-400">
-                {avgViralScore}%
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Avg Viral Score</h3>
-            <p className="text-sm text-gray-400">
-              {avgViralScore >= 80
-                ? "Excellent"
-                : avgViralScore >= 60
-                  ? "Good"
-                  : "Needs work"}
-            </p>
-          </CardContent>
-        </Card>
+            <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 border-purple-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-purple-300">Engagement Rate</p>
+                    <motion.p
+                      key={Math.round(realtimeData.engagementRate)}
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      className="text-2xl font-bold text-purple-400"
+                    >
+                      {realtimeData.engagementRate.toFixed(1)}%
+                    </motion.p>
+                  </div>
+                  <Target className="text-purple-400" size={20} />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-purple-500/20 p-3 rounded-lg">
-                <BarChart3 className="text-purple-400" size={24} />
-              </div>
-              <span className="text-2xl font-bold text-purple-400">
-                {avgCompletionRate}%
-              </span>
-            </div>
-            <h3 className="font-semibold text-white">Completion Rate</h3>
-            <p className="text-sm text-gray-400">Users finishing stories</p>
-          </CardContent>
-        </Card>
+            <Card className="bg-gradient-to-br from-orange-900/30 to-orange-800/20 border-orange-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-orange-300">New Subscriptions</p>
+                    <motion.p
+                      key={realtimeData.newSubscriptions}
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      className="text-2xl font-bold text-orange-400"
+                    >
+                      +{realtimeData.newSubscriptions}
+                    </motion.p>
+                  </div>
+                  <CreditCard className="text-orange-400" size={20} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Performance Metrics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {performanceMetrics.map((metric, index) => (
+          <motion.div
+            key={metric.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Card className="bg-gray-800 border-gray-700 hover:border-gray-600 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-gray-400">{metric.label}</p>
+                  <div className="flex items-center space-x-1">
+                    {getTrendIcon(metric.trend)}
+                    <span
+                      className={`text-xs ${
+                        metric.trend === "up"
+                          ? "text-green-400"
+                          : metric.trend === "down"
+                            ? "text-red-400"
+                            : "text-gray-400"
+                      }`}
+                    >
+                      {metric.change > 0 ? "+" : ""}
+                      {metric.change}%
+                    </span>
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  {formatMetricValue(metric.value, metric.format)}
+                </p>
+                <Progress
+                  value={Math.abs(metric.change) * 5}
+                  className="mt-2 h-1"
+                />
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
-      {/* API Status Grid */}
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle>🔌 API Connections</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <Globe className="text-orange-400" size={20} />
-              <div className="flex-1">
-                <div className="font-medium">Reddit API</div>
-                <div className="text-sm text-gray-400">Content Import</div>
-              </div>
-              {connectionStatus.connections.reddit ? (
-                <Badge className="bg-green-500/20 text-green-400">
-                  <CheckCircle size={12} className="mr-1" />
-                  Connected
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-gray-400">
-                  Not configured
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <Shield className="text-green-400" size={20} />
-              <div className="flex-1">
-                <div className="font-medium">Clerk Auth</div>
-                <div className="text-sm text-gray-400">User Management</div>
-              </div>
-              {connectionStatus.connections.clerk ? (
-                <Badge className="bg-green-500/20 text-green-400">
-                  <CheckCircle size={12} className="mr-1" />
-                  Connected
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-gray-400">
-                  Not configured
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <CreditCard className="text-yellow-400" size={20} />
-              <div className="flex-1">
-                <div className="font-medium">PayPal</div>
-                <div className="text-sm text-gray-400">Payments</div>
-              </div>
-              {connectionStatus.connections.paypal ? (
-                <Badge className="bg-green-500/20 text-green-400">
-                  <CheckCircle size={12} className="mr-1" />
-                  Connected
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-gray-400">
-                  Not configured
-                </Badge>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Performing Stories */}
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle>🔥 Top Performing Stories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {topStories.length > 0 ? (
-              <div className="space-y-3">
-                {topStories.map((story, index) => (
-                  <div
-                    key={story.id}
-                    className="flex items-center justify-between p-3 bg-gray-700 rounded-lg"
-                  >
-                    <div>
-                      <div className="font-semibold text-white">
-                        {story.title}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {(story.stats?.views || 0).toLocaleString()} views •{" "}
-                        {story.viralScore}% viral
-                      </div>
-                    </div>
-                    <div className="text-2xl">
-                      {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
-                    </div>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Stories Overview */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Core Stats */}
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <BarChart3 className="text-blue-400" />
+                <span>Story Performance</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="bg-blue-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <BookOpen className="text-blue-400" size={24} />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center text-gray-400 py-6">
-                <BookOpen size={32} className="mx-auto mb-2 opacity-50" />
-                <p>No stories created yet</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onNavigate("story")}
-                  className="mt-2"
-                >
-                  Create Your First Story
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <div className="text-2xl font-bold text-blue-400">
+                    {activeStories.length}
+                  </div>
+                  <div className="text-sm text-gray-400">Active Stories</div>
+                  <div className="text-xs text-gray-500">
+                    {stories.length - activeStories.length} inactive
+                  </div>
+                </div>
 
-        {/* Quick Actions */}
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle>⚡ Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+                <div className="text-center">
+                  <div className="bg-green-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Eye className="text-green-400" size={24} />
+                  </div>
+                  <div className="text-2xl font-bold text-green-400">
+                    {totalViews.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-400">Total Views</div>
+                  <div className="text-xs text-gray-500">All time</div>
+                </div>
+
+                <div className="text-center">
+                  <div className="bg-orange-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Flame className="text-orange-400" size={24} />
+                  </div>
+                  <div className="text-2xl font-bold text-orange-400">
+                    {avgViralScore}%
+                  </div>
+                  <div className="text-sm text-gray-400">Avg Viral Score</div>
+                  <div className="text-xs text-gray-500">
+                    {avgViralScore >= 80
+                      ? "🔥 Excellent"
+                      : avgViralScore >= 60
+                        ? "👍 Good"
+                        : "📈 Improving"}
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="bg-purple-500/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Target className="text-purple-400" size={24} />
+                  </div>
+                  <div className="text-2xl font-bold text-purple-400">
+                    {avgCompletionRate}%
+                  </div>
+                  <div className="text-sm text-gray-400">Completion Rate</div>
+                  <div className="text-xs text-gray-500">Users finishing</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top Performing Stories */}
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="text-orange-400" />
+                <span>Top Performing Stories</span>
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate("library")}
+              >
+                View All
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {topStories.length > 0 ? (
+                <div className="space-y-3">
+                  {topStories.map((story, index) => (
+                    <motion.div
+                      key={story.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors group"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="text-xl">
+                          {index === 0
+                            ? "🥇"
+                            : index === 1
+                              ? "🥈"
+                              : index === 2
+                                ? "🥉"
+                                : "🏆"}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+                            {story.title}
+                          </div>
+                          <div className="text-sm text-gray-400 flex items-center space-x-2">
+                            <span>
+                              {(story.stats?.views || 0).toLocaleString()} views
+                            </span>
+                            <span>•</span>
+                            <span>{story.viralScore}% viral</span>
+                            <span>•</span>
+                            <Badge variant="outline" className="text-xs">
+                              {story.genre}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="sm">
+                          <Eye size={14} />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Share2 size={14} />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-400 py-8">
+                  <BookOpen size={32} className="mx-auto mb-3 opacity-50" />
+                  <p className="mb-2">No stories created yet</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onNavigate("story")}
+                    className="border-gray-600"
+                  >
+                    Create Your First Story
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* API Status */}
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-lg">🔌 System Status</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+                <div className="flex items-center space-x-2">
+                  <Globe className="text-orange-400" size={16} />
+                  <span className="text-sm">Reddit API</span>
+                </div>
+                {connectionStatus.connections.reddit ? (
+                  <Badge className="bg-green-500/20 text-green-400 text-xs">
+                    <CheckCircle size={10} className="mr-1" />
+                    Connected
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="text-gray-400 text-xs cursor-pointer"
+                    onClick={() => onNavigate("settings")}
+                  >
+                    Setup Required
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+                <div className="flex items-center space-x-2">
+                  <Shield className="text-green-400" size={16} />
+                  <span className="text-sm">Clerk Auth</span>
+                </div>
+                {connectionStatus.connections.clerk ? (
+                  <Badge className="bg-green-500/20 text-green-400 text-xs">
+                    <CheckCircle size={10} className="mr-1" />
+                    Connected
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="text-gray-400 text-xs cursor-pointer"
+                    onClick={() => onNavigate("settings")}
+                  >
+                    Setup Required
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+                <div className="flex items-center space-x-2">
+                  <CreditCard className="text-yellow-400" size={16} />
+                  <span className="text-sm">PayPal</span>
+                </div>
+                {connectionStatus.connections.paypal ? (
+                  <Badge className="bg-green-500/20 text-green-400 text-xs">
+                    <CheckCircle size={10} className="mr-1" />
+                    Connected
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="text-gray-400 text-xs cursor-pointer"
+                    onClick={() => onNavigate("settings")}
+                  >
+                    Setup Required
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-lg">⚡ Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
               <Button
                 onClick={() => onNavigate("story")}
-                className="w-full bg-purple-600 hover:bg-purple-700 justify-start"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 justify-start"
               >
                 <Zap size={16} className="mr-2" />
                 <div className="text-left">
-                  <div className="font-semibold">Create New Story</div>
+                  <div className="font-semibold">Create Story</div>
                   <div className="text-sm text-purple-200">
-                    Start building your next viral hit
+                    Build your next viral hit
                   </div>
                 </div>
               </Button>
 
               <Button
                 onClick={() => onNavigate("import")}
-                className="w-full bg-blue-600 hover:bg-blue-700 justify-start"
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 justify-start"
                 disabled={!connectionStatus.connections.reddit}
               >
                 <Globe size={16} className="mr-2" />
@@ -314,7 +704,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   <div className="font-semibold">Import from Reddit</div>
                   <div className="text-sm text-blue-200">
                     {connectionStatus.connections.reddit
-                      ? "Source viral content automatically"
+                      ? "Auto-source viral content"
                       : "Configure Reddit API first"}
                   </div>
                 </div>
@@ -322,13 +712,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
               <Button
                 onClick={() => onNavigate("library")}
-                className="w-full bg-green-600 hover:bg-green-700 justify-start"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 justify-start"
               >
                 <BookOpen size={16} className="mr-2" />
                 <div className="text-left">
                   <div className="font-semibold">Manage Library</div>
                   <div className="text-sm text-green-200">
-                    Organize and analyze your stories
+                    Organize your collection
                   </div>
                 </div>
               </Button>
@@ -342,15 +732,46 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   <Settings size={16} className="mr-2" />
                   <div className="text-left">
                     <div className="font-semibold">Complete Setup</div>
-                    <div className="text-sm">
-                      Configure remaining API connections
-                    </div>
+                    <div className="text-sm">Configure remaining APIs</div>
                   </div>
                 </Button>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {/* Recent Activity */}
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">📈 Recent Activity</CardTitle>
+              <Button variant="ghost" size="sm">
+                <RefreshCw size={14} />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {recentActivity.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-start space-x-3 p-2 hover:bg-gray-700/30 rounded transition-colors"
+                  >
+                    <div className={`p-1 rounded ${activity.color}`}>
+                      <activity.icon size={12} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white truncate">
+                        {activity.title}
+                      </p>
+                      <p className="text-xs text-gray-400">{activity.time}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
