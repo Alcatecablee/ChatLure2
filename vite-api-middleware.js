@@ -25,8 +25,9 @@ export function apiMiddleware() {
             return handleApiResponse(res, "credentials", req);
           } else if (apiPath === "/analytics/dashboard") {
             return handleApiResponse(res, "analytics", req);
-          } else if (apiPath === "/test-connection") {
-            return handleApiResponse(res, "test", req);
+          } else if (apiPath.startsWith("/test-connection/")) {
+            const service = apiPath.replace("/test-connection/", "");
+            return handleApiResponse(res, `test-${service}`, req);
           } else if (apiPath.startsWith("/reddit/")) {
             return handleApiResponse(res, "reddit", req);
           }
