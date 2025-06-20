@@ -14,6 +14,7 @@ import {
   Calendar,
   Power,
 } from "lucide-react";
+import { useAppConfig } from "@/contexts/AppContext";
 
 interface AppIconProps {
   icon: React.ReactNode;
