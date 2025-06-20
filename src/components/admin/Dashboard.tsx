@@ -877,7 +877,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 <Button
                   onClick={() => onNavigate("settings")}
                   variant="outline"
-                  className="w-full border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10 justify-start"
+                  className="w-full justify-start"
                 >
                   <Settings size={16} className="mr-2" />
                   <div className="text-left">
