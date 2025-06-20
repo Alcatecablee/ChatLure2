@@ -35,7 +35,7 @@ export function LockScreenProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, setSettings] = useState<LockScreenSettings>(() => {
+  const [settings, setSettings] = React.useState<LockScreenSettings>(() => {
     const saved = localStorage.getItem("chatlure-lockscreen-settings");
     return saved
       ? { ...defaultSettings, ...JSON.parse(saved) }
