@@ -83,6 +83,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   });
   const [isLiveMode, setIsLiveMode] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
+  const [performanceMetrics, setPerformanceMetrics] = useState<
+    PerformanceMetric[]
+  >([]);
 
   // Update realtime data
   useEffect(() => {
@@ -687,7 +690,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                             : index === 1
                               ? "🥈"
                               : index === 2
-                                ? "🥉"
+                                ? "���"
                                 : "🏆"}
                         </div>
                         <div>
