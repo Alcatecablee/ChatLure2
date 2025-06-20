@@ -379,20 +379,9 @@ function AppSettings() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Simulate API call to save app settings
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      addNotification({
-        type: "success",
-        title: "App Settings Saved",
-        message: "Your app configuration has been updated successfully.",
-      });
+      await updateAppConfig(appConfig);
     } catch (error) {
-      addNotification({
-        type: "error",
-        title: "Save Failed",
-        message: "Failed to save app settings. Please try again.",
-      });
+      // Error handling is done in updateAppConfig
     } finally {
       setIsSaving(false);
     }
