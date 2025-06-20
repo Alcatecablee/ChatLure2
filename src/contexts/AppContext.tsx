@@ -722,6 +722,11 @@ export function useNotifications() {
   return state.notifications;
 }
 
+export function useAppConfig() {
+  const { state } = useApp();
+  return state.appConfig;
+}
+
 export function useUsers() {
   const { state } = useApp();
   return state.users;
