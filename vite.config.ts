@@ -27,8 +27,15 @@ export default defineConfig(({ mode }) => ({
     exclude: ["@radix-ui/react-tooltip"],
     force: true,
   },
+  build: {
+    rollupOptions: {
+      external: ["@radix-ui/react-tooltip"],
+    },
+  },
   define: {
     // Prevent any tooltip-related code from executing
     "process.env.DISABLE_TOOLTIPS": '"true"',
+    // Completely disable the module at build time
+    "@radix-ui/react-tooltip": "undefined",
   },
 }));
