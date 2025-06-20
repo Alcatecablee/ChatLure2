@@ -596,10 +596,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <CardContent>
               <div className="grid grid-cols-4 gap-6 text-center">
                 <div className="text-center">
-                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <BookOpen className="text-primary" size={24} />
+                  <div className="bg-muted/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <BookOpen className="text-muted-foreground" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-foreground">
                     {activeStories.length}
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -611,10 +611,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 </div>
 
                 <div className="text-center">
-                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <Eye className="text-primary" size={24} />
+                  <div className="bg-muted/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Eye className="text-muted-foreground" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-foreground">
                     {totalViews.toLocaleString()}
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -624,10 +624,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 </div>
 
                 <div className="text-center">
-                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <Flame className="text-primary" size={24} />
+                  <div className="bg-muted/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Flame className="text-muted-foreground" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-foreground">
                     {avgViralScore}%
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -643,10 +643,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 </div>
 
                 <div className="text-center">
-                  <div className="bg-primary/20 p-3 rounded-lg mb-2 mx-auto w-fit">
-                    <Target className="text-primary" size={24} />
+                  <div className="bg-muted/20 p-3 rounded-lg mb-2 mx-auto w-fit">
+                    <Target className="text-muted-foreground" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-foreground">
                     {avgCompletionRate}%
                   </div>
                   <div className="text-sm text-muted-foreground">
