@@ -79,6 +79,8 @@ export function Settings() {
 
   const saveCredentials = () => {
     try {
+      console.log("Saving credentials:", credentials); // Debug log
+
       // Save to localStorage first
       localStorage.setItem("reddit_client_id", credentials.reddit.clientId);
       localStorage.setItem(
@@ -120,6 +122,10 @@ export function Settings() {
         credentials.paypal.enabled.toString(),
       );
 
+      // Verify localStorage save
+      const savedRedditId = localStorage.getItem("reddit_client_id");
+      console.log("Verified save - Reddit Client ID:", savedRedditId); // Debug log
+
       // Update AppContext
       dispatch({ type: "UPDATE_CREDENTIALS", payload: credentials });
 
@@ -128,19 +134,21 @@ export function Settings() {
       // Show success notification
       addNotification({
         type: "success",
-        title: "Settings Saved",
-        message: "API credentials have been saved successfully!",
+        title: "✅ Settings Saved Successfully",
+        message: `Reddit API credentials saved! Client ID: ${credentials.reddit.clientId.substring(0, 8)}...`,
       });
 
       // Dispatch event for other components to listen to
       window.dispatchEvent(
         new CustomEvent("credentials-updated", { detail: credentials }),
       );
+
+      console.log("Settings save completed successfully"); // Debug log
     } catch (error) {
       console.error("Failed to save credentials:", error);
       addNotification({
         type: "error",
-        title: "Save Failed",
+        title: "❌ Save Failed",
         message: "Failed to save API credentials. Please try again.",
       });
     }
