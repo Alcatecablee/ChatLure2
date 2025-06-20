@@ -376,8 +376,8 @@ export function ContentImporter({
     try {
       addNotification({
         type: "info",
-        title: "Scanning Reddit",
-        message: `Searching ${selectedSubreddit === "all" ? "all subreddits" : selectedSubreddit} for "${searchQuery || "viral content"}"`,
+        title: "🔍 Scanning Reddit",
+        message: `Searching ${selectedSubreddit === "all" ? "all viral subreddits" : selectedSubreddit} for "${searchQuery || "high-engagement content"}"`,
       });
 
       // Make actual Reddit API call
@@ -390,27 +390,55 @@ export function ContentImporter({
           subreddit: selectedSubreddit,
           query: searchQuery,
           minViralScore,
+          timeFilter: "week", // Focus on recent viral content
+          sort: "hot", // Get trending posts
+          limit: 25, // More results for better selection
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch Reddit posts");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch Reddit posts");
       }
 
       const data = await response.json();
-      setRedditPosts(data.posts || []);
+      const posts = data.posts || [];
+
+      // Sort by viral potential
+      const sortedPosts = posts.sort(
+        (a: RedditPost, b: RedditPost) =>
+          b.upvotes + b.comments * 10 - (a.upvotes + a.comments * 10),
+      );
+
+      setRedditPosts(sortedPosts);
 
       addNotification({
         type: "success",
-        title: "Reddit Scan Complete",
-        message: `Found ${data.posts?.length || 0} potential viral posts`,
+        title: "🔥 Reddit Scan Complete",
+        message: `Found ${posts.length} viral-potential posts! Top post has ${posts[0]?.upvotes || 0} upvotes.`,
       });
+
+      // Auto-convert top posts if enabled
+      if (autoConvert && posts.length > 0) {
+        const topPosts = posts.slice(0, 3);
+        const convertedStories = topPosts.map(convertRedditToStory);
+        setParsedStories((prev) => [...prev, ...convertedStories]);
+
+        addNotification({
+          type: "info",
+          title: "🤖 Auto-Conversion Complete",
+          message: `Converted top ${topPosts.length} posts to ChatLure format!`,
+        });
+      }
     } catch (error) {
+      console.error("Reddit scan error:", error);
       addNotification({
         type: "error",
         title: "Reddit Scan Failed",
         message:
-          "Failed to fetch content from Reddit. Check your API credentials.",
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch content from Reddit. Check your API credentials.",
       });
     }
 
