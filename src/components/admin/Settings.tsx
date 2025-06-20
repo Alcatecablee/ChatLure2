@@ -671,9 +671,10 @@ export function Settings() {
                 </div>
               </div>
             </div>
-          </Card>
+          </CardContent>
+        </Card>
 
-      {/* Actions */}
+        {/* Actions */}
       <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
         <div>
           <h3 className="text-white font-medium">Reset Settings</h3>
