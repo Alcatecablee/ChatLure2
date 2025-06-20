@@ -465,7 +465,7 @@ export function ContentImporter({
     try {
       addNotification({
         type: "info",
-        title: "🔍 Scanning Reddit",
+        title: "��� Scanning Reddit",
         message: `Searching ${selectedSubreddit === "all" ? "all viral subreddits" : selectedSubreddit} for "${searchQuery || "high-engagement content"}"`,
       });
 
@@ -534,6 +534,27 @@ export function ContentImporter({
     setIsProcessing(false);
   };
 
+  const importSingleStory = async (story: ImportedStory) => {
+    try {
+      await importStories([story]);
+      setParsedStories((prev) =>
+        prev.map((s) => (s.id === story.id ? { ...s, isImported: true } : s)),
+      );
+
+      addNotification({
+        type: "success",
+        title: "Story Imported",
+        message: `"${story.title}" has been added to your library!`,
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Import Failed",
+        message: "Failed to import story. Please try again.",
+      });
+    }
+  };
+
   const StoryCard = ({
     story,
     index,
@@ -545,18 +566,20 @@ export function ContentImporter({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-gray-800 border border-gray-700 rounded-lg p-4"
+      className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-all"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h4 className="font-semibold text-white mb-1">{story.title}</h4>
+          <h4 className="font-semibold text-white mb-1 line-clamp-2">
+            {story.title}
+          </h4>
           <div className="flex items-center space-x-2 mb-2">
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs capitalize">
               {story.genre}
             </Badge>
             {story.source === "reddit" && (
               <Badge className="bg-orange-500/20 text-orange-400 text-xs">
-                📍 Reddit
+                🔥 Reddit
               </Badge>
             )}
             <div
@@ -576,26 +599,45 @@ export function ContentImporter({
           </div>
         </div>
         <div className="flex items-center space-x-1">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" title="Preview messages">
             <Eye size={14} />
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" title="Edit story">
             <Edit size={14} />
           </Button>
-          <Button variant="ghost" size="sm" className="text-red-400">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-400"
+            title="Delete story"
+          >
             <Trash2 size={14} />
           </Button>
         </div>
       </div>
 
+      {/* Message Preview */}
+      {story.messages.length > 0 && (
+        <div className="bg-gray-700/50 p-3 rounded-lg mb-3">
+          <div className="text-xs text-gray-400 mb-1">Preview:</div>
+          <div className="text-sm text-gray-300 italic">
+            "{story.messages[0].message.substring(0, 80)}..."
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4 text-sm mb-3">
         <div>
           <span className="text-gray-400">Messages:</span>
-          <span className="ml-2 text-white">{story.messages.length}</span>
+          <span className="ml-2 text-white font-semibold">
+            {story.messages.length}
+          </span>
         </div>
         <div>
           <span className="text-gray-400">Characters:</span>
-          <span className="ml-2 text-white">{story.characters.length}</span>
+          <span className="ml-2 text-white font-semibold">
+            {story.characters.length}
+          </span>
         </div>
       </div>
 
@@ -603,19 +645,21 @@ export function ContentImporter({
         <div className="grid grid-cols-2 gap-4 text-sm mb-3">
           <div className="flex items-center space-x-1">
             <span className="text-gray-400">↑</span>
-            <span className="text-green-400">
+            <span className="text-green-400 font-semibold">
               {story.upvotes?.toLocaleString()}
             </span>
           </div>
           <div className="flex items-center space-x-1">
             <MessageSquare size={12} className="text-blue-400" />
-            <span className="text-blue-400">{story.comments}</span>
+            <span className="text-blue-400 font-semibold">
+              {story.comments}
+            </span>
           </div>
         </div>
       )}
 
       <div className="flex flex-wrap gap-1 mb-3">
-        {story.tags.map((tag, i) => (
+        {story.tags.slice(0, 4).map((tag, i) => (
           <Badge
             key={i}
             variant="secondary"
@@ -624,6 +668,14 @@ export function ContentImporter({
             {tag}
           </Badge>
         ))}
+        {story.tags.length > 4 && (
+          <Badge
+            variant="secondary"
+            className="text-xs bg-gray-700 text-gray-400"
+          >
+            +{story.tags.length - 4}
+          </Badge>
+        )}
       </div>
 
       <div className="flex items-center justify-between">
@@ -632,12 +684,20 @@ export function ContentImporter({
         </span>
         <div className="flex items-center space-x-2">
           {!story.isImported && (
-            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+            <Button
+              size="sm"
+              onClick={() => importSingleStory(story)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle size={14} className="mr-1" />
               Import
             </Button>
           )}
           {story.isImported && (
-            <Badge className="bg-green-500/20 text-green-400">✓ Imported</Badge>
+            <Badge className="bg-green-500/20 text-green-400">
+              <CheckCircle size={12} className="mr-1" />
+              Imported
+            </Badge>
           )}
         </div>
       </div>
