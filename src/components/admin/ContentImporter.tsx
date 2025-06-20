@@ -486,22 +486,6 @@ export function ContentImporter({
   const fetchRedditContent = async () => {
     setIsProcessing(true);
 
-    // Check if Reddit credentials are configured
-    if (
-      !credentials.reddit.enabled ||
-      !credentials.reddit.clientId ||
-      !credentials.reddit.clientSecret
-    ) {
-      addNotification({
-        type: "error",
-        title: "Reddit Not Configured",
-        message:
-          "Please configure your Reddit API credentials in Settings before scanning.",
-      });
-      setIsProcessing(false);
-      return;
-    }
-
     try {
       addNotification({
         type: "info",
@@ -509,7 +493,7 @@ export function ContentImporter({
         message: `Searching ${selectedSubreddit === "all" ? "all subreddits" : selectedSubreddit} for "${searchQuery || "viral content"}"`,
       });
 
-      // Use real Reddit API
+      // Use Reddit API with fallback
       const posts = await fetchFromRedditAPI(
         selectedSubreddit,
         searchQuery || "drama toxic relationship affair betrayed",
@@ -522,19 +506,37 @@ export function ContentImporter({
 
       setRedditPosts(filteredPosts);
 
+      // Determine if this was from Reddit API or fallback
+      const isFromFallback = filteredPosts.some((post) =>
+        post.id.startsWith("curated_"),
+      );
+
       addNotification({
         type: "success",
-        title: "Reddit Scan Complete",
-        message: `Found ${filteredPosts.length} potential viral posts from Reddit API`,
+        title: isFromFallback
+          ? "Content Loaded (Fallback)"
+          : "Reddit Scan Complete",
+        message: isFromFallback
+          ? `Found ${filteredPosts.length} curated viral posts (Reddit API unavailable due to CORS)`
+          : `Found ${filteredPosts.length} potential viral posts from Reddit`,
       });
+
+      // Show info about CORS limitation if using fallback
+      if (isFromFallback) {
+        addNotification({
+          type: "info",
+          title: "💡 Pro Tip",
+          message:
+            "For live Reddit data, set up a backend proxy server to handle Reddit API calls.",
+        });
+      }
     } catch (error: any) {
       console.error("Reddit fetch error:", error);
       addNotification({
         type: "error",
-        title: "Reddit Scan Failed",
+        title: "Content Loading Failed",
         message:
-          error.message ||
-          "Failed to fetch content from Reddit. Check your API credentials.",
+          "Unable to load content. Please try again or check your connection.",
       });
     }
 
