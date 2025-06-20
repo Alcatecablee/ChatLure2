@@ -88,25 +88,49 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   >([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
-  // Update realtime data
+  // Update realtime data with real database queries
   useEffect(() => {
     if (!isLiveMode) return;
 
-    const interval = setInterval(() => {
-      setRealtimeData((prev) => ({
-        activeUsers: prev.activeUsers + Math.floor(Math.random() * 10) - 5,
-        storiesBeingRead:
-          prev.storiesBeingRead + Math.floor(Math.random() * 4) - 2,
-        engagementRate: Math.max(
-          0,
-          Math.min(100, prev.engagementRate + (Math.random() - 0.5) * 2),
-        ),
-        newSubscriptions: prev.newSubscriptions + (Math.random() > 0.8 ? 1 : 0),
-      }));
-    }, 3000);
+    const fetchRealtimeData = async () => {
+      try {
+        const data = await APIClient.getDashboardMetrics();
+
+        // Calculate active stories being read (stories with recent views)
+        const activeStoriesBeingRead = stories.filter(
+          (story) => story.stats?.views > 0,
+        ).length;
+
+        // Calculate current engagement rate from real rating data
+        const engagementRate = data.avgRating
+          ? (data.avgRating / 5.0) * 100
+          : 0;
+
+        // Estimate new subscriptions based on premium users
+        const premiumUsers = users.filter(
+          (user) => user.subscription?.status === "premium",
+        ).length;
+
+        setRealtimeData({
+          activeUsers: data.totalUsers,
+          storiesBeingRead: activeStoriesBeingRead,
+          engagementRate: engagementRate,
+          newSubscriptions: premiumUsers,
+        });
+      } catch (error) {
+        console.error("Failed to fetch realtime data:", error);
+        // Keep existing data if fetch fails
+      }
+    };
+
+    // Fetch immediately
+    fetchRealtimeData();
+
+    // Then fetch every 5 seconds for real updates
+    const interval = setInterval(fetchRealtimeData, 5000);
 
     return () => clearInterval(interval);
-  }, [isLiveMode]);
+  }, [isLiveMode, stories, users]);
 
   // Fetch real dashboard data
   useEffect(() => {
