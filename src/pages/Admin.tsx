@@ -365,6 +365,457 @@ function UserManagement() {
   );
 }
 
+// App Settings Component for Branding and Configuration
+function AppSettings() {
+  const { addNotification } = useApp();
+  const [appConfig, setAppConfig] = useState({
+    appName: "ChatLure",
+    tagline: "Real-time insights into your viral story empire",
+    logo: "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+    favicon:
+      "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+    phoneIcons: {
+      chatLure:
+        "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
+      phone: "📞",
+      camera: "📷",
+      photos: "🌸",
+      settings: "⚙️",
+      calculator: "🔢",
+      mail: "✉️",
+      clock: "🕒",
+      maps: "🗺️",
+      music: "🎵",
+      safari: "🧭",
+      calendar: "📅",
+    },
+    sponsoredApps: {
+      spotify: "🎵",
+      netflix: "N",
+      uber: "🚗",
+      airbnb: "🏠",
+      instagram: "📸",
+      tiktok: "🎬",
+      doordash: "🍕",
+      youtube: "▶️",
+    },
+    theme: {
+      primaryColor: "#9333EA",
+      backgroundColor: "#141414",
+      cardColor: "#1A1A1A",
+    },
+  });
+
+  const [activeTab, setActiveTab] = useState("branding");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Simulate API call to save app settings
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      addNotification({
+        type: "success",
+        title: "App Settings Saved",
+        message: "Your app configuration has been updated successfully.",
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Save Failed",
+        message: "Failed to save app settings. Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleIconUpdate = (category: string, key: string, value: string) => {
+    if (category === "phone") {
+      setAppConfig((prev) => ({
+        ...prev,
+        phoneIcons: {
+          ...prev.phoneIcons,
+          [key]: value,
+        },
+      }));
+    } else if (category === "sponsored") {
+      setAppConfig((prev) => ({
+        ...prev,
+        sponsoredApps: {
+          ...prev.sponsoredApps,
+          [key]: value,
+        },
+      }));
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">⚙️ App Settings</h2>
+          <p className="text-muted-foreground">
+            Configure your app's branding, icons, and general settings
+          </p>
+        </div>
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          {isSaving ? (
+            <>
+              <RefreshCw size={16} className="mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Settings size={16} className="mr-2" />
+              Save Settings
+            </>
+          )}
+        </Button>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="branding">🎨 Branding</TabsTrigger>
+          <TabsTrigger value="phone-icons">📱 Phone Icons</TabsTrigger>
+          <TabsTrigger value="sponsored-apps">🌟 Sponsored Apps</TabsTrigger>
+          <TabsTrigger value="general">⚙️ General</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="branding" className="space-y-6">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle>App Branding</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage your app's logo, name, and visual identity
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    App Name
+                  </label>
+                  <Input
+                    value={appConfig.appName}
+                    onChange={(e) =>
+                      setAppConfig((prev) => ({
+                        ...prev,
+                        appName: e.target.value,
+                      }))
+                    }
+                    className="bg-input border-border"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Tagline
+                  </label>
+                  <Input
+                    value={appConfig.tagline}
+                    onChange={(e) =>
+                      setAppConfig((prev) => ({
+                        ...prev,
+                        tagline: e.target.value,
+                      }))
+                    }
+                    className="bg-input border-border"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Logo URL
+                  </label>
+                  <div className="space-y-3">
+                    <Input
+                      value={appConfig.logo}
+                      onChange={(e) =>
+                        setAppConfig((prev) => ({
+                          ...prev,
+                          logo: e.target.value,
+                        }))
+                      }
+                      className="bg-input border-border"
+                      placeholder="https://example.com/logo.png"
+                    />
+                    <div className="flex items-center space-x-3 p-3 bg-accent/50 rounded-lg">
+                      <img
+                        src={appConfig.logo}
+                        alt="Logo Preview"
+                        className="w-8 h-8 object-cover rounded"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23666'/%3E%3Ctext x='12' y='12' text-anchor='middle' dy='.3em' fill='white' font-size='10'%3E?%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        Logo Preview
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Favicon URL
+                  </label>
+                  <div className="space-y-3">
+                    <Input
+                      value={appConfig.favicon}
+                      onChange={(e) =>
+                        setAppConfig((prev) => ({
+                          ...prev,
+                          favicon: e.target.value,
+                        }))
+                      }
+                      className="bg-input border-border"
+                      placeholder="https://example.com/favicon.ico"
+                    />
+                    <div className="flex items-center space-x-3 p-3 bg-accent/50 rounded-lg">
+                      <img
+                        src={appConfig.favicon}
+                        alt="Favicon Preview"
+                        className="w-4 h-4 object-cover rounded"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23666'/%3E%3Ctext x='12' y='12' text-anchor='middle' dy='.3em' fill='white' font-size='10'%3E?%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        Favicon Preview
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="phone-icons" className="space-y-6">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle>Phone App Icons</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Customize the icons that appear on the phone home screen
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(appConfig.phoneIcons).map(([key, icon]) => (
+                  <div key={key} className="p-4 bg-accent/50 rounded-lg">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                        {key === "chatLure" ? (
+                          <img
+                            src={icon}
+                            alt={key}
+                            className="w-6 h-6 object-cover"
+                          />
+                        ) : (
+                          <span className="text-lg">{icon}</span>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium capitalize text-foreground">
+                          {key === "chatLure" ? "ChatLure" : key}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {key === "chatLure" ? "Main App" : "System App"}
+                        </div>
+                      </div>
+                    </div>
+                    <Input
+                      value={icon}
+                      onChange={(e) =>
+                        handleIconUpdate("phone", key, e.target.value)
+                      }
+                      className="bg-input border-border text-sm"
+                      placeholder={
+                        key === "chatLure" ? "Image URL" : "Emoji or URL"
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sponsored-apps" className="space-y-6">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle>Sponsored Apps</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Configure the sponsored app icons shown on the phone
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {Object.entries(appConfig.sponsoredApps).map(([key, icon]) => (
+                  <div key={key} className="p-4 bg-accent/50 rounded-lg">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                        <span className="text-lg">{icon}</span>
+                      </div>
+                      <div>
+                        <div className="font-medium capitalize text-foreground">
+                          {key}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Sponsored
+                        </div>
+                      </div>
+                    </div>
+                    <Input
+                      value={icon}
+                      onChange={(e) =>
+                        handleIconUpdate("sponsored", key, e.target.value)
+                      }
+                      className="bg-input border-border text-sm"
+                      placeholder="Emoji or URL"
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="general" className="space-y-6">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle>General Settings</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Configure general app behavior and preferences
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Primary Color
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <Input
+                      type="color"
+                      value={appConfig.theme.primaryColor}
+                      onChange={(e) =>
+                        setAppConfig((prev) => ({
+                          ...prev,
+                          theme: {
+                            ...prev.theme,
+                            primaryColor: e.target.value,
+                          },
+                        }))
+                      }
+                      className="w-16 h-10 p-1 bg-input border-border"
+                    />
+                    <Input
+                      value={appConfig.theme.primaryColor}
+                      onChange={(e) =>
+                        setAppConfig((prev) => ({
+                          ...prev,
+                          theme: {
+                            ...prev.theme,
+                            primaryColor: e.target.value,
+                          },
+                        }))
+                      }
+                      className="bg-input border-border"
+                      placeholder="#9333EA"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Background Color
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <Input
+                      type="color"
+                      value={appConfig.theme.backgroundColor}
+                      onChange={(e) =>
+                        setAppConfig((prev) => ({
+                          ...prev,
+                          theme: {
+                            ...prev.theme,
+                            backgroundColor: e.target.value,
+                          },
+                        }))
+                      }
+                      className="w-16 h-10 p-1 bg-input border-border"
+                    />
+                    <Input
+                      value={appConfig.theme.backgroundColor}
+                      onChange={(e) =>
+                        setAppConfig((prev) => ({
+                          ...prev,
+                          theme: {
+                            ...prev.theme,
+                            backgroundColor: e.target.value,
+                          },
+                        }))
+                      }
+                      className="bg-input border-border"
+                      placeholder="#141414"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">App Information</h4>
+                <div className="grid grid-cols-3 gap-4 p-4 bg-accent/50 rounded-lg">
+                  <div>
+                    <div className="text-sm text-muted-foreground">Version</div>
+                    <div className="font-mono text-sm">1.0.0</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Build</div>
+                    <div className="font-mono text-sm">2024.1</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">
+                      Environment
+                    </div>
+                    <div className="font-mono text-sm">Development</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Quick Actions</h4>
+                <div className="flex space-x-3">
+                  <Button variant="outline" className="flex-1">
+                    <RefreshCw size={16} className="mr-2" />
+                    Reset to Defaults
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Download size={16} className="mr-2" />
+                    Export Config
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Upload size={16} className="mr-2" />
+                    Import Config
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
 // Real PayPal Billing Component
 function PayPalBilling() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("inactive");
