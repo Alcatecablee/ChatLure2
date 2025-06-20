@@ -462,10 +462,7 @@ function AppSettings() {
                   <Input
                     value={appConfig.appName}
                     onChange={(e) =>
-                      setAppConfig((prev) => ({
-                        ...prev,
-                        appName: e.target.value,
-                      }))
+                      updateAppConfig({ appName: e.target.value })
                     }
                     className="bg-input border-border"
                   />
@@ -477,10 +474,7 @@ function AppSettings() {
                   <Input
                     value={appConfig.tagline}
                     onChange={(e) =>
-                      setAppConfig((prev) => ({
-                        ...prev,
-                        tagline: e.target.value,
-                      }))
+                      updateAppConfig({ tagline: e.target.value })
                     }
                     className="bg-input border-border"
                   />
