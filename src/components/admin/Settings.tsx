@@ -624,7 +624,7 @@ export function Settings() {
                     <Input
                       id="paypal-client-secret"
                       type={showSecrets.paypal ? "text" : "password"}
-                      value={credentials.paypal.clientSecret}
+                      value={credentials?.paypal?.clientSecret || ""}
                       onChange={(e) =>
                         setCredentials((prev) => ({
                           ...prev,
