@@ -70,8 +70,9 @@ export function apiRoutesPlugin(): Plugin {
             });
           }
 
-          // Load and execute the handler
-          const handlerModule = await import(handlerPath);
+          // Load and execute the handler - use absolute path
+          const absoluteHandlerPath = path.resolve(handlerPath);
+          const handlerModule = await import(absoluteHandlerPath);
           const handler = handlerModule.default;
 
           // Create request/response objects
