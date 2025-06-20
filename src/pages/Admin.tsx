@@ -735,7 +735,7 @@ const Admin = () => {
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 text-sm text-gray-400">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <div
                 className={`w-2 h-2 rounded-full ${
                   state.isLoading
