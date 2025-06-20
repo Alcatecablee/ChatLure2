@@ -185,7 +185,6 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       name: "ChatLure+",
       color: "#F59E0B",
     },
-    },
     {
       id: "settings",
       icon: <Settings size={24} />,
