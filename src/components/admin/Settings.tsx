@@ -54,11 +54,6 @@ export function Settings() {
     showNotificationsOnLock: true,
     autoLockTime: 5,
     requirePasscode: false,
-
-    // Notification Settings
-    emailNotifications: true,
-    pushNotifications: true,
-    weeklyDigest: true,
   });
 
   const [showApiKeys, setShowApiKeys] = useState(false);
@@ -69,16 +64,15 @@ export function Settings() {
   );
 
   useEffect(() => {
-    // Load settings from user preferences and localStorage
     loadSettings();
   }, [currentUser]);
 
   const loadSettings = () => {
-    // Load from localStorage (simulating app-wide settings)
-    const savedSettings = localStorage.getItem("chatlure-admin-settings");
-    if (savedSettings) {
+    // Load from localStorage
+    const saved = localStorage.getItem("chatlure-admin-settings");
+    if (saved) {
       try {
-        const parsed = JSON.parse(savedSettings);
+        const parsed = JSON.parse(saved);
         setSettings((prev) => ({ ...prev, ...parsed }));
       } catch (error) {
         console.error("Failed to load settings:", error);
@@ -90,7 +84,6 @@ export function Settings() {
       setSettings((prev) => ({
         ...prev,
         enableNotifications: currentUser.preferences.notifications,
-        // Add other user preference mappings
       }));
     }
   };
@@ -107,16 +100,14 @@ export function Settings() {
           preferences: {
             ...currentUser.preferences,
             notifications: settings.enableNotifications,
-            soundEnabled: true, // Keep existing
-            theme: currentUser.preferences.theme, // Keep existing
-            autoPlay: true, // Keep existing
+            soundEnabled: true,
+            theme: currentUser.preferences.theme,
+            autoPlay: true,
           },
         });
       }
 
       setLastSaved(new Date());
-
-      // Show success feedback
       setTimeout(() => setSaving(false), 1000);
     } catch (error) {
       console.error("Failed to save settings:", error);
@@ -145,9 +136,13 @@ export function Settings() {
         const success = await redditAPI.testConnection(redditCreds);
 
         if (success) {
-          alert("✅ Reddit API connection successful! You can now scan Reddit for viral content.");
+          alert(
+            "✅ Reddit API connection successful! You can now scan Reddit for viral content.",
+          );
         } else {
-          alert("❌ Reddit API connection failed. Please check your credentials.");
+          alert(
+            "❌ Reddit API connection failed. Please check your credentials.",
+          );
         }
 
         setTestingConnection(null);
@@ -157,10 +152,12 @@ export function Settings() {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         alert(`${service} connection testing is not yet implemented.`);
         setTestingConnection(null);
-        return Math.random() > 0.3; // 70% success rate for demo
+        return Math.random() > 0.3;
       }
     } catch (error) {
-      alert(`Connection test failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Connection test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       setTestingConnection(null);
       return false;
     }
@@ -214,31 +211,30 @@ export function Settings() {
             className="bg-purple-600 hover:bg-purple-700"
           >
             {saving ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
-              </>
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
             ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Save Settings
-              </>
+              <Save className="w-4 h-4 mr-2" />
             )}
+            {saving ? "Saving..." : "Save Settings"}
           </Button>
         </div>
       </div>
 
       {/* API Configuration */}
-      <Card className="bg-gray-900 border-gray-700">
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-white flex items-center space-x-2">
-            <Globe className="w-5 h-5" />
+          <CardTitle className="flex items-center space-x-2">
+            <Globe className="w-5 h-5 text-blue-400" />
             <span>API Configuration</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-gray-400">API Keys</span>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setShowApiKeys(!showApiKeys)}
-              className="text-gray-400 hover:text-white"
             >
               {showApiKeys ? (
                 <EyeOff className="w-4 h-4" />
@@ -246,15 +242,14 @@ export function Settings() {
                 <Eye className="w-4 h-4" />
               )}
             </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          </div>
+
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 OpenAI API Key
               </label>
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-2">
                 <Input
                   type={showApiKeys ? "text" : "password"}
                   value={settings.openaiApiKey}
@@ -264,7 +259,7 @@ export function Settings() {
                       openaiApiKey: e.target.value,
                     }))
                   }
-                  placeholder="sk-..."
+                  placeholder="Enter OpenAI API key"
                   className="bg-gray-800 border-gray-600 text-white"
                 />
                 <Button
@@ -288,7 +283,7 @@ export function Settings() {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Reddit Client ID
               </label>
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-2">
                 <Input
                   type={showApiKeys ? "text" : "password"}
                   value={settings.redditClientId}
@@ -317,92 +312,17 @@ export function Settings() {
               </div>
               <ConnectionStatus isConnected={!!settings.redditClientId} />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                PayPal Client ID
-              </label>
-              <Input
-                type={showApiKeys ? "text" : "password"}
-                value={settings.paypalClientId}
-                onChange={(e) =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    paypalClientId: e.target.value,
-                  }))
-                }
-                placeholder="Enter PayPal client ID"
-                className="bg-gray-800 border-gray-600 text-white"
-              />
-              <ConnectionStatus isConnected={!!settings.paypalClientId} />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                PayPal Plan ID
-              </label>
-              <Input
-                value={settings.paypalPlanId}
-                onChange={(e) =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    paypalPlanId: e.target.value,
-                  }))
-                }
-                placeholder="Enter PayPal subscription plan ID"
-                className="bg-gray-800 border-gray-600 text-white"
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* App Configuration */}
-      <Card className="bg-gray-900 border-gray-700">
+      {/* App Settings */}
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-white flex items-center space-x-2">
-            <SettingsIcon className="w-5 h-5" />
-            <span>App Configuration</span>
-          </CardTitle>
+          <CardTitle>App Configuration</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Max Stories Per User
-                </label>
-                <Input
-                  type="number"
-                  value={settings.maxStoriesPerUser}
-                  onChange={(e) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      maxStoriesPerUser: parseInt(e.target.value),
-                    }))
-                  }
-                  className="bg-gray-800 border-gray-600 text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Min Reading Time (minutes)
-                </label>
-                <Input
-                  type="number"
-                  value={settings.minReadingTime}
-                  onChange={(e) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      minReadingTime: parseInt(e.target.value),
-                    }))
-                  }
-                  className="bg-gray-800 border-gray-600 text-white"
-                />
-              </div>
-            </div>
-
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -427,50 +347,10 @@ export function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-sm font-medium text-gray-300">
-                    Allow Anonymous
-                  </label>
-                  <p className="text-xs text-gray-500">
-                    Allow anonymous story posting
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.allowAnonymous}
-                  onCheckedChange={(checked) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      allowAnonymous: checked,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-sm font-medium text-gray-300">
-                    Enable Location
-                  </label>
-                  <p className="text-xs text-gray-500">
-                    Enable location-based features
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.enableLocation}
-                  onCheckedChange={(checked) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      enableLocation: checked,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-sm font-medium text-gray-300">
                     Enable Notifications
                   </label>
                   <p className="text-xs text-gray-500">
-                    Enable push notifications
+                    Allow push notifications
                   </p>
                 </div>
                 <Switch
@@ -484,198 +364,53 @@ export function Settings() {
                 />
               </div>
             </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-300">
+                    Enable Lock Screen
+                  </label>
+                  <p className="text-xs text-gray-500">
+                    Show lock screen with wallpaper
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.lockScreenEnabled}
+                  onCheckedChange={(checked) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      lockScreenEnabled: checked,
+                    }))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Auto Lock Time (minutes)
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="60"
+                  value={settings.autoLockTime}
+                  onChange={(e) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      autoLockTime: parseInt(e.target.value) || 5,
+                    }))
+                  }
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Privacy & Safety */}
-      <Card className="bg-gray-900 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center space-x-2">
-            <Shield className="w-5 h-5" />
-            <span>Privacy & Safety</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-sm font-medium text-gray-300">
-                    Content Filtering
-                  </label>
-                  <p className="text-xs text-gray-500">
-                    Enable content filtering
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.contentFiltering}
-                  onCheckedChange={(checked) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      contentFiltering: checked,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-sm font-medium text-gray-300">
-                    Allow Explicit Content
-                  </label>
-                  <p className="text-xs text-gray-500">
-                    Allow explicit content
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.explicitContent}
-                  onCheckedChange={(checked) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      explicitContent: checked,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-sm font-medium text-gray-300">
-                    Public Profiles
-                  </label>
-                  <p className="text-xs text-gray-500">
-                    Allow public user profiles
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.publicProfiles}
-                  onCheckedChange={(checked) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      publicProfiles: checked,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-sm font-medium text-gray-300">
-                    Allow Data Export
-                  </label>
-                  <p className="text-xs text-gray-500">
-                    Allow users to export their data
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.allowDataExport}
-                  onCheckedChange={(checked) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      allowDataExport: checked,
-                    }))
-                  }
-                />
-              </div>
-
-              {/* Lock Screen Settings */}
-              <div className="border-t border-gray-700 pt-6">
-                <h4 className="text-lg font-medium text-white mb-4 flex items-center space-x-2">
-                  <span>🔒</span>
-                  <span>Lock Screen</span>
-                </h4>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-sm font-medium text-gray-300">
-                        Enable Lock Screen
-                      </label>
-                      <p className="text-xs text-gray-500">
-                        Show lock screen with wallpaper and time
-                      </p>
-                    </div>
-                    <Switch
-                      checked={settings.lockScreenEnabled}
-                      onCheckedChange={(checked) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          lockScreenEnabled: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-sm font-medium text-gray-300">
-                        Show Notifications on Lock
-                      </label>
-                      <p className="text-xs text-gray-500">
-                        Display notifications on lock screen
-                      </p>
-                    </div>
-                    <Switch
-                      checked={settings.showNotificationsOnLock}
-                      onCheckedChange={(checked) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          showNotificationsOnLock: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Auto Lock Timer (minutes)
-                    </label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="60"
-                      value={settings.autoLockTime}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          autoLockTime: parseInt(e.target.value) || 5,
-                        }))
-                      }
-                      className="bg-gray-700 border-gray-600 text-white"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-sm font-medium text-gray-300">
-                        Require Passcode
-                      </label>
-                      <p className="text-xs text-gray-500">
-                        Require passcode to unlock (coming soon)
-                      </p>
-                    </div>
-                    <Switch
-                      checked={settings.requirePasscode}
-                      onCheckedChange={(checked) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          requirePasscode: checked,
-                        }))
-                      }
-                      disabled
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Actions */}
-        <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
+      {/* Actions */}
+      <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
         <div>
           <h3 className="text-white font-medium">Reset Settings</h3>
           <p className="text-gray-400 text-sm">
@@ -689,16 +424,16 @@ export function Settings() {
         >
           Reset to Defaults
         </Button>
-        </div>
+      </div>
 
-        {/* Status */}
-        <div className="flex items-center space-x-4 text-sm text-gray-400">
+      {/* Status */}
+      <div className="flex items-center space-x-4 text-sm text-gray-400">
         <Badge variant="outline" className="border-green-600 text-green-400">
           <CheckCircle className="w-3 h-3 mr-1" />
           Settings Active
         </Badge>
         <span>Configuration saved to local storage</span>
-        </div>
       </div>
+    </div>
   );
 }
