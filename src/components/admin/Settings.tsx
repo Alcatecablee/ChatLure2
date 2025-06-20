@@ -145,13 +145,9 @@ export function Settings() {
         const success = await redditAPI.testConnection(redditCreds);
 
         if (success) {
-          alert(
-            "✅ Reddit API connection successful! You can now scan Reddit for viral content.",
-          );
+          alert("✅ Reddit API connection successful! You can now scan Reddit for viral content.");
         } else {
-          alert(
-            "❌ Reddit API connection failed. Please check your credentials.",
-          );
+          alert("❌ Reddit API connection failed. Please check your credentials.");
         }
 
         setTestingConnection(null);
@@ -164,9 +160,7 @@ export function Settings() {
         return Math.random() > 0.3; // 70% success rate for demo
       }
     } catch (error) {
-      alert(
-        `Connection test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+      alert(`Connection test failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       setTestingConnection(null);
       return false;
     }
@@ -570,24 +564,114 @@ export function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-sm font-medium text-gray-300">
-                    Share Analytics
+                    Allow Data Export
                   </label>
                   <p className="text-xs text-gray-500">
-                    Share anonymous analytics
+                    Allow users to export their data
                   </p>
                 </div>
                 <Switch
-                  checked={settings.shareAnalytics}
+                  checked={settings.allowDataExport}
                   onCheckedChange={(checked) =>
                     setSettings((prev) => ({
                       ...prev,
-                      shareAnalytics: checked,
+                      allowDataExport: checked,
                     }))
                   }
                 />
               </div>
+
+              {/* Lock Screen Settings */}
+              <div className="border-t border-gray-700 pt-6">
+                <h4 className="text-lg font-medium text-white mb-4 flex items-center space-x-2">
+                  <span>🔒</span>
+                  <span>Lock Screen</span>
+                </h4>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm font-medium text-gray-300">
+                        Enable Lock Screen
+                      </label>
+                      <p className="text-xs text-gray-500">
+                        Show lock screen with wallpaper and time
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.lockScreenEnabled}
+                      onCheckedChange={(checked) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          lockScreenEnabled: checked,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm font-medium text-gray-300">
+                        Show Notifications on Lock
+                      </label>
+                      <p className="text-xs text-gray-500">
+                        Display notifications on lock screen
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.showNotificationsOnLock}
+                      onCheckedChange={(checked) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          showNotificationsOnLock: checked,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Auto Lock Timer (minutes)
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="60"
+                      value={settings.autoLockTime}
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          autoLockTime: parseInt(e.target.value) || 5,
+                        }))
+                      }
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm font-medium text-gray-300">
+                        Require Passcode
+                      </label>
+                      <p className="text-xs text-gray-500">
+                        Require passcode to unlock (coming soon)
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.requirePasscode}
+                      onCheckedChange={(checked) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          requirePasscode: checked,
+                        }))
+                      }
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </Card>
         </CardContent>
       </Card>
 
