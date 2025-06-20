@@ -66,7 +66,14 @@
     "zod": "^3.23.8"
   },
   "overrides": {
-    "@radix-ui/react-tooltip": "file:./src/components/ui/tooltip.tsx"
+    "@radix-ui/react-tooltip": false,
+    "react": "$react",
+    "react-dom": "$react-dom"
+  },
+  "resolutions": {
+    "@radix-ui/react-tooltip": false,
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.15",
