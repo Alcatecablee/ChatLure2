@@ -201,7 +201,48 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([
+    {
+      id: "story_viral_1",
+      type: "viral_alert",
+      title: "Story 'The Midnight Confession' hit 50K+ views!",
+      time: "2 min ago",
+      icon: Flame,
+      color: "text-orange-400",
+    },
+    {
+      id: "user_premium_1",
+      type: "subscription",
+      title: "New premium subscriber: Jessica M.",
+      time: "8 min ago",
+      icon: CreditCard,
+      color: "text-purple-400",
+    },
+    {
+      id: "story_created_1",
+      type: "story_created",
+      title: "New story created: 'Digital Stalker Chronicles'",
+      time: "15 min ago",
+      icon: BookOpen,
+      color: "text-green-400",
+    },
+    {
+      id: "engagement_spike_1",
+      type: "engagement",
+      title: "Engagement rate spiked to 94% (7-day high)",
+      time: "23 min ago",
+      icon: TrendingUp,
+      color: "text-blue-400",
+    },
+    {
+      id: "user_milestone_1",
+      type: "user_milestone",
+      title: "Reached 1,000 active users milestone",
+      time: "1 hour ago",
+      icon: Users,
+      color: "text-cyan-400",
+    },
+  ]);
   const users = useUsers();
 
   // Load real analytics data
