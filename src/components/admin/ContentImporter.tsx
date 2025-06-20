@@ -172,46 +172,7 @@ export function ContentImporter({
   const [minViralScore, setMinViralScore] = useState(70);
   const [autoConvert, setAutoConvert] = useState(true);
 
-  // Mock Reddit data for demo
-  const mockRedditPosts: RedditPost[] = [
-    {
-      id: "1",
-      title: "My mom went through my phone and found my secret relationship",
-      content:
-        "I (17F) have been dating Taylor (18M) for 3 months. My mom is super strict and doesn't want me dating until college. I thought I was being careful but she found all our texts...",
-      upvotes: 12500,
-      comments: 856,
-      subreddit: "r/insaneparents",
-      url: "https://reddit.com/r/insaneparents/...",
-      created: "2024-01-15",
-      author: "throwaway_teen",
-      flair: "Advice",
-    },
-    {
-      id: "2",
-      title: "Caught my husband having an affair through his Apple Watch",
-      content:
-        "I was doing laundry and his watch lit up with a text from 'Jessica' saying 'Can't wait to see you tonight baby 💕'. My world just collapsed...",
-      upvotes: 23400,
-      comments: 1240,
-      subreddit: "r/relationship_advice",
-      url: "https://reddit.com/r/relationship_advice/...",
-      created: "2024-01-14",
-      author: "betrayed_wife_34",
-    },
-    {
-      id: "3",
-      title: "My MIL demanded I give her my wedding dress for her daughter",
-      content:
-        "My monster-in-law showed up to my house unannounced demanding I hand over my $3000 wedding dress because 'it's only fair' that her daughter gets to wear it too...",
-      upvotes: 18700,
-      comments: 967,
-      subreddit: "r/entitledparents",
-      url: "https://reddit.com/r/entitledparents/...",
-      created: "2024-01-13",
-      author: "bridezilla_nightmare",
-    },
-  ];
+  // Reddit posts will be fetched from the actual Reddit API
 
   const calculateViralScore = (messages: ImportedMessage[]): number => {
     let score = 50;
@@ -413,30 +374,36 @@ export function ContentImporter({
     }
 
     try {
-      // For now, use mock data but with credential validation
       addNotification({
         type: "info",
         title: "Scanning Reddit",
         message: `Searching ${selectedSubreddit === "all" ? "all subreddits" : selectedSubreddit} for "${searchQuery || "viral content"}"`,
       });
 
-      // Simulate API call with credentials
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Make actual Reddit API call
+      const response = await fetch("/api/reddit/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subreddit: selectedSubreddit,
+          query: searchQuery,
+          minViralScore,
+        }),
+      });
 
-      const filtered = mockRedditPosts.filter(
-        (post) =>
-          (selectedSubreddit === "all" ||
-            post.subreddit === selectedSubreddit) &&
-          (!searchQuery ||
-            post.title.toLowerCase().includes(searchQuery.toLowerCase())),
-      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch Reddit posts");
+      }
 
-      setRedditPosts(filtered);
+      const data = await response.json();
+      setRedditPosts(data.posts || []);
 
       addNotification({
         type: "success",
         title: "Reddit Scan Complete",
-        message: `Found ${filtered.length} potential viral posts`,
+        message: `Found ${data.posts?.length || 0} potential viral posts`,
       });
     } catch (error) {
       addNotification({
