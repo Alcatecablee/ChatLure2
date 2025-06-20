@@ -369,44 +369,8 @@ function UserManagement() {
 
 // App Settings Component for Branding and Configuration
 function AppSettings() {
-  const { addNotification } = useApp();
-  const [appConfig, setAppConfig] = useState({
-    appName: "ChatLure",
-    tagline: "Real-time insights into your viral story empire",
-    logo: "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
-    favicon:
-      "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
-    phoneIcons: {
-      chatLure:
-        "https://cdn.builder.io/api/v1/assets/890476fbb754497cbf35f5a7e20b5494/default-12-7008ca?format=webp&width=800",
-      phone: "📞",
-      camera: "📷",
-      photos: "🌸",
-      settings: "⚙️",
-      calculator: "🔢",
-      mail: "✉️",
-      clock: "🕒",
-      maps: "🗺️",
-      music: "🎵",
-      safari: "🧭",
-      calendar: "📅",
-    },
-    sponsoredApps: {
-      spotify: "🎵",
-      netflix: "N",
-      uber: "🚗",
-      airbnb: "🏠",
-      instagram: "📸",
-      tiktok: "🎬",
-      doordash: "🍕",
-      youtube: "▶️",
-    },
-    theme: {
-      primaryColor: "#9333EA",
-      backgroundColor: "#141414",
-      cardColor: "#1A1A1A",
-    },
-  });
+  const { addNotification, updateAppConfig } = useApp();
+  const appConfig = useAppConfig();
 
   const [activeTab, setActiveTab] = useState("branding");
   const [isSaving, setIsSaving] = useState(false);
