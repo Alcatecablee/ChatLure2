@@ -28,20 +28,26 @@ export function SettingsApp({ onBack }: SettingsAppProps) {
 
   const toggleSettings = [
     {
-      name: "Push Notifications",
-      description: "Get alerts when new drama unfolds",
+      name: "Notifications",
+      description: "Receive push notifications",
       value: notificationsEnabled,
       onChange: setNotificationsEnabled,
     },
     {
-      name: "Auto-Play Stories",
-      description: "Automatically start new conversations",
+      name: "Lock Screen",
+      description: "Enable lock screen with wallpaper",
+      value: true, // Will be connected to lock screen context
+      onChange: () => {}, // Will be connected to lock screen context
+    },
+    {
+      name: "Auto-play Videos",
+      description: "Videos play automatically",
       value: autoPlay,
       onChange: setAutoPlay,
     },
     {
       name: "Adult Content",
-      description: "Show mature storylines (18+)",
+      description: "Show mature/explicit content",
       value: adultContent,
       onChange: setAdultContent,
     },
