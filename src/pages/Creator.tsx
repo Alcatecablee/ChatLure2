@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { StoryCreator } from "@/components/admin/StoryCreator";
-import { ContentImporter } from "@/components/admin/ContentImporter";
+import { CreatorContentImporter } from "@/components/creator/CreatorContentImporter";
 import { StoryLibrary } from "@/components/admin/StoryLibrary";
 import { NotificationCenter } from "@/components/ui/notification-center";
 import { useCredentials } from "@/contexts/AppContext";
