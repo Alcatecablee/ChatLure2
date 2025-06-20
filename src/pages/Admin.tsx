@@ -249,7 +249,7 @@ function UserManagement() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-colors"
+              className="bg-card border border-border p-6 rounded-xl hover:border-border/80 transition-colors"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-4">
