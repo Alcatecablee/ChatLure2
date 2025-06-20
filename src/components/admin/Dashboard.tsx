@@ -202,7 +202,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [stories, users]);
 
   // Generate real activity data from stories and users
   useEffect(() => {
