@@ -664,7 +664,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="text-primary" />
+                <TrendingUp className="text-muted-foreground" />
                 <span>Top Performing Stories</span>
               </CardTitle>
               <Button
