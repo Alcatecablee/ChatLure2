@@ -116,10 +116,13 @@ export function Settings() {
     try {
       // Validate credentials before testing
       if (service === "reddit") {
-        if (!credentials.reddit.clientId || !credentials.reddit.clientSecret) {
+        if (
+          !credentials?.reddit?.clientId ||
+          !credentials?.reddit?.clientSecret
+        ) {
           throw new Error("Client ID and Secret are required");
         }
-        if (!credentials.reddit.userAgent) {
+        if (!credentials?.reddit?.userAgent) {
           throw new Error("User Agent is required");
         }
       }
