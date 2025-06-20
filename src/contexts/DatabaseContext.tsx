@@ -56,9 +56,35 @@ interface DatabaseContextType {
   clearData: () => Promise<void>;
 }
 
-const DatabaseContext = createContext<DatabaseContextType | undefined>(
-  undefined,
-);
+// Create a default context value to prevent undefined errors
+const defaultContextValue: DatabaseContextType = {
+  isInitialized: false,
+  currentUser: null,
+  createUser: async () => ({}) as User,
+  loginUser: async () => null,
+  updateUser: async () => {},
+  createStory: async () => ({}) as Story,
+  getStory: async () => undefined,
+  getTrendingStories: async () => [],
+  getMyStories: async () => [],
+  searchStories: async () => [],
+  notifications: [],
+  unreadCount: 0,
+  createNotification: async () => {},
+  markAsRead: async () => {},
+  refreshNotifications: async () => {},
+  bookmarks: [],
+  addBookmark: async () => {},
+  removeBookmark: async () => {},
+  refreshBookmarks: async () => {},
+  saveProgress: async () => {},
+  getProgress: async () => undefined,
+  incrementViews: async () => {},
+  exportData: async () => "",
+  clearData: async () => {},
+};
+
+const DatabaseContext = createContext<DatabaseContextType>(defaultContextValue);
 
 export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -366,7 +392,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
 
 export function useDatabase() {
   const context = useContext(DatabaseContext);
-  if (!context) {
+  if (context === defaultContextValue) {
     throw new Error("useDatabase must be used within a DatabaseProvider");
   }
   return context;
