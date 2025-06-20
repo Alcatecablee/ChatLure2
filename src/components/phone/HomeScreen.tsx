@@ -22,6 +22,7 @@ interface AppIconProps {
   onClick?: () => void;
   delay?: number;
   isSponsored?: boolean;
+  isCreatorApp?: boolean;
 }
 
 function AppIcon({
@@ -31,8 +32,15 @@ function AppIcon({
   onClick,
   delay = 0,
   isSponsored = false,
+  isCreatorApp = false,
 }: AppIconProps) {
   const handleSponsoredClick = () => {
+    // Handle Creator app navigation
+    if (isCreatorApp) {
+      window.location.href = "/creator";
+      return;
+    }
+
     // Try to open external app or redirect to store
     const appUrls: Record<string, string> = {
       Spotify: "https://open.spotify.com",
@@ -57,7 +65,7 @@ function AppIcon({
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay, duration: 0.3, ease: "backOut" }}
       whileTap={{ scale: 0.9 }}
-      onClick={isSponsored ? handleSponsoredClick : onClick}
+      onClick={isSponsored || isCreatorApp ? handleSponsoredClick : onClick}
       className="flex flex-col items-center space-y-1 group"
     >
       <div
@@ -66,7 +74,7 @@ function AppIcon({
       >
         {name === "ChatLure" ? (
           <img
-            src="https://cdn.builder.io/api/v1/assets/9af82e6ddd6549809662cfc01aa22662/favico-c760c4?format=webp&width=800"
+            src="https://cdn.builder.io/api/v1/assets/4fad96d56bab4dd5bf3f69370c695246/default-12-6ca444?format=webp&width=800"
             alt="ChatLure"
             className="w-full h-full object-cover rounded-app"
           />
@@ -143,8 +151,16 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
     },
   ];
 
-  // Sponsored apps - Real looking apps with proper branding
+  // Sponsored apps - Real looking apps with proper branding + Creator Studio
   const sponsoredApps = [
+    {
+      id: "creator",
+      icon: <div className="text-lg font-bold">👑</div>,
+      name: "Creator",
+      color: "#8B5CF6",
+      isSponsored: false,
+      isCreatorApp: true,
+    },
     {
       id: "spotify",
       icon: <div className="text-lg font-bold text-white">♪</div>,
@@ -185,13 +201,6 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
       icon: <div className="text-lg font-bold">♫</div>,
       name: "TikTok",
       color: "#000000",
-      isSponsored: true,
-    },
-    {
-      id: "doordash",
-      icon: <div className="text-lg font-bold">🍔</div>,
-      name: "DoorDash",
-      color: "#FF3008",
       isSponsored: true,
     },
     {
@@ -265,7 +274,8 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
                 name={app.name}
                 color={app.color}
                 delay={1.0 + index * 0.1}
-                isSponsored={true}
+                isSponsored={app.isSponsored}
+                isCreatorApp={app.isCreatorApp}
               />
             ))}
           </div>
@@ -279,7 +289,8 @@ export function HomeScreen({ onAppSelect }: HomeScreenProps) {
                 name={app.name}
                 color={app.color}
                 delay={1.4 + index * 0.1}
-                isSponsored={true}
+                isSponsored={app.isSponsored}
+                isCreatorApp={app.isCreatorApp}
               />
             ))}
           </div>
