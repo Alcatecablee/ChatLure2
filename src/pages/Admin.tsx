@@ -205,36 +205,38 @@ function UserManagement() {
 
       {/* User Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-400">
+            <div className="text-2xl font-bold text-foreground">
               {users.length}
             </div>
-            <div className="text-sm text-gray-400">Total Users</div>
+            <div className="text-sm text-muted-foreground">Total Users</div>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-400">
+            <div className="text-2xl font-bold text-foreground">
               {premiumUsers.length}
             </div>
-            <div className="text-sm text-gray-400">Premium Users</div>
+            <div className="text-sm text-muted-foreground">Premium Users</div>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400">
+            <div className="text-2xl font-bold text-foreground">
               {avgStoriesRead}
             </div>
-            <div className="text-sm text-gray-400">Avg Stories Read</div>
+            <div className="text-sm text-muted-foreground">
+              Avg Stories Read
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-orange-400">
+            <div className="text-2xl font-bold text-foreground">
               {activeToday.length}
             </div>
-            <div className="text-sm text-gray-400">Active Today</div>
+            <div className="text-sm text-muted-foreground">Active Today</div>
           </CardContent>
         </Card>
       </div>
