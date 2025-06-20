@@ -350,7 +350,7 @@ export function Settings() {
                 <Label htmlFor="reddit-user-agent">User Agent</Label>
                 <Input
                   id="reddit-user-agent"
-                  value={credentials.reddit.userAgent}
+                  value={credentials?.reddit?.userAgent || ""}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
