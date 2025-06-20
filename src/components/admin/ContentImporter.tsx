@@ -284,6 +284,439 @@ export function ContentImporter({
     }
   };
 
+  // Intelligent WhatsApp Chat Parser
+  const parseWhatsAppChat = (chatText: string): ImportedStory[] => {
+    if (!chatText.trim()) return [];
+
+    try {
+      // Detect WhatsApp format patterns
+      const lines = chatText.split("\n").filter((line) => line.trim());
+      const messages: ImportedMessage[] = [];
+      const participants = new Set<string>();
+      let storyTitle = "WhatsApp Drama";
+
+      // Parse different WhatsApp export formats
+      for (const line of lines) {
+        const message = parseWhatsAppLine(line);
+        if (message) {
+          messages.push(message);
+          participants.add(message.sender);
+        }
+      }
+
+      if (messages.length === 0) return [];
+
+      // Intelligent story title generation
+      storyTitle = generateStoryTitle(messages);
+
+      // Detect drama and emotional moments
+      const dramaticMoments = detectDramaticMoments(messages);
+      const emotionalAnalysis = analyzeEmotions(messages);
+
+      // Apply anonymization if enabled
+      if (anonymizeChats) {
+        anonymizeMessages(messages);
+      }
+
+      // Calculate viral score based on content analysis
+      const viralScore = calculateWhatsAppViralScore(messages, dramaticMoments);
+
+      const story: ImportedStory = {
+        id: `whatsapp_${Date.now()}`,
+        title: storyTitle,
+        characters: Array.from(participants).map((name) =>
+          anonymizeChats ? anonymizeName(name) : name,
+        ),
+        messages: messages,
+        genre: detectGenre(messages),
+        estimatedViralScore: viralScore,
+        source: "manual",
+        tags: extractTags(messages),
+        isImported: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      return [story];
+    } catch (error) {
+      console.error("WhatsApp parsing error:", error);
+      addNotification({
+        type: "error",
+        title: "Parsing Failed",
+        message: "Could not parse WhatsApp chat. Please check the format.",
+      });
+      return [];
+    }
+  };
+
+  const parseWhatsAppLine = (line: string): ImportedMessage | null => {
+    // Support multiple WhatsApp export formats
+    const patterns = [
+      // Pattern 1: [DD/MM/YYYY, HH:MM:SS] Name: Message
+      /^\[(\d{1,2}\/\d{1,2}\/\d{4}), (\d{1,2}:\d{2}:\d{2})\] ([^:]+): (.+)$/,
+      // Pattern 2: DD/MM/YYYY, HH:MM - Name: Message
+      /^(\d{1,2}\/\d{1,2}\/\d{4}), (\d{1,2}:\d{2}) - ([^:]+): (.+)$/,
+      // Pattern 3: MM/DD/YY, HH:MM - Name: Message
+      /^(\d{1,2}\/\d{1,2}\/\d{2}), (\d{1,2}:\d{2}) - ([^:]+): (.+)$/,
+      // Pattern 4: Name (DD/MM/YYYY HH:MM): Message
+      /^([^(]+) \((\d{1,2}\/\d{1,2}\/\d{4}) (\d{1,2}:\d{2})\): (.+)$/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = line.match(pattern);
+      if (match) {
+        const [, date, time, sender, messageText] = match;
+
+        return {
+          id: `msg_${Date.now()}_${Math.random()}`,
+          timestamp: `${date} ${time}`,
+          sender: sender.trim(),
+          message: messageText.trim(),
+          emotion: detectEmotion(messageText),
+          isCliffhanger: isCliffhanger(messageText),
+          hasMedia: hasMediaAttachment(messageText),
+        };
+      }
+    }
+
+    return null;
+  };
+
+  const generateStoryTitle = (messages: ImportedMessage[]): string => {
+    const content = messages
+      .map((m) => m.message)
+      .join(" ")
+      .toLowerCase();
+
+    const titleTriggers = [
+      {
+        keywords: ["affair", "cheating", "cheated"],
+        title: "The Affair Discovery",
+      },
+      {
+        keywords: ["pregnant", "pregnancy", "baby"],
+        title: "Unexpected Pregnancy Drama",
+      },
+      { keywords: ["wedding", "married", "divorce"], title: "Marriage Chaos" },
+      { keywords: ["boss", "work", "fired", "job"], title: "Workplace Drama" },
+      {
+        keywords: ["friend", "betrayed", "backstab"],
+        title: "Friendship Betrayal",
+      },
+      { keywords: ["family", "mom", "dad", "parent"], title: "Family Drama" },
+      {
+        keywords: ["money", "debt", "broke", "loan"],
+        title: "Financial Crisis",
+      },
+      {
+        keywords: ["secret", "hidden", "discovered"],
+        title: "Secret Revealed",
+      },
+    ];
+
+    for (const trigger of titleTriggers) {
+      if (trigger.keywords.some((keyword) => content.includes(keyword))) {
+        return trigger.title;
+      }
+    }
+
+    return "WhatsApp Drama Story";
+  };
+
+  const detectDramaticMoments = (messages: ImportedMessage[]) => {
+    return messages.filter((msg) => {
+      const text = msg.message.toLowerCase();
+      const dramaticTriggers = [
+        "can't believe",
+        "shocked",
+        "devastated",
+        "betrayed",
+        "furious",
+        "wtf",
+        "omg",
+        "no way",
+        "seriously?",
+        "what the hell",
+        "i'm done",
+        "it's over",
+        "how could you",
+        "you lied",
+      ];
+
+      return (
+        dramaticTriggers.some((trigger) => text.includes(trigger)) ||
+        msg.message.includes("!!!") ||
+        msg.message.includes("???") ||
+        (msg.message.match(/[A-Z]/g) || []).length > msg.message.length * 0.3
+      );
+    });
+  };
+
+  const analyzeEmotions = (messages: ImportedMessage[]) => {
+    return messages.map((msg) => ({
+      ...msg,
+      emotion: detectEmotion(msg.message),
+    }));
+  };
+
+  const detectEmotion = (text: string): string => {
+    const emotionPatterns = {
+      angry: ["wtf", "furious", "pissed", "angry", "mad", "hate", "😡", "🤬"],
+      sad: [
+        "crying",
+        "devastated",
+        "heartbroken",
+        "depressed",
+        "😭",
+        "💔",
+        "😢",
+      ],
+      shocked: [
+        "omg",
+        "wtf",
+        "can't believe",
+        "shocked",
+        "stunned",
+        "😱",
+        "🤯",
+      ],
+      happy: ["lol", "haha", "excited", "amazing", "love", "😂", "❤️", "😍"],
+      scared: ["terrified", "scared", "worried", "anxious", "😨", "😰"],
+      betrayed: ["betrayed", "lied", "cheated", "backstabbed"],
+      neutral: [],
+    };
+
+    const lowerText = text.toLowerCase();
+
+    for (const [emotion, triggers] of Object.entries(emotionPatterns)) {
+      if (triggers.some((trigger) => lowerText.includes(trigger))) {
+        return emotion;
+      }
+    }
+
+    return "neutral";
+  };
+
+  const isCliffhanger = (text: string): boolean => {
+    const cliffhangerTriggers = [
+      "wait until you hear this",
+      "you won't believe",
+      "i need to tell you something",
+      "we need to talk",
+      "call me now",
+      "emergency",
+      "something happened",
+      "i have news",
+    ];
+
+    const lowerText = text.toLowerCase();
+    return (
+      cliffhangerTriggers.some((trigger) => lowerText.includes(trigger)) ||
+      text.includes("...") ||
+      (text.endsWith("?") && text.includes("what")) ||
+      text.includes("to be continued")
+    );
+  };
+
+  const hasMediaAttachment = (text: string): boolean => {
+    const mediaIndicators = [
+      "<Media omitted>",
+      "image omitted",
+      "video omitted",
+      "audio omitted",
+      "document omitted",
+      "sticker omitted",
+    ];
+
+    return mediaIndicators.some((indicator) => text.includes(indicator));
+  };
+
+  const anonymizeName = (name: string): string => {
+    if (!name || name.length === 0) return "Anonymous";
+
+    const anonymizedNames = [
+      "Alex",
+      "Jordan",
+      "Taylor",
+      "Casey",
+      "Riley",
+      "Avery",
+      "Quinn",
+      "Sage",
+      "Blake",
+      "Drew",
+      "Emery",
+      "Finley",
+    ];
+
+    // Create consistent mapping based on name hash
+    const hash = name.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
+    return anonymizedNames[hash % anonymizedNames.length];
+  };
+
+  const anonymizeMessages = (messages: ImportedMessage[]) => {
+    const nameMap = new Map<string, string>();
+
+    messages.forEach((msg) => {
+      if (!nameMap.has(msg.sender)) {
+        nameMap.set(msg.sender, anonymizeName(msg.sender));
+      }
+      msg.sender = nameMap.get(msg.sender)!;
+
+      // Also anonymize names mentioned in messages
+      nameMap.forEach((anonymized, original) => {
+        const regex = new RegExp(`\\b${original}\\b`, "gi");
+        msg.message = msg.message.replace(regex, anonymized);
+      });
+    });
+  };
+
+  const detectGenre = (messages: ImportedMessage[]): string => {
+    const content = messages
+      .map((m) => m.message)
+      .join(" ")
+      .toLowerCase();
+
+    const genreKeywords = {
+      romance: [
+        "love",
+        "boyfriend",
+        "girlfriend",
+        "dating",
+        "crush",
+        "relationship",
+      ],
+      family: [
+        "mom",
+        "dad",
+        "parent",
+        "family",
+        "sibling",
+        "brother",
+        "sister",
+      ],
+      workplace: ["boss", "work", "job", "office", "colleague", "meeting"],
+      friendship: ["friend", "bff", "bestie", "group chat"],
+      drama: ["drama", "fight", "argument", "betrayed", "lied", "cheated"],
+    };
+
+    let maxScore = 0;
+    let detectedGenre = "drama";
+
+    Object.entries(genreKeywords).forEach(([genre, keywords]) => {
+      const score = keywords.reduce((count, keyword) => {
+        return count + (content.match(new RegExp(keyword, "g")) || []).length;
+      }, 0);
+
+      if (score > maxScore) {
+        maxScore = score;
+        detectedGenre = genre;
+      }
+    });
+
+    return detectedGenre;
+  };
+
+  const extractTags = (messages: ImportedMessage[]): string[] => {
+    const content = messages
+      .map((m) => m.message)
+      .join(" ")
+      .toLowerCase();
+    const tags = [];
+
+    const tagKeywords = [
+      "viral",
+      "drama",
+      "shocking",
+      "betrayal",
+      "cheating",
+      "affair",
+      "pregnancy",
+      "wedding",
+      "divorce",
+      "family",
+      "work",
+      "friendship",
+      "money",
+      "secret",
+      "revealed",
+      "emotional",
+      "heartbreak",
+    ];
+
+    tagKeywords.forEach((tag) => {
+      if (content.includes(tag)) {
+        tags.push(tag);
+      }
+    });
+
+    return tags.slice(0, 5); // Limit to 5 tags
+  };
+
+  const calculateWhatsAppViralScore = (
+    messages: ImportedMessage[],
+    dramaticMoments: ImportedMessage[],
+  ): number => {
+    let score = 50; // Base score
+
+    // Length factor
+    if (messages.length > 20) score += 15;
+    else if (messages.length > 10) score += 10;
+    else if (messages.length > 5) score += 5;
+
+    // Drama factor
+    const dramaRatio = dramaticMoments.length / messages.length;
+    score += dramaRatio * 30;
+
+    // Emotion variety
+    const emotions = new Set(messages.map((m) => m.emotion));
+    score += emotions.size * 3;
+
+    // Cliffhanger factor
+    const cliffhangers = messages.filter((m) => m.isCliffhanger).length;
+    score += cliffhangers * 10;
+
+    // Media attachments
+    const mediaMessages = messages.filter((m) => m.hasMedia).length;
+    score += mediaMessages * 5;
+
+    return Math.min(Math.round(score), 100);
+  };
+
+  const processWhatsAppImport = () => {
+    setIsProcessing(true);
+
+    try {
+      const stories = parseWhatsAppChat(whatsappChatText);
+
+      if (stories.length === 0) {
+        addNotification({
+          type: "warning",
+          title: "No Stories Found",
+          message:
+            "Could not extract any valid conversations from the WhatsApp chat.",
+        });
+      } else {
+        setWhatsappStories(stories);
+        setParsedStories((prev) => [...prev, ...stories]);
+
+        addNotification({
+          type: "success",
+          title: "WhatsApp Import Successful",
+          message: `Successfully converted ${stories.length} WhatsApp conversation(s) into ChatLure format!`,
+        });
+      }
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Import Failed",
+        message:
+          "Failed to process WhatsApp chat. Please check the format and try again.",
+      });
+    }
+
+    setIsProcessing(false);
+  };
+
   // Curated fallback content for when Reddit API is unavailable
   const getCuratedContent = (subreddit: string, query: string) => {
     const curatedPosts = [
