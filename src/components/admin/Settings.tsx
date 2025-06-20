@@ -607,7 +607,7 @@ export function Settings() {
                   <Label htmlFor="paypal-client-id">Client ID</Label>
                   <Input
                     id="paypal-client-id"
-                    value={credentials.paypal.clientId}
+                    value={credentials?.paypal?.clientId || ""}
                     onChange={(e) =>
                       setCredentials((prev) => ({
                         ...prev,
