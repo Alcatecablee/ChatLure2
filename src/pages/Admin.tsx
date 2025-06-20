@@ -566,7 +566,7 @@ const Admin = () => {
             animate={{ x: 0 }}
             exit={{ x: -288 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="w-72 bg-gradient-to-b from-gray-900 to-gray-800 border-r border-gray-700 flex flex-col min-h-screen shadow-xl"
+            className="w-72 bg-sidebar border-r border-sidebar-border flex flex-col min-h-screen shadow-xl"
           >
             {/* Header */}
             <div className="p-6 border-b border-gray-700">
