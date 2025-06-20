@@ -4,7 +4,7 @@ import {
   type Story,
   type User,
   type ApiCredentials,
-} from "@/lib/api";
+} from "@/lib/api-client";
 
 // Notification types
 interface Notification {
