@@ -614,6 +614,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // App configuration
+  const updateAppConfig = async (config: Partial<AppConfig>) => {
+    try {
+      // Update local state immediately for real-time UI updates
+      dispatch({ type: "UPDATE_APP_CONFIG", payload: config });
+
+      // Save to localStorage for persistence
+      const updatedConfig = { ...state.appConfig, ...config };
+      localStorage.setItem("appConfig", JSON.stringify(updatedConfig));
+
+      addNotification({
+        type: "success",
+        title: "App Settings Updated",
+        message: "Your app configuration has been saved successfully.",
+      });
+    } catch (error) {
+      console.error("Failed to update app config:", error);
+      addNotification({
+        type: "error",
+        title: "Update Failed",
+        message: "Failed to save app configuration. Please try again.",
+      });
+      throw error;
+    }
+  };
+
   // Utility functions
   const addNotification = (
     notificationData: Omit<Notification, "id" | "timestamp" | "isRead">,
