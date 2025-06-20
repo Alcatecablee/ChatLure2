@@ -159,6 +159,106 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     fetchDashboardData();
   }, []);
 
+  // Generate real activity data from stories and users
+  useEffect(() => {
+    if (stories.length > 0 || users.length > 0) {
+      const activities: any[] = [];
+
+      // Add recent stories as activities
+      const recentStories = stories
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .slice(0, 2);
+
+      recentStories.forEach((story, index) => {
+        activities.push({
+          id: `story_${story.id}`,
+          type: "story_created",
+          title: `New story created: "${story.title}"`,
+          time: formatTimeAgo(story.createdAt),
+          icon: BookOpen,
+          color: "text-green-400",
+        });
+      });
+
+      // Add high-performing stories
+      const topStories = stories
+        .filter((story) => story.stats?.views > 500)
+        .sort((a, b) => b.stats.views - a.stats.views)
+        .slice(0, 1);
+
+      topStories.forEach((story) => {
+        activities.push({
+          id: `viral_${story.id}`,
+          type: "viral_alert",
+          title: `Story "${story.title}" hit ${story.stats.views.toLocaleString()}+ views!`,
+          time: "Recent",
+          icon: Flame,
+          color: "text-orange-400",
+        });
+      });
+
+      // Add user milestones
+      const premiumUsers = users.filter(
+        (user) => user.subscription?.status === "premium",
+      );
+      if (premiumUsers.length > 0) {
+        activities.push({
+          id: "users_premium",
+          type: "subscription",
+          title: `${premiumUsers.length} premium subscribers active`,
+          time: "Today",
+          icon: CreditCard,
+          color: "text-purple-400",
+        });
+      }
+
+      // Add engagement data
+      if (dashboardData?.avgRating > 4.0) {
+        activities.push({
+          id: "rating_high",
+          type: "engagement",
+          title: `High user satisfaction: ${dashboardData.avgRating.toFixed(1)}/5.0 average rating`,
+          time: "This week",
+          icon: TrendingUp,
+          color: "text-blue-400",
+        });
+      }
+
+      // Add user milestone
+      if (users.length >= 4) {
+        activities.push({
+          id: "user_milestone",
+          type: "user_milestone",
+          title: `Reached ${users.length} active users`,
+          time: "Current",
+          icon: Users,
+          color: "text-cyan-400",
+        });
+      }
+
+      setRecentActivity(activities.slice(0, 5)); // Limit to 5 activities
+    }
+  }, [stories, users, dashboardData]);
+
+  // Helper function to format time ago
+  const formatTimeAgo = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    if (diffHours > 0)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffMinutes > 0) return `${diffMinutes} min ago`;
+    return "Just now";
+  };
+
   const activeStories = stories.filter((story) => story.isActive);
   const totalViews = stories.reduce(
     (sum, story) => sum + (story.stats?.views || 0),
