@@ -16,6 +16,25 @@ interface Notification {
   isRead: boolean;
 }
 
+// App Configuration types
+interface AppConfig {
+  appName: string;
+  tagline: string;
+  logo: string;
+  favicon: string;
+  phoneIcons: {
+    [key: string]: string;
+  };
+  sponsoredApps: {
+    [key: string]: string;
+  };
+  theme: {
+    primaryColor: string;
+    backgroundColor: string;
+    cardColor: string;
+  };
+}
+
 interface AppState {
   stories: Story[];
   users: User[];
