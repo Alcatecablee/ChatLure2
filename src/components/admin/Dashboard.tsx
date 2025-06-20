@@ -209,7 +209,22 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const loadDashboardData = async () => {
       try {
         // Load performance metrics from API
-        const metrics = await APIClient.getDashboardMetrics();
+        let metrics;
+        try {
+          metrics = await APIClient.getDashboardMetrics();
+        } catch (apiError) {
+          console.warn("API not available, using fallback data:", apiError);
+          // Use fallback values when API is not available
+          metrics = {
+            totalRevenue: 0,
+            activeSubscribers: 0,
+            avgEngagementTime: 0,
+            revenueChange: 0,
+            subscriberChange: 0,
+            engagementChange: 0,
+            completionChange: 0,
+          };
+        }
 
         setPerformanceMetrics([
           {
