@@ -310,7 +310,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [performanceMetrics, setPerformanceMetrics] = useState<
     PerformanceMetric[]
   >([]);
-  const [dashboardData, setDashboardData] = useState<any>(null);
 
   const formatMetricValue = (value: number, format: string) => {
     switch (format) {
