@@ -19,7 +19,9 @@ export default async function handler(req, res) {
           const stories = StoryAPI.getAll();
           const users = UserAPI.getAll();
 
-          return res.status(200).json({
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          return res.end(JSON.stringify({
             health,
             stats: {
               ...dashboardMetrics,
