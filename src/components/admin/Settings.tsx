@@ -680,7 +680,7 @@ export function Settings() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      checked={credentials.paypal.environment === "sandbox"}
+                      checked={credentials?.paypal?.environment === "sandbox"}
                       onChange={() =>
                         setCredentials((prev) => ({
                           ...prev,
