@@ -798,6 +798,7 @@ const Admin = () => {
                 />
               )}
               {section === "settings" && <Settings />}
+              {section === "app-settings" && <AppSettings />}
               {section === "users" && <UserManagement />}
               {section === "billing" && <PayPalBilling />}
               {section === "notifications" && (
