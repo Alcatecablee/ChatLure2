@@ -817,7 +817,7 @@ export function ContentImporter({
                       Auto-convert to ChatLure format
                     </span>
                   </div>
-                  {credentials.reddit.enabled ? (
+                  {credentials?.reddit?.enabled ? (
                     <Badge className="bg-green-500/20 text-green-400 text-xs">
                       ✓ Reddit Connected
                     </Badge>
