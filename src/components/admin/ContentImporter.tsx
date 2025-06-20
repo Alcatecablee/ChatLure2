@@ -776,8 +776,9 @@ export function ContentImporter({
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-800">
+        <TabsList className="grid w-full grid-cols-5 bg-gray-800">
           <TabsTrigger value="reddit">🔥 Reddit</TabsTrigger>
+          <TabsTrigger value="whatsapp">💬 WhatsApp</TabsTrigger>
           <TabsTrigger value="manual">📝 Manual</TabsTrigger>
           <TabsTrigger value="bulk">📊 Bulk Import</TabsTrigger>
           <TabsTrigger value="library">📚 Library</TabsTrigger>
