@@ -172,6 +172,12 @@ export function ContentImporter({
   const [minViralScore, setMinViralScore] = useState(10);
   const [autoConvert, setAutoConvert] = useState(true);
 
+  // WhatsApp Import State
+  const [whatsappChatText, setWhatsappChatText] = useState("");
+  const [anonymizeChats, setAnonymizeChats] = useState(true);
+  const [detectDrama, setDetectDrama] = useState(true);
+  const [whatsappStories, setWhatsappStories] = useState<ImportedStory[]>([]);
+
   // Reddit content with fallback system (CORS-safe approach)
   const fetchFromRedditAPI = async (subreddit: string, query: string) => {
     try {
