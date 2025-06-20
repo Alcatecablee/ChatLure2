@@ -557,7 +557,7 @@ const Admin = () => {
   );
 
   return (
-    <div className="w-full min-h-screen bg-black text-white flex">
+    <div className="w-full min-h-screen bg-background text-foreground flex">
       {/* Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
