@@ -163,22 +163,47 @@ export const StoryAPI = {
     const row = stmt.get(id);
     if (!row) return null;
 
-    return {
-      ...row,
-      isActive: Boolean(row.isActive),
-      tags: row.tags ? JSON.parse(row.tags) : [],
-      stats: row.stats
-        ? JSON.parse(row.stats)
-        : {
-            views: 0,
-            completions: 0,
-            shares: 0,
-            avgRating: 0,
-            completionRate: 0,
-          },
-      characters: row.characters ? JSON.parse(row.characters) : [],
-      plotPoints: row.plotPoints ? JSON.parse(row.plotPoints) : [],
-    };
+    try {
+      return {
+        ...row,
+        isActive: Boolean(row.isActive),
+        tags: row.tags && row.tags !== "undefined" ? JSON.parse(row.tags) : [],
+        stats:
+          row.stats && row.stats !== "undefined"
+            ? JSON.parse(row.stats)
+            : {
+                views: 0,
+                completions: 0,
+                shares: 0,
+                avgRating: 0,
+                completionRate: 0,
+              },
+        characters:
+          row.characters && row.characters !== "undefined"
+            ? JSON.parse(row.characters)
+            : [],
+        plotPoints:
+          row.plotPoints && row.plotPoints !== "undefined"
+            ? JSON.parse(row.plotPoints)
+            : [],
+      };
+    } catch (error) {
+      console.error("Error parsing story row:", row, error);
+      return {
+        ...row,
+        isActive: Boolean(row.isActive),
+        tags: [],
+        stats: {
+          views: 0,
+          completions: 0,
+          shares: 0,
+          avgRating: 0,
+          completionRate: 0,
+        },
+        characters: [],
+        plotPoints: [],
+      };
+    }
   },
 
   create(story) {
