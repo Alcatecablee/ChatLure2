@@ -235,8 +235,16 @@ export const UserAPI = {
     const stmt = db.prepare("SELECT * FROM users ORDER BY createdAt DESC");
     return stmt.all().map((row) => ({
       ...row,
-      subscription: JSON.parse(row.subscription),
-      engagement: JSON.parse(row.engagement),
+      subscription: row.subscription
+        ? JSON.parse(row.subscription)
+        : { status: "free" },
+      engagement: row.engagement
+        ? JSON.parse(row.engagement)
+        : {
+            storiesRead: 0,
+            avgTime: "0m",
+            favoriteGenre: "unknown",
+          },
     }));
   },
 
