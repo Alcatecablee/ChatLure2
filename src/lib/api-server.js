@@ -138,10 +138,18 @@ export const StoryAPI = {
     return {
       ...row,
       isActive: Boolean(row.isActive),
-      tags: JSON.parse(row.tags),
-      stats: JSON.parse(row.stats),
-      characters: JSON.parse(row.characters),
-      plotPoints: JSON.parse(row.plotPoints),
+      tags: row.tags ? JSON.parse(row.tags) : [],
+      stats: row.stats
+        ? JSON.parse(row.stats)
+        : {
+            views: 0,
+            completions: 0,
+            shares: 0,
+            avgRating: 0,
+            completionRate: 0,
+          },
+      characters: row.characters ? JSON.parse(row.characters) : [],
+      plotPoints: row.plotPoints ? JSON.parse(row.plotPoints) : [],
     };
   },
 
