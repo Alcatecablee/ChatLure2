@@ -115,10 +115,18 @@ export const StoryAPI = {
     return stmt.all().map((row) => ({
       ...row,
       isActive: Boolean(row.isActive),
-      tags: JSON.parse(row.tags),
-      stats: JSON.parse(row.stats),
-      characters: JSON.parse(row.characters),
-      plotPoints: JSON.parse(row.plotPoints),
+      tags: row.tags ? JSON.parse(row.tags) : [],
+      stats: row.stats
+        ? JSON.parse(row.stats)
+        : {
+            views: 0,
+            completions: 0,
+            shares: 0,
+            avgRating: 0,
+            completionRate: 0,
+          },
+      characters: row.characters ? JSON.parse(row.characters) : [],
+      plotPoints: row.plotPoints ? JSON.parse(row.plotPoints) : [],
     }));
   },
 
@@ -141,7 +149,7 @@ export const StoryAPI = {
     const id = `story_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const stmt = db.prepare(`
       INSERT INTO stories (
-        id, title, genre, description, isActive, viralScore, source, 
+        id, title, genre, description, isActive, viralScore, source,
         tags, stats, characters, plotPoints
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
@@ -176,9 +184,9 @@ export const StoryAPI = {
     if (!current) return null;
 
     const stmt = db.prepare(`
-      UPDATE stories SET 
-        title = ?, genre = ?, description = ?, isActive = ?, 
-        viralScore = ?, source = ?, tags = ?, stats = ?, 
+      UPDATE stories SET
+        title = ?, genre = ?, description = ?, isActive = ?,
+        viralScore = ?, source = ?, tags = ?, stats = ?,
         characters = ?, plotPoints = ?, updatedAt = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
@@ -326,7 +334,7 @@ export const AnalyticsAPI = {
     const recentStories = db
       .prepare(
         `
-      SELECT title, createdAt FROM stories 
+      SELECT title, createdAt FROM stories
       ORDER BY createdAt DESC LIMIT 5
     `,
       )
@@ -335,7 +343,7 @@ export const AnalyticsAPI = {
     const recentUsers = db
       .prepare(
         `
-      SELECT firstName, lastName, createdAt FROM users 
+      SELECT firstName, lastName, createdAt FROM users
       ORDER BY createdAt DESC LIMIT 3
     `,
       )
@@ -360,7 +368,7 @@ export const AnalyticsAPI = {
     const genreStats = db
       .prepare(
         `
-      SELECT genre, COUNT(*) as count FROM stories 
+      SELECT genre, COUNT(*) as count FROM stories
       GROUP BY genre ORDER BY count DESC
     `,
       )
@@ -387,7 +395,7 @@ export const AnalyticsAPI = {
 
   getDateRange(startDate, endDate) {
     const stmt = db.prepare(`
-      SELECT * FROM analytics 
+      SELECT * FROM analytics
       WHERE timestamp BETWEEN ? AND ?
       ORDER BY timestamp DESC
     `);
