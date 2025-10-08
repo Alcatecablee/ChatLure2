@@ -10,9 +10,11 @@ ChatLure is a full-stack React application that converts viral Reddit posts into
 ## Recent Changes
 - **Oct 8, 2025**: Configured for Replit environment
   - Updated Vite config to use port 5000 with 0.0.0.0 host
+  - Configured HMR (Hot Module Reload) with WebSocket for Replit proxy
   - Fixed TypeScript configuration for proper module resolution
   - Installed all dependencies
-  - Verified application is running successfully
+  - Fixed Dashboard component null-safety issues
+  - Verified all routes and functionality working correctly
 
 ## Project Architecture
 
@@ -66,7 +68,10 @@ ChatLure is a full-stack React application that converts viral Reddit posts into
 ## Development
 
 ### Running Locally
-The application runs on port 5000 with the `npm run dev` command. The dev server is configured to accept connections from all hosts (0.0.0.0) to work with Replit's proxy system.
+The application runs on port 5000 with the `npm run dev` command. The dev server is configured to:
+- Listen on 0.0.0.0 to accept connections from Replit's proxy
+- Use WebSocket Secure (WSS) protocol for Hot Module Reload
+- Automatically detect Replit environment via REPLIT_DEV_DOMAIN
 
 ### Available Routes
 - `/` - Main phone interface
