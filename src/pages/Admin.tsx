@@ -5,6 +5,7 @@ import { ContentImporter } from "@/components/admin/ContentImporter";
 import { StoryLibrary } from "@/components/admin/StoryLibrary";
 import { Settings } from "@/components/admin/Settings";
 import { Dashboard } from "@/components/admin/Dashboard";
+import AIStoryGenerator from "@/components/admin/AIStoryGenerator";
 import { NotificationCenter } from "@/components/ui/notification-center";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import {
@@ -54,6 +55,13 @@ const sections = [
     icon: Archive,
     color: "text-purple-400",
     description: "Manage your stories",
+  },
+  {
+    key: "ai-generator",
+    label: "AI Story Generator",
+    icon: Sparkles,
+    color: "text-purple-400",
+    description: "Generate stories with AI",
   },
   {
     key: "story",
@@ -1180,6 +1188,7 @@ const Admin = () => {
             >
               {section === "dashboard" && <Dashboard onNavigate={setSection} />}
               {section === "library" && <StoryLibrary />}
+              {section === "ai-generator" && <AIStoryGenerator />}
               {section === "story" && (
                 <StoryCreator
                   onSave={(story) => {
