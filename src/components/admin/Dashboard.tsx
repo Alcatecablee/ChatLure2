@@ -233,14 +233,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       // Add high-performing stories
       const topStories = stories
         .filter((story) => story.stats?.views > 500)
-        .sort((a, b) => b.stats.views - a.stats.views)
+        .sort((a, b) => (b.stats?.views || 0) - (a.stats?.views || 0))
         .slice(0, 1);
 
       topStories.forEach((story) => {
         activities.push({
           id: `viral_${story.id}`,
           type: "viral_alert",
-          title: `Story "${story.title}" hit ${story.stats.views.toLocaleString()}+ views!`,
+          title: `Story "${story.title}" hit ${(story.stats?.views || 0).toLocaleString()}+ views!`,
           time: "Recent",
           icon: Flame,
           color: "text-orange-400",
@@ -457,7 +457,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                       animate={{ scale: 1 }}
                       className="text-2xl font-bold text-foreground"
                     >
-                      {realtimeData.activeUsers.toLocaleString()}
+                      {(realtimeData.activeUsers || 0).toLocaleString()}
                     </motion.p>
                   </div>
                   <Activity className="text-muted-foreground" size={20} />
@@ -568,12 +568,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 </div>
                 <div className="text-2xl font-bold text-foreground">
                   {metric.format === "percentage"
-                    ? `${metric.value}%`
+                    ? `${metric.value || 0}%`
                     : metric.format === "currency"
-                      ? `$${metric.value.toLocaleString()}`
+                      ? `$${(metric.value || 0).toLocaleString()}`
                       : metric.format === "rating"
-                        ? `${metric.value.toFixed(1)}/5.0`
-                        : metric.value.toLocaleString()}
+                        ? `${(metric.value || 0).toFixed(1)}/5.0`
+                        : (metric.value || 0).toLocaleString()}
                 </div>
                 <Progress value={(metric.value / 100) * 100} className="mt-2" />
               </motion.div>
@@ -615,7 +615,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                     <Eye className="text-muted-foreground" size={24} />
                   </div>
                   <div className="text-2xl font-bold text-foreground">
-                    {totalViews.toLocaleString()}
+                    {(totalViews || 0).toLocaleString()}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Total Views
